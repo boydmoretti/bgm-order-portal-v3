@@ -292,14 +292,26 @@ const P=[
 ];
 
 // STATE
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:JSON.parse(localStorage.getItem("bgm_v3")||"[]"),adminAuth:false,adminTab:"orders"};
+const SUPA_URL="https://zilrgqnqoswtmvlmzdim.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4";
+
+async function supaGet(table,filter=""){
+  const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});
+  return res.json();
+}
+async function supaPost(table,data){
+  await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});
+}
+
+let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders"};
 
 function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
 function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
 function tot(){return sub()+SHIP;}
 function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
 function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
-function saveOrd(){const o={id:Date.now(),round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,total:tot()};S.orders.push(o);localStorage.setItem("bgm_v3",JSON.stringify(S.orders));}
+async function saveOrd(){const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,total:tot()};await supaPost("orders",o);}
+async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
 function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
 
 function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
@@ -392,9 +404,9 @@ function gb(){S.screen="browse";render();}
 function ga(){S.screen="admin";render();}
 function alo(){S.adminAuth=false;S.screen="browse";render();}
 function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";render();}
-function sat(t){S.adminTab=t;render();}
-function submit(){if(!S.form.name||!S.form.phone||!S.form.email)return;saveOrd();S.screen="confirm";render();}
-function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;render();}else document.getElementById("aerr").textContent="Incorrect password";}
+function sat(t){S.adminTab=t;if(t==="orders"&&S.adminAuth)loadOrders().then(()=>render());else render();}
+async function submit(){if(!S.form.name||!S.form.phone||!S.form.email)return;const btn=document.getElementById("sbtn");if(btn){btn.disabled=true;btn.textContent="Submitting...";}await saveOrd();S.screen="confirm";render();}
+function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;loadOrders().then(()=>render());}else document.getElementById("aerr").textContent="Incorrect password";}
 function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value;render();}
 function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
