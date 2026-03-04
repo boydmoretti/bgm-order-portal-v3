@@ -5,701 +5,399 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>~BgM's~ BioStack Community — Group Order Portal</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;min-height:100vh}
-  #app{max-width:640px;margin:0 auto;background:#f0f4f8;min-height:100vh;position:relative}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;min-height:100vh}
+#app{max-width:640px;margin:0 auto;background:#f0f4f8;min-height:100vh}
 
-  /* HEADER */
-  .header{background:linear-gradient(135deg,#1e3a5f,#0f2542);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.4)}
-  .header-row{display:flex;align-items:center;justify-content:space-between}
-  .header h1{font-size:14px;font-weight:700;letter-spacing:.3px}
-  .header p{font-size:10px;opacity:.7;margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
-  .cart-btn{background:#22c55e;color:#fff;border:none;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.header{background:linear-gradient(135deg,#1e3a5f,#0f2542);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.header-row{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:14px;font-weight:700}
+.header p{font-size:10px;opacity:.7;margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
+.cart-btn{background:#22c55e;color:#fff;border:none;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;margin-right:10px}
+.admin-gear{background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;margin-left:8px}
 
-  /* CLOSED BANNER */
-  .closed-banner{background:#dc2626;color:#fff;text-align:center;padding:20px 16px;margin:16px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
+.round-badge{background:#fff;margin:10px 14px 0;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:12px;color:#475569}
+.round-badge strong{color:#0f2542;font-size:13px}
+.open-dot{color:#22c55e;font-weight:700}
 
-  /* ROUND BADGE */
-  .round-badge{background:#fff;margin:10px 14px 0;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:12px;color:#475569}
-  .round-badge strong{color:#0f2542;font-size:13px}
+.search-bar{padding:10px 14px;background:#fff;border-bottom:1px solid #e2e8f0;margin-top:8px}
+.search-bar input{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none}
 
-  /* SEARCH */
-  .search-bar{padding:10px 14px;background:#fff;border-bottom:1px solid #e2e8f0;margin-top:8px}
-  .search-bar input{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none}
+.closed-banner{background:#dc2626;color:#fff;text-align:center;padding:20px 16px;margin:16px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
 
-  /* CATEGORY TABS */
-  .cat-scroll{display:flex;gap:7px;padding:8px 14px;overflow-x:auto;background:#fff;border-bottom:1px solid #e2e8f0;scrollbar-width:none}
-  .cat-scroll::-webkit-scrollbar{display:none}
-  .cat-btn{padding:5px 11px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;background:#f1f5f9;color:#475569;flex-shrink:0}
-  .cat-btn.active{background:#1e3a5f;color:#fff}
+/* PRODUCT TABLE */
+table{width:100%;border-collapse:collapse;margin-top:8px}
+thead th{padding:6px 10px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;background:#f8fafc}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid rgba(0,0,0,0.05)}
+td{padding:7px 10px;font-size:13px;vertical-align:middle}
+.sku{display:inline-block;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;margin-right:4px;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.6)}
+.pname{font-weight:600;color:#1e293b}
+.pmg{font-size:11px;color:#94a3b8;display:block;margin-top:1px}
+.pprice{font-weight:700;color:#0f2542;white-space:nowrap}
 
-  /* SECTION */
-  .section-header{padding:7px 14px;display:flex;align-items:center;gap:8px;border-left:4px solid #ccc}
-  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
-  .section-count{font-size:10px;opacity:.6}
+/* QTY BUTTONS */
+.qrow{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.qbtn{width:29px;height:29px;border-radius:7px;border:none;cursor:pointer;font-size:19px;font-weight:700;display:flex;align-items:center;justify-content:center;-webkit-appearance:none}
+.qbtn.plus{background:#22c55e;color:#fff}
+.qbtn.minus{background:#e2e8f0;color:#aaa}
+.qbtn.minus.on{background:#dc2626;color:#fff}
+.qnum{min-width:22px;text-align:center;font-size:14px;font-weight:700;color:#0f2542}
 
-  /* TABLE */
-  table{width:100%;border-collapse:collapse;background:#fff}
-  thead th{padding:5px 10px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
-  th.right,td.right{text-align:right}
-  tbody tr:nth-child(even){background:#f8fafc}
-  tbody tr{border-bottom:1px solid #f1f5f9}
-  td{padding:7px 10px;font-size:13px;vertical-align:middle}
-  .sku-tag{display:inline-block;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin-right:3px}
-  .prod-name{font-weight:600;color:#1e293b}
-  .prod-mg{font-size:11px;color:#94a3b8;display:block;margin-top:1px}
-  .price-cell{font-weight:700;color:#0f2542;white-space:nowrap}
-  .qty-row{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-  .qty-btn{width:27px;height:27px;border-radius:6px;border:none;cursor:pointer;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
-  .qty-btn.minus{background:#e2e8f0;color:#64748b}
-  .qty-btn.minus.active{background:#0f2542;color:#fff}
-  .qty-btn.plus{background:#0f2542;color:#fff}
-  .qty-num{min-width:22px;text-align:center;font-size:14px;font-weight:700;color:#0f2542}
+/* CART BAR */
+.cart-bar{position:sticky;bottom:0;background:#0f2542;color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -2px 12px rgba(0,0,0,.3);z-index:100}
+.cb-total{font-weight:700;font-size:15px}
+.cb-sub{opacity:.6;font-size:11px;margin-top:1px}
+.co-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
 
-  /* CART BAR */
-  .cart-bar{position:sticky;bottom:0;background:#0f2542;color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -2px 12px rgba(0,0,0,.25);z-index:100}
-  .cart-bar-text{font-size:13px}
-  .cart-bar-total{font-weight:700;font-size:15px}
-  .cart-bar-sub{opacity:.6;font-size:11px;margin-top:1px}
-  .checkout-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
+/* CHECKOUT / CONFIRM PAGES */
+.page{padding:16px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card-title{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+.oitem{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f8fafc;font-size:13px}
+.oname{font-weight:600;color:#1e293b}
+.odetail{font-size:11px;color:#94a3b8;margin-top:2px}
+.oprice{font-weight:700;color:#0f2542;text-align:right;flex-shrink:0;margin-left:8px}
+.oeach{font-size:10px;color:#94a3b8;font-weight:400}
+.trow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#475569}
+.tbig{display:flex;justify-content:space-between;padding:9px 0 0;font-size:16px;font-weight:700;color:#0f2542;border-top:1px solid #e2e8f0;margin-top:4px}
+.finput{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:10px;outline:none;-webkit-appearance:none}
+.vbox{background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
+.vhandle{font-size:22px;font-weight:700;color:#008069;letter-spacing:.5px;margin:6px 0;text-decoration:none;display:block}
+.vtotal{font-size:15px;font-weight:700;color:#0f2542;margin-top:6px}
+.vsub{font-size:11px;color:#64748b;margin-top:2px}
+.disc{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#92400e}
+.sbtn{width:100%;background:#0f2542;color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;-webkit-appearance:none}
+.sbtn:disabled{opacity:.4;cursor:not-allowed}
+.sbtn.green{background:#22c55e}
+.fnote{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;padding-bottom:20px}
 
-  /* CHECKOUT / CONFIRM */
-  .page{padding:16px;display:none}
-  .page.active{display:block}
-  .back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;margin-right:10px;line-height:1}
-  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-  .card-title{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-  .order-item{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f8fafc;font-size:13px}
-  .order-item-left{}
-  .order-item-name{font-weight:600;color:#1e293b}
-  .order-item-detail{font-size:11px;color:#94a3b8;margin-top:2px}
-  .order-item-price{font-weight:700;color:#0f2542;text-align:right}
-  .order-item-each{font-size:10px;color:#94a3b8;font-weight:400}
-  .total-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#475569}
-  .total-big{display:flex;justify-content:space-between;padding:9px 0 0;font-size:16px;font-weight:700;color:#0f2542;border-top:1px solid #e2e8f0;margin-top:4px}
-  .form-input{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:10px;outline:none;-webkit-appearance:none}
-  .venmo-box{background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
-  .venmo-handle{font-size:22px;font-weight:700;color:#008069;letter-spacing:.5px;margin:4px 0}
-  .venmo-total{font-size:15px;font-weight:700;color:#0f2542;margin-top:6px}
-  .venmo-sub{font-size:11px;color:#64748b;margin-top:2px}
-  .disclaimer{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#92400e}
-  .submit-btn{width:100%;background:#0f2542;color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;-webkit-appearance:none}
-  .submit-btn:disabled{opacity:.45;cursor:not-allowed}
-  .submit-btn.green{background:#22c55e}
-  .footer-note{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;padding-bottom:20px}
+/* CONFIRM */
+.conf{padding:32px 20px;text-align:center}
+.conf-icon{font-size:60px;margin-bottom:12px}
+.conf-title{font-size:22px;font-weight:700;color:#0f2542;margin-bottom:8px}
+.conf-txt{font-size:14px;color:#64748b;margin-bottom:20px;line-height:1.5}
 
-  /* CONFIRM */
-  .confirm-wrap{padding:32px 20px;text-align:center}
-  .confirm-icon{font-size:60px;margin-bottom:12px}
-  .confirm-title{font-size:22px;font-weight:700;color:#0f2542;margin-bottom:8px}
-  .confirm-text{font-size:14px;color:#64748b;margin-bottom:20px;line-height:1.5}
-
-  /* ADMIN */
-  .admin-login{padding:40px 20px;text-align:center}
-  .admin-login h2{font-size:20px;font-weight:700;color:#0f2542;margin-bottom:6px}
-  .admin-login p{font-size:13px;color:#64748b;margin-bottom:20px}
-  .admin-wrap{padding:14px}
-  .admin-section{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-  .admin-section h3{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-  .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .toggle-label{font-size:13px;font-weight:600;color:#1e293b}
-  .toggle{position:relative;width:48px;height:26px;display:inline-block}
-  .toggle input{opacity:0;width:0;height:0}
-  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e2e8f0;border-radius:999px;transition:.3s}
-  .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-  input:checked+.slider{background:#22c55e}
-  input:checked+.slider:before{transform:translateX(22px)}
-  .date-input{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none}
-  .save-btn{background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
-  .order-card{border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px}
-  .order-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-  .order-card-name{font-weight:700;font-size:14px;color:#0f2542}
-  .order-card-total{font-weight:700;font-size:14px;color:#22c55e}
-  .order-card-info{font-size:11px;color:#64748b;margin-bottom:6px}
-  .order-card-items{font-size:12px;color:#475569;line-height:1.8}
-  .vivian-box{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
-  .copy-btn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
-  .copy-btn.copied{background:#22c55e}
-  .no-orders{text-align:center;color:#94a3b8;font-size:13px;padding:20px}
-  .tab-row{display:flex;gap:8px;margin-bottom:14px}
-  .tab-btn{flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#475569}
-  .tab-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-  .logout-btn{background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer}
+/* ADMIN */
+.al{padding:40px 20px;text-align:center}
+.al h2{font-size:20px;font-weight:700;color:#0f2542;margin-bottom:6px}
+.al p{font-size:13px;color:#64748b;margin-bottom:20px}
+.aw{padding:14px}
+.asec{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.asec h3{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+.trow2{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tlbl{font-size:13px;font-weight:600;color:#1e293b}
+.tgl{position:relative;width:48px;height:26px;display:inline-block}
+.tgl input{opacity:0;width:0;height:0}
+.sld{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e2e8f0;border-radius:999px;transition:.3s}
+.sld:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked+.sld{background:#22c55e}
+input:checked+.sld:before{transform:translateX(22px)}
+.dinput{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none}
+.savebtn{background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.ocard{border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.ocard-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ocard-name{font-weight:700;font-size:14px;color:#0f2542}
+.ocard-tot{font-weight:700;font-size:14px;color:#22c55e}
+.ocard-info{font-size:11px;color:#64748b;margin-bottom:6px}
+.ocard-items{font-size:12px;color:#475569;line-height:1.8}
+.vbox2{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
+.cpybtn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
+.cpybtn.done{background:#22c55e}
+.tabrow{display:flex;gap:8px;margin-bottom:14px}
+.tabbtn{flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#475569}
+.tabbtn.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.lgout{background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer}
+.empty{text-align:center;color:#94a3b8;font-size:13px;padding:24px}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-// ============================================================
-// DATA
-// ============================================================
-const ADMIN_PASSWORD = "BgM2026!";
-const VENMO = "@Boyd-Moretti";
-const SHIPPING = 25;
+const PASS="BgM2026!";
+const VENMO_HANDLE="@Boyd-Moretti";
+const VENMO_URL="https://venmo.com/Boyd-Moretti";
+const SHIP=25;
 
-// Supabase config - UPDATE THESE when you set up Supabase
-const SUPABASE_URL = "";
-const SUPABASE_KEY = "";
+// ROW COLORS - no headers, just colored rows matching Vivian's groups
+// c = background color for that row
+const C={
+  sem:"#dbeafe",  // Semaglutide - blue
+  tir:"#fef9c3",  // Tirzepatide - yellow
+  ret:"#dcfce7",  // Retatrutide - green
+  kvn:"#ede9fe",  // KPV/VIP/Cagrilintide/BPC/CJC/TB/NAD - purple
+  bdy:"#ffedd5",  // Page 3 body (L-Carnitine thru Super Human Blend) - orange
+  pep:"#fce7f3",  // Page 4 peptides (Fat Blaster thru SS-31) - pink
+  ghr:"#e0f2fe",  // GHRP/Sermorelin/HGH/HCG/HMG/IGF - light blue
+  tes:"#fef3c7",  // Tesamorelin - amber
+  ipa:"#ecfdf5",  // Ipamorelin/Hexarelin - mint
+  ghk:"#fdf4ff",  // GHK-CU - lavender
+  kst:"#f0fdf4",  // KissPeptin/Thymalin/Thymosin Alpha - light green
+  mot:"#f7fee7",  // MOTS-c - lime
+  p6: "#f0f9ff",  // LL-37/Dermorphin/Glutathione/rest of p6 - sky
+  sup:"#f9fafb",  // Supplies - gray
+};
 
-const PRODUCTS = [
-  {sku:"SM5",  name:"Semaglutide", mg:"5mg*10vials",   price:40,  cat:"Semaglutide"},
-  {sku:"SM10", name:"Semaglutide", mg:"10mg*10vials",  price:63,  cat:"Semaglutide"},
-  {sku:"SM15", name:"Semaglutide", mg:"15mg*10vials",  price:74,  cat:"Semaglutide"},
-  {sku:"SM20", name:"Semaglutide", mg:"20mg*10vials",  price:89,  cat:"Semaglutide"},
-  {sku:"SM30", name:"Semaglutide", mg:"30mg*10vials",  price:109, cat:"Semaglutide"},
-  {sku:"TR5",  name:"Tirzepatide", mg:"5mg*10vials",   price:43,  cat:"Tirzepatide"},
-  {sku:"TR10", name:"Tirzepatide", mg:"10mg*10vials",  price:63,  cat:"Tirzepatide"},
-  {sku:"TR15", name:"Tirzepatide", mg:"15mg*10vials",  price:80,  cat:"Tirzepatide"},
-  {sku:"TR20", name:"Tirzepatide", mg:"20mg*10vials",  price:94,  cat:"Tirzepatide"},
-  {sku:"TR30", name:"Tirzepatide", mg:"30mg*10vials",  price:114, cat:"Tirzepatide"},
-  {sku:"TR40", name:"Tirzepatide", mg:"40mg*10vials",  price:143, cat:"Tirzepatide"},
-  {sku:"TR50", name:"Tirzepatide", mg:"50mg*10vials",  price:171, cat:"Tirzepatide"},
-  {sku:"TR60", name:"Tirzepatide", mg:"60mg*10vials",  price:186, cat:"Tirzepatide"},
-  {sku:"TR70", name:"Tirzepatide", mg:"70mg*10vials",  price:204, cat:"Tirzepatide"},
-  {sku:"TR80", name:"Tirzepatide", mg:"80mg*10vials",  price:231, cat:"Tirzepatide"},
-  {sku:"TR90", name:"Tirzepatide", mg:"90mg*10vials",  price:258, cat:"Tirzepatide"},
-  {sku:"TR100",name:"Tirzepatide", mg:"100mg*10vials", price:286, cat:"Tirzepatide"},
-  {sku:"TR120",name:"Tirzepatide", mg:"120mg*10vials", price:312, cat:"Tirzepatide"},
-  {sku:"RT5",  name:"Retatrutide", mg:"5mg*10vials",   price:73,  cat:"Retatrutide"},
-  {sku:"RT10", name:"Retatrutide", mg:"10mg*10vials",  price:109, cat:"Retatrutide"},
-  {sku:"RT15", name:"Retatrutide", mg:"15mg*10vials",  price:122, cat:"Retatrutide"},
-  {sku:"RT20", name:"Retatrutide", mg:"20mg*10vials",  price:136, cat:"Retatrutide"},
-  {sku:"RT30", name:"Retatrutide", mg:"30mg*10vials",  price:204, cat:"Retatrutide"},
-  {sku:"RT40", name:"Retatrutide", mg:"40mg*10vials",  price:244, cat:"Retatrutide"},
-  {sku:"RT50", name:"Retatrutide", mg:"50mg*10vials",  price:299, cat:"Retatrutide"},
-  {sku:"RT60", name:"Retatrutide", mg:"60mg*10vials",  price:353, cat:"Retatrutide"},
-  {sku:"CGL5", name:"Cagrilintide",mg:"5mg*10vials",   price:122, cat:"Cagrilintide"},
-  {sku:"CGL10",name:"Cagrilintide",mg:"10mg*10vials",  price:230, cat:"Cagrilintide"},
-  {sku:"CS10", name:"Cagri+Sema Combo",mg:"5mg+5mg*10vials",price:176,cat:"Cagrilintide"},
-  {sku:"KP10", name:"KPV",         mg:"10mg*10vials",  price:71,  cat:"KPV / VIP"},
-  {sku:"VP10", name:"VIP",         mg:"10mg*10vials",  price:190, cat:"KPV / VIP"},
-  {sku:"BC5",  name:"BPC-157",     mg:"5mg*10vials",   price:41,  cat:"BPC-157 & TB500"},
-  {sku:"BC10", name:"BPC-157",     mg:"10mg*10vials",  price:68,  cat:"BPC-157 & TB500"},
-  {sku:"BT2",  name:"TB500",       mg:"2mg*10vials",   price:49,  cat:"BPC-157 & TB500"},
-  {sku:"BT5",  name:"TB500",       mg:"5mg*10vials",   price:95,  cat:"BPC-157 & TB500"},
-  {sku:"BT10", name:"TB500",       mg:"10mg*10vials",  price:176, cat:"BPC-157 & TB500"},
-  {sku:"BB10", name:"BPC+TB Combo",mg:"10mg*10vials",  price:122, cat:"BPC-157 & TB500"},
-  {sku:"BB20", name:"BPC+TB Combo",mg:"20mg*10vials",  price:214, cat:"BPC-157 & TB500"},
-  {sku:"BBG70",name:"Glow Blend",  mg:"70mg*10vials",  price:231, cat:"BPC-157 & TB500"},
-  {sku:"K80",  name:"Klow Blend",  mg:"80mg*10vials",  price:250, cat:"BPC-157 & TB500"},
-  {sku:"CND2", name:"CJC-1295 w/o DAC",mg:"2mg*10vials",price:41,cat:"CJC-1295"},
-  {sku:"CND5", name:"CJC-1295 w/o DAC",mg:"5mg*10vials",price:95,cat:"CJC-1295"},
-  {sku:"CND10",name:"CJC-1295 w/o DAC",mg:"10mg*10vials",price:185,cat:"CJC-1295"},
-  {sku:"CP10", name:"CJC w/o DAC + IPA",mg:"10mg*10vials",price:122,cat:"CJC-1295"},
-  {sku:"CD2",  name:"CJC-1295 w/ DAC",mg:"2mg*10vials",price:81,cat:"CJC-1295"},
-  {sku:"CD5",  name:"CJC-1295 w/ DAC",mg:"5mg*10vials",price:190,cat:"CJC-1295"},
-  {sku:"NJ100",name:"NAD+",        mg:"100mg*10vials", price:54,  cat:"NAD+"},
-  {sku:"NJ500",name:"NAD+",        mg:"500mg*10vials", price:95,  cat:"NAD+"},
-  {sku:"NJ1000",name:"NAD+",       mg:"1000mg*10vials",price:176, cat:"NAD+"},
-  {sku:"LC600",name:"L-Carnitine", mg:"10ml*10vials",  price:40,  cat:"Fat Loss"},
-  {sku:"LC216",name:"L-Carnitine Complex",mg:"10ml*10vials",price:81,cat:"Fat Loss"},
-  {sku:"LC526",name:"Fat Blaster Blend",mg:"10ml*10vials",price:120,cat:"Fat Loss"},
-  {sku:"LB",   name:"Lemon Bottle", mg:"10ml*10vials", price:80,  cat:"Fat Loss"},
-  {sku:"2AD",  name:"AOD9604",     mg:"2mg*10vials",   price:60,  cat:"Fat Loss"},
-  {sku:"5AD",  name:"AOD9604",     mg:"5mg*10vials",   price:109, cat:"Fat Loss"},
-  {sku:"SLU5", name:"SLUPP-332",   mg:"5mg*10vials",   price:100, cat:"Fat Loss"},
-  {sku:"ML10", name:"Melanotan-2", mg:"10mg*10vials",  price:54,  cat:"Fat Loss"},
-  {sku:"MT10", name:"Melatonin",   mg:"10mg*10vials",  price:68,  cat:"Fat Loss"},
-  {sku:"MT1",  name:"Melanotan-1", mg:"10mg*10vials",  price:68,  cat:"Fat Loss"},
-  {sku:"M10",  name:"HGH 191AA",   mg:"10iu*10vials",  price:49,  cat:"Growth Hormone"},
-  {sku:"M12",  name:"HGH 191AA",   mg:"12iu*10vials",  price:65,  cat:"Growth Hormone"},
-  {sku:"M15",  name:"HGH 191AA",   mg:"15iu*10vials",  price:73,  cat:"Growth Hormone"},
-  {sku:"M24",  name:"HGH 191AA",   mg:"24iu*10vials",  price:125, cat:"Growth Hormone"},
-  {sku:"M36",  name:"HGH 191AA",   mg:"36iu*10vials",  price:180, cat:"Growth Hormone"},
-  {sku:"SMO5", name:"Sermorelin",  mg:"5mg*10vials",   price:76,  cat:"Growth Hormone"},
-  {sku:"SMO10",name:"Sermorelin",  mg:"10mg*10vials",  price:157, cat:"Growth Hormone"},
-  {sku:"IP5",  name:"Ipamorelin",  mg:"5mg*10vials",   price:41,  cat:"Growth Hormone"},
-  {sku:"IP10", name:"Ipamorelin",  mg:"10mg*10vials",  price:81,  cat:"Growth Hormone"},
-  {sku:"HX5",  name:"Hexarelin",   mg:"5mg*10vials",   price:95,  cat:"Growth Hormone"},
-  {sku:"TSM2", name:"Tesamorelin", mg:"2mg*10vials",   price:60,  cat:"Growth Hormone"},
-  {sku:"TSM5", name:"Tesamorelin", mg:"5mg*10vials",   price:113, cat:"Growth Hormone"},
-  {sku:"TSM10",name:"Tesamorelin", mg:"10mg*10vials",  price:200, cat:"Growth Hormone"},
-  {sku:"TSM20",name:"Tesamorelin", mg:"20mg*10vials",  price:357, cat:"Growth Hormone"},
-  {sku:"G25",  name:"GHRP-2",      mg:"5mg*10vials",   price:27,  cat:"Growth Hormone"},
-  {sku:"G210", name:"GHRP-2",      mg:"10mg*10vials",  price:54,  cat:"Growth Hormone"},
-  {sku:"G65",  name:"GHRP-6",      mg:"5mg*10vials",   price:27,  cat:"Growth Hormone"},
-  {sku:"G610", name:"GHRP-6",      mg:"10mg*10vials",  price:54,  cat:"Growth Hormone"},
-  {sku:"IG01", name:"IGF-1 LR3",   mg:"0.1mg*10vials", price:46,  cat:"Growth Hormone"},
-  {sku:"IG1",  name:"IGF-1 LR3",   mg:"1mg*10vials",   price:200, cat:"Growth Hormone"},
-  {sku:"G10K", name:"HCG",         mg:"10000IU*10vials",price:163,cat:"HCG / HMG"},
-  {sku:"G5K",  name:"HCG",         mg:"5000IU*10vials",price:87,  cat:"HCG / HMG"},
-  {sku:"G75",  name:"HMG",         mg:"75IU*10vials",  price:68,  cat:"HCG / HMG"},
-  {sku:"TA5",  name:"Thymosin Alpha-1",mg:"5mg*10vials",price:109,cat:"Immune & Recovery"},
-  {sku:"TA10", name:"Thymosin Alpha-1",mg:"10mg*10vials",price:176,cat:"Immune & Recovery"},
-  {sku:"TY10", name:"Thymalin",    mg:"10mg*10vials",  price:68,  cat:"Immune & Recovery"},
-  {sku:"375",  name:"LL-37",       mg:"5mg*10vials",   price:103, cat:"Immune & Recovery"},
-  {sku:"MS10", name:"MOTS-c",      mg:"10mg*10vials",  price:71,  cat:"Immune & Recovery"},
-  {sku:"MS20", name:"MOTS-c",      mg:"20mg*10vials",  price:136, cat:"Immune & Recovery"},
-  {sku:"MS40", name:"MOTS-c",      mg:"40mg*10vials",  price:244, cat:"Immune & Recovery"},
-  {sku:"SK5",  name:"Selank",      mg:"5mg*10vials",   price:49,  cat:"Cognitive & Neuro"},
-  {sku:"SK10", name:"Selank",      mg:"10mg*10vials",  price:81,  cat:"Cognitive & Neuro"},
-  {sku:"XA5",  name:"Semax",       mg:"5mg*10vials",   price:49,  cat:"Cognitive & Neuro"},
-  {sku:"XA10", name:"Semax",       mg:"10mg*10vials",  price:81,  cat:"Cognitive & Neuro"},
-  {sku:"DS5",  name:"DSIP",        mg:"5mg*10vials",   price:46,  cat:"Cognitive & Neuro"},
-  {sku:"DS10", name:"DSIP",        mg:"10mg*10vials",  price:92,  cat:"Cognitive & Neuro"},
-  {sku:"DS15", name:"DSIP",        mg:"15mg*10vials",  price:114, cat:"Cognitive & Neuro"},
-  {sku:"P10",  name:"Pinealon",    mg:"10mg*10vials",  price:65,  cat:"Cognitive & Neuro"},
-  {sku:"CBL60",name:"Cerebrolysin",mg:"60mg*6vials",   price:49,  cat:"Cognitive & Neuro"},
-  {sku:"NP810",name:"SNAP-8",      mg:"10mg*10vials",  price:49,  cat:"Cognitive & Neuro"},
-  {sku:"CU50", name:"GHK-CU",      mg:"50mg*10vials",  price:33,  cat:"GHK-CU"},
-  {sku:"CU100",name:"GHK-CU",      mg:"100mg*10vials", price:65,  cat:"GHK-CU"},
-  {sku:"OT2",  name:"Oxytocin",    mg:"2mg*10vials",   price:41,  cat:"Other Peptides"},
-  {sku:"OT5",  name:"Oxytocin",    mg:"5mg*10vials",   price:68,  cat:"Other Peptides"},
-  {sku:"OT10", name:"Oxytocin",    mg:"10mg*10vials",  price:125, cat:"Other Peptides"},
-  {sku:"ET10", name:"Epithalon",   mg:"10mg*10vials",  price:38,  cat:"Other Peptides"},
-  {sku:"ET50", name:"Epithalon",   mg:"50mg*10vials",  price:176, cat:"Other Peptides"},
-  {sku:"AP5",  name:"Adipotide",   mg:"5mg*10vials",   price:176, cat:"Other Peptides"},
-  {sku:"AR50", name:"AICAR",       mg:"50mg*10vials",  price:67,  cat:"Other Peptides"},
-  {sku:"2S10", name:"SS-31",       mg:"10mg*10vials",  price:109, cat:"Other Peptides"},
-  {sku:"2S50", name:"SS-31",       mg:"50mg*10vials",  price:407, cat:"Other Peptides"},
-  {sku:"DR5",  name:"Dermorphin",  mg:"5mg*10vials",   price:38,  cat:"Other Peptides"},
-  {sku:"P41",  name:"PT-141",      mg:"10mg*10vials",  price:62,  cat:"Other Peptides"},
-  {sku:"GND2", name:"Gonadorelin", mg:"2mg*10vials",   price:41,  cat:"Other Peptides"},
-  {sku:"KS5",  name:"KissPeptin-10",mg:"5mg*10vials",  price:68,  cat:"Other Peptides"},
-  {sku:"KS10", name:"KissPeptin-10",mg:"10mg*10vials", price:130, cat:"Other Peptides"},
-  {sku:"SUR10",name:"Suvratide",   mg:"10mg*10vials",  price:326, cat:"Other Peptides"},
-  {sku:"MDT10",name:"Mazdutide",   mg:"10mg*10vials",  price:195, cat:"Other Peptides"},
-  {sku:"FM2",  name:"MGF",         mg:"2mg*10vials",   price:65,  cat:"Other Peptides"},
-  {sku:"FMP2", name:"PEG MGF",     mg:"2mg*10vials",   price:100, cat:"Other Peptides"},
-  {sku:"HA5",  name:"Hyaluronic Acid",mg:"1ml*1vial",  price:35,  cat:"Other Peptides"},
-  {sku:"5AM",  name:"5-Amino-1MQ", mg:"5mg*10vials",   price:87,  cat:"Other Peptides"},
-  {sku:"50AM", name:"5-Amino-1MQ", mg:"50mg*10vials",  price:136, cat:"Other Peptides"},
-  {sku:"F410", name:"FOXO4-DRI",   mg:"10mg*10vials",  price:380, cat:"Other Peptides"},
-  {sku:"GTT600",name:"Glutathione",mg:"600mg*10vials", price:40,  cat:"Glutathione & Misc"},
-  {sku:"GTT",  name:"Glutathione", mg:"1500mg*10vials",price:90,  cat:"Glutathione & Misc"},
-  {sku:"SHB",  name:"Super Human Blend",mg:"10ml*10vials",price:85,cat:"Glutathione & Misc"},
-  {sku:"B1210",name:"B12",         mg:"10ml*10vials",  price:25,  cat:"Glutathione & Misc"},
-  {sku:"B12",  name:"B12",         mg:"2ml*10vials",   price:10,  cat:"Glutathione & Misc"},
-  {sku:"2AD",  name:"AOD9604",     mg:"2mg*10vials",   price:60,  cat:"Glutathione & Misc"},
-  {sku:"WA2",  name:"Bac Water",   mg:"2ml*10vials",   price:7,   cat:"Supplies"},
-  {sku:"WA3",  name:"Bac Water",   mg:"3ml*10vials",   price:10,  cat:"Supplies"},
-  {sku:"WA10", name:"Bac Water",   mg:"10ml*10vials",  price:11,  cat:"Supplies"},
-  {sku:"AA3",  name:"Acetic Acid 0.6%",mg:"3ml*10vials",price:10, cat:"Supplies"},
-  {sku:"AA10", name:"Acetic Acid 0.6%",mg:"10ml*10vials",price:11,cat:"Supplies"},
+// EXACT ORDER FROM VIVIAN'S ZLZ PRICE LIST - PAGE BY PAGE
+const P=[
+  // PAGE 1 - Semaglutide
+  {sku:"SM5",  name:"Semaglutide",            mg:"5mg*10vials",    price:40,  c:C.sem},
+  {sku:"SM10", name:"Semaglutide",            mg:"10mg*10vials",   price:63,  c:C.sem},
+  {sku:"SM15", name:"Semaglutide",            mg:"15mg*10vials",   price:74,  c:C.sem},
+  {sku:"SM20", name:"Semaglutide",            mg:"20mg*10vials",   price:89,  c:C.sem},
+  {sku:"SM30", name:"Semaglutide",            mg:"30mg*10vials",   price:109, c:C.sem},
+  // Tirzepatide
+  {sku:"TR5",  name:"Tirzepatide",            mg:"5mg*10vials",    price:43,  c:C.tir},
+  {sku:"TR10", name:"Tirzepatide",            mg:"10mg*10vials",   price:63,  c:C.tir},
+  {sku:"TR15", name:"Tirzepatide",            mg:"15mg*10vials",   price:80,  c:C.tir},
+  {sku:"TR20", name:"Tirzepatide",            mg:"20mg*10vials",   price:94,  c:C.tir},
+  {sku:"TR30", name:"Tirzepatide",            mg:"30mg*10vials",   price:114, c:C.tir},
+  {sku:"TR40", name:"Tirzepatide",            mg:"40mg*10vials",   price:143, c:C.tir},
+  {sku:"TR50", name:"Tirzepatide",            mg:"50mg*10vials",   price:171, c:C.tir},
+  {sku:"TR60", name:"Tirzepatide",            mg:"60mg*10vials",   price:186, c:C.tir},
+  {sku:"TR70", name:"Tirzepatide",            mg:"70mg*10vials",   price:204, c:C.tir},
+  {sku:"TR80", name:"Tirzepatide",            mg:"80mg*10vials",   price:231, c:C.tir},
+  {sku:"TR90", name:"Tirzepatide",            mg:"90mg*10vials",   price:258, c:C.tir},
+  {sku:"TR100",name:"Tirzepatide",            mg:"100mg*10vials",  price:286, c:C.tir},
+  {sku:"TR120",name:"Tirzepatide",            mg:"120mg*10vials",  price:312, c:C.tir},
+  // Retatrutide
+  {sku:"RT5",  name:"Retatrutide",            mg:"5mg*10vials",    price:73,  c:C.ret},
+  {sku:"RT10", name:"Retatrutide",            mg:"10mg*10vials",   price:109, c:C.ret},
+  {sku:"RT15", name:"Retatrutide",            mg:"15mg*10vials",   price:122, c:C.ret},
+  {sku:"RT20", name:"Retatrutide",            mg:"20mg*10vials",   price:136, c:C.ret},
+  {sku:"RT30", name:"Retatrutide",            mg:"30mg*10vials",   price:204, c:C.ret},
+  {sku:"RT40", name:"Retatrutide",            mg:"40mg*10vials",   price:244, c:C.ret},
+  {sku:"RT50", name:"Retatrutide",            mg:"50mg*10vials",   price:299, c:C.ret},
+  {sku:"RT60", name:"Retatrutide",            mg:"60mg*10vials",   price:353, c:C.ret},
+  // PAGE 2 - KPV thru NAD+
+  {sku:"KP10", name:"KPV",                   mg:"10mg*10vials",   price:71,  c:C.kvn},
+  {sku:"VP10", name:"VIP",                   mg:"10mg*10vials",   price:190, c:C.kvn},
+  {sku:"CS10", name:"Cagrilintide+Sema",     mg:"10mg*10vials",   price:176, c:C.kvn},
+  {sku:"CGL5", name:"Cagrilintide",          mg:"5mg*10vials",    price:122, c:C.kvn},
+  {sku:"CGL10",name:"Cagrilintide",          mg:"10mg*10vials",   price:230, c:C.kvn},
+  {sku:"BC5",  name:"BPC-157",               mg:"5mg*10vials",    price:41,  c:C.kvn},
+  {sku:"BC10", name:"BPC-157",               mg:"10mg*10vials",   price:68,  c:C.kvn},
+  {sku:"BB10", name:"BPC+TB Combo",          mg:"10mg*10vials",   price:122, c:C.kvn},
+  {sku:"BB20", name:"BPC+TB Combo",          mg:"20mg*10vials",   price:214, c:C.kvn},
+  {sku:"CND2", name:"CJC-1295 w/o DAC",      mg:"2mg*10vials",    price:41,  c:C.kvn},
+  {sku:"CND5", name:"CJC-1295 w/o DAC",      mg:"5mg*10vials",    price:95,  c:C.kvn},
+  {sku:"CND10",name:"CJC-1295 w/o DAC",      mg:"10mg*10vials",   price:185, c:C.kvn},
+  {sku:"CP10", name:"CJC-1295 w/o DAC + IPA",mg:"10mg*10vials",   price:122, c:C.kvn},
+  {sku:"CD2",  name:"CJC-1295 with DAC",     mg:"2mg*10vials",    price:81,  c:C.kvn},
+  {sku:"CD5",  name:"CJC-1295 with DAC",     mg:"5mg*10vials",    price:190, c:C.kvn},
+  {sku:"BT2",  name:"TB500",                 mg:"2mg*10vials",    price:49,  c:C.kvn},
+  {sku:"BT5",  name:"TB500",                 mg:"5mg*10vials",    price:95,  c:C.kvn},
+  {sku:"BT10", name:"TB500",                 mg:"10mg*10vials",   price:176, c:C.kvn},
+  {sku:"BBG70",name:"Glow Blend (BT+BPC+CU)",mg:"70mg*10vials",   price:231, c:C.kvn},
+  {sku:"K80",  name:"Klow Blend (BT+BC+CU+KP)",mg:"80mg*10vials", price:250, c:C.kvn},
+  {sku:"NJ100",name:"NAD+",                  mg:"100mg*10vials",  price:54,  c:C.kvn},
+  {sku:"NJ500",name:"NAD+",                  mg:"500mg*10vials",  price:95,  c:C.kvn},
+  {sku:"NJ1000",name:"NAD+",                 mg:"1000mg*10vials", price:176, c:C.kvn},
+  // PAGE 3 - Body composition
+  {sku:"LC216",name:"L-Carnitine Complex",   mg:"10ml*10vials",   price:81,  c:C.bdy},
+  {sku:"LC600",name:"L-Carnitine",           mg:"10ml*10vials",   price:40,  c:C.bdy},
+  {sku:"LB",   name:"Lemon Bottle",          mg:"10ml*10vials",   price:80,  c:C.bdy},
+  {sku:"ML10", name:"Melanotan-2",           mg:"10mg*10vials",   price:54,  c:C.bdy},
+  {sku:"MT10", name:"Melatonin",             mg:"10mg*10vials",   price:68,  c:C.bdy},
+  {sku:"MT1",  name:"Melanotan-1",           mg:"10mg*10vials",   price:68,  c:C.bdy},
+  {sku:"2AD",  name:"AOD9604",               mg:"2mg*10vials",    price:60,  c:C.bdy},
+  {sku:"5AD",  name:"AOD9604",               mg:"5mg*10vials",    price:109, c:C.bdy},
+  {sku:"SLU5", name:"SLUPP-332",             mg:"5mg*10vials",    price:100, c:C.bdy},
+  {sku:"SHB",  name:"Super Human Blend",     mg:"10ml*10vials",   price:85,  c:C.bdy},
+  // PAGE 4 - Peptides
+  {sku:"LC526",name:"Fat Blaster Blend",     mg:"10ml*10vials",   price:120, c:C.pep},
+  {sku:"P10",  name:"Pinealon",              mg:"10mg*10vials",   price:65,  c:C.pep},
+  {sku:"HA5",  name:"Hyaluronic Acid",       mg:"1ml*1vial",      price:35,  c:C.pep},
+  {sku:"MDT10",name:"Mazdutide",             mg:"10mg*10vials",   price:195, c:C.pep},
+  {sku:"P41",  name:"PT-141",                mg:"10mg*10vials",   price:62,  c:C.pep},
+  {sku:"GND2", name:"Gonadorelin",           mg:"2mg*10vials",    price:41,  c:C.pep},
+  {sku:"DS5",  name:"DSIP",                  mg:"5mg*10vials",    price:46,  c:C.pep},
+  {sku:"DS10", name:"DSIP",                  mg:"10mg*10vials",   price:92,  c:C.pep},
+  {sku:"DS15", name:"DSIP",                  mg:"15mg*10vials",   price:114, c:C.pep},
+  {sku:"SK5",  name:"Selank",                mg:"5mg*10vials",    price:49,  c:C.pep},
+  {sku:"SK10", name:"Selank",                mg:"10mg*10vials",   price:81,  c:C.pep},
+  {sku:"XA5",  name:"Semax",                 mg:"5mg*10vials",    price:49,  c:C.pep},
+  {sku:"XA10", name:"Semax",                 mg:"10mg*10vials",   price:81,  c:C.pep},
+  {sku:"OT2",  name:"Oxytocin",              mg:"2mg*10vials",    price:41,  c:C.pep},
+  {sku:"OT5",  name:"Oxytocin",              mg:"5mg*10vials",    price:68,  c:C.pep},
+  {sku:"OT10", name:"Oxytocin",              mg:"10mg*10vials",   price:125, c:C.pep},
+  {sku:"ET10", name:"Epithalon",             mg:"10mg*10vials",   price:38,  c:C.pep},
+  {sku:"ET50", name:"Epithalon",             mg:"50mg*10vials",   price:176, c:C.pep},
+  {sku:"AP5",  name:"Adipotide",             mg:"5mg*10vials",    price:176, c:C.pep},
+  {sku:"AR50", name:"AICAR",                 mg:"50mg*10vials",   price:67,  c:C.pep},
+  {sku:"2S10", name:"SS-31",                 mg:"10mg*10vials",   price:109, c:C.pep},
+  {sku:"2S50", name:"SS-31",                 mg:"50mg*10vials",   price:407, c:C.pep},
+  // PAGE 5 - Growth Hormone group
+  {sku:"G25",  name:"GHRP-2",                mg:"5mg*10vials",    price:27,  c:C.ghr},
+  {sku:"G210", name:"GHRP-2",                mg:"10mg*10vials",   price:54,  c:C.ghr},
+  {sku:"G65",  name:"GHRP-6",                mg:"5mg*10vials",    price:27,  c:C.ghr},
+  {sku:"G610", name:"GHRP-6",                mg:"10mg*10vials",   price:54,  c:C.ghr},
+  {sku:"SMO10",name:"Sermorelin",            mg:"10mg*10vials",   price:157, c:C.ghr},
+  {sku:"SMO5", name:"Sermorelin",            mg:"5mg*10vials",    price:76,  c:C.ghr},
+  {sku:"M10",  name:"HGH 191AA",             mg:"10iu*10vials",   price:49,  c:C.ghr},
+  {sku:"M12",  name:"HGH 191AA",             mg:"12iu*10vials",   price:65,  c:C.ghr},
+  {sku:"M15",  name:"HGH 191AA",             mg:"15iu*10vials",   price:73,  c:C.ghr},
+  {sku:"M24",  name:"HGH 191AA",             mg:"24iu*10vials",   price:125, c:C.ghr},
+  {sku:"M36",  name:"HGH 191AA",             mg:"36iu*10vials",   price:180, c:C.ghr},
+  {sku:"G10K", name:"HCG",                   mg:"10000IU*10vials",price:163, c:C.ghr},
+  {sku:"G5K",  name:"HCG",                   mg:"5000IU*10vials", price:87,  c:C.ghr},
+  {sku:"G75",  name:"HMG",                   mg:"75IU*10vials",   price:68,  c:C.ghr},
+  {sku:"IG01", name:"IGF-1 LR3",             mg:"0.1mg*10vials",  price:46,  c:C.ghr},
+  {sku:"IG1",  name:"IGF-1 LR3",             mg:"1mg*10vials",    price:200, c:C.ghr},
+  // Tesamorelin - its own color
+  {sku:"TSM2", name:"Tesamorelin",           mg:"2mg*10vials",    price:60,  c:C.tes},
+  {sku:"TSM5", name:"Tesamorelin",           mg:"5mg*10vials",    price:113, c:C.tes},
+  {sku:"TSM10",name:"Tesamorelin",           mg:"10mg*10vials",   price:200, c:C.tes},
+  {sku:"TSM20",name:"Tesamorelin",           mg:"20mg*10vials",   price:357, c:C.tes},
+  // Ipamorelin / Hexarelin
+  {sku:"IP5",  name:"Ipamorelin",            mg:"5mg*10vials",    price:41,  c:C.ipa},
+  {sku:"IP10", name:"Ipamorelin",            mg:"10mg*10vials",   price:81,  c:C.ipa},
+  {sku:"HX5",  name:"Hexarelin",             mg:"5mg*10vials",    price:95,  c:C.ipa},
+  // GHK-CU - its own color
+  {sku:"CU50", name:"GHK-CU",               mg:"50mg*10vials",   price:33,  c:C.ghk},
+  {sku:"CU100",name:"GHK-CU",               mg:"100mg*10vials",  price:65,  c:C.ghk},
+  // KissPeptin / Thymalin / Thymosin Alpha
+  {sku:"KS5",  name:"KissPeptin-10",         mg:"5mg*10vials",    price:68,  c:C.kst},
+  {sku:"KS10", name:"KissPeptin-10",         mg:"10mg*10vials",   price:130, c:C.kst},
+  {sku:"TY10", name:"Thymalin",              mg:"10mg*10vials",   price:68,  c:C.kst},
+  {sku:"TA5",  name:"Thymosin Alpha-1",      mg:"5mg*10vials",    price:109, c:C.kst},
+  {sku:"TA10", name:"Thymosin Alpha-1",      mg:"10mg*10vials",   price:176, c:C.kst},
+  // PAGE 6 - MOTS-c its own color
+  {sku:"MS10", name:"MOTS-c",               mg:"10mg*10vials",   price:71,  c:C.mot},
+  {sku:"MS20", name:"MOTS-c",               mg:"20mg*10vials",   price:136, c:C.mot},
+  {sku:"MS40", name:"MOTS-c",               mg:"40mg*10vials",   price:244, c:C.mot},
+  // Rest of page 6
+  {sku:"375",  name:"LL-37",                 mg:"5mg*10vials",    price:103, c:C.p6},
+  {sku:"DR5",  name:"Dermorphin",            mg:"5mg*10vials",    price:38,  c:C.p6},
+  {sku:"GTT600",name:"Glutathione",          mg:"600mg*10vials",  price:40,  c:C.p6},
+  {sku:"GTT",  name:"Glutathione",           mg:"1500mg*10vials", price:90,  c:C.p6},
+  // Supplies
+  {sku:"WA2",  name:"Bac Water",             mg:"2ml*10vials",    price:7,   c:C.sup},
+  {sku:"WA3",  name:"Bac Water",             mg:"3ml*10vials",    price:10,  c:C.sup},
+  {sku:"WA10", name:"Bac Water",             mg:"10ml*10vials",   price:11,  c:C.sup},
+  {sku:"AA3",  name:"Acetic Acid 0.6%",      mg:"3ml*10vials",    price:10,  c:C.sup},
+  {sku:"AA10", name:"Acetic Acid 0.6%",      mg:"10ml*10vials",   price:11,  c:C.sup},
+  // Rest of page 6
+  {sku:"5AM",  name:"5-Amino-1MQ",           mg:"5mg*10vials",    price:87,  c:C.p6},
+  {sku:"50AM", name:"5-Amino-1MQ",           mg:"50mg*10vials",   price:136, c:C.p6},
+  {sku:"CBL60",name:"Cerebrolysin",          mg:"60mg*6vials",    price:49,  c:C.p6},
+  {sku:"NP810",name:"SNAP-8",                mg:"10mg*10vials",   price:49,  c:C.p6},
+  {sku:"SUR10",name:"Suvratide",             mg:"10mg*10vials",   price:326, c:C.p6},
+  {sku:"B1210",name:"B12",                   mg:"10ml*10vials",   price:25,  c:C.p6},
+  {sku:"B12",  name:"B12",                   mg:"2ml*10vials",    price:10,  c:C.p6},
+  {sku:"F410", name:"FOXO4-DRI",             mg:"10mg*10vials",   price:380, c:C.p6},
+  {sku:"FM2",  name:"MGF",                   mg:"2mg*10vials",    price:65,  c:C.p6},
+  {sku:"FMP2", name:"PEG MGF",               mg:"2mg*10vials",    price:100, c:C.p6},
 ];
 
-const CAT_COLORS = {
-  "Semaglutide":       {bg:"#dbeafe",accent:"#1d4ed8"},
-  "Tirzepatide":       {bg:"#fef9c3",accent:"#a16207"},
-  "Retatrutide":       {bg:"#dcfce7",accent:"#15803d"},
-  "Cagrilintide":      {bg:"#fce7f3",accent:"#9d174d"},
-  "KPV / VIP":         {bg:"#ede9fe",accent:"#6d28d9"},
-  "BPC-157 & TB500":   {bg:"#ffedd5",accent:"#c2410c"},
-  "CJC-1295":          {bg:"#e0e7ff",accent:"#4338ca"},
-  "NAD+":              {bg:"#fff1f2",accent:"#be123c"},
-  "Fat Loss":          {bg:"#fef2f2",accent:"#dc2626"},
-  "Growth Hormone":    {bg:"#f0fdf4",accent:"#166534"},
-  "HCG / HMG":         {bg:"#fdf4ff",accent:"#7e22ce"},
-  "Immune & Recovery": {bg:"#ecfdf5",accent:"#047857"},
-  "Cognitive & Neuro": {bg:"#f5f3ff",accent:"#5b21b6"},
-  "GHK-CU":            {bg:"#fdf6ec",accent:"#b45309"},
-  "Other Peptides":    {bg:"#f8fafc",accent:"#475569"},
-  "Glutathione & Misc":{bg:"#f0f9ff",accent:"#0369a1"},
-  "Supplies":          {bg:"#f9fafb",accent:"#374151"},
-};
-
-// ============================================================
 // STATE
-// ============================================================
-let state = {
-  screen: "browse", // browse | checkout | confirm | admin
-  cart: {},
-  form: {name:"",phone:"",email:""},
-  activeCategory: "All",
-  search: "",
-  roundOpen: true,
-  roundNum: 2,
-  openDate: "",
-  closeDate: "",
-  orders: JSON.parse(localStorage.getItem("bgm_orders")||"[]"),
-  adminAuth: false,
-  adminTab: "orders",
-};
+let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:JSON.parse(localStorage.getItem("bgm_v3")||"[]"),adminAuth:false,adminTab:"orders"};
 
-// ============================================================
-// HELPERS
-// ============================================================
-function cartItems(){
-  return PRODUCTS.filter(p=>state.cart[p.sku]>0).map(p=>({...p,qty:state.cart[p.sku]}));
-}
-function subtotal(){return cartItems().reduce((s,i)=>s+i.price*i.qty,0)}
-function total(){return subtotal()+SHIPPING}
-function cartCount(){return cartItems().reduce((s,i)=>s+i.qty,0)}
+function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
+function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
+function tot(){return sub()+SHIP;}
+function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
+function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
+function saveOrd(){const o={id:Date.now(),round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,total:tot()};S.orders.push(o);localStorage.setItem("bgm_v3",JSON.stringify(S.orders));}
+function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
 
-function categories(){
-  const cats = [...new Set(PRODUCTS.map(p=>p.cat))];
-  return ["All",...cats];
-}
+function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
 
-function filteredProducts(){
-  let list = PRODUCTS;
-  if(state.activeCategory!=="All") list=list.filter(p=>p.cat===state.activeCategory);
-  if(state.search){
-    const q=state.search.toLowerCase();
-    list=list.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));
-  }
-  return list;
+function hdr(t,s,back){return`<div class="header"><div class="header-row">${back?`<button class="back-btn" onclick="gb()">←</button>`:""}<div style="flex:1"><h1>${t}</h1><p>${s}</p></div>${S.screen==="browse"&&cc()>0?`<button class="cart-btn" onclick="gc()">🛒 ${cc()} kit${cc()>1?"s":""}</button>`:""}${S.screen==="browse"?`<button class="admin-gear" onclick="ga()">⚙</button>`:""}</div></div>`;}
+
+function rBrowse(){
+  if(!S.roundOpen)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
+  const list=fl();
+  const rows=list.map(p=>{
+    const q=S.cart[p.sku]||0;
+    return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;
+  }).join("");
+  const bar=cc()>0?`<div class="cart-bar"><div><div class="cb-total">${cc()} kit${cc()>1?"s":""} · $${sub()}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button></div>`:"";
+  return hdr("~BgM's~ BioStack Community","2026 ZLZ PEPTIDE — GROUP ORDER #"+S.roundNum,false)+
+  `<div class="round-badge"><span>Group Order <strong>#${S.roundNum}</strong></span>${S.closeDate?`<span>Closes: <strong>${S.closeDate}</strong></span>`:`<span class="open-dot">● Open Now</span>`}</div>
+  <div class="search-bar"><input type="search" placeholder="🔍  Search by name, SKU, or mg..." value="${S.search}" id="si"/></div>
+  ${list.length===0?`<div class="empty">No products found</div>`:`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${rows}</tbody></table>`}
+  <div style="padding:12px 16px 100px;text-align:center;font-size:11px;color:#94a3b8">For experimental research use only. Not for human consumption.</div>
+  ${bar}`;
 }
 
-function grouped(){
-  const g={};
-  filteredProducts().forEach(p=>{
-    if(!g[p.cat])g[p.cat]=[];
-    g[p.cat].push(p);
-  });
-  return g;
+function rCheckout(){
+  const items=ci();
+  const ih=items.map(i=>`<div class="oitem"><div><div class="oname"><span class="sku">${i.sku}</span>${i.name}</div><div class="odetail">${i.mg} · ${i.qty} kit${i.qty>1?"s":""}</div></div><div class="oprice">$${(i.price*i.qty).toFixed(2)}<div class="oeach">$${i.price}/kit</div></div></div>`).join("");
+  return hdr("Review & Checkout","~BgM's~ BioStack Community",true)+
+  `<div class="page"><div class="card"><div class="card-title">📋 Your Order</div>${ih}
+    <div class="trow"><span>Subtotal</span><span>$${sub().toFixed(2)}</span></div>
+    <div class="trow"><span>Shipping & Customs (flat fee)</span><span>$${SHIP}.00</span></div>
+    <div class="tbig"><span>Total Due</span><span>$${tot().toFixed(2)}</span></div>
+  </div>
+  <div class="card"><div class="card-title">👤 Your Info</div>
+    <input class="finput" type="text" placeholder="Full Name *" id="fn" value="${S.form.name}"/>
+    <input class="finput" type="tel" placeholder="Phone Number *" id="fp" value="${S.form.phone}"/>
+    <input class="finput" type="email" placeholder="Email Address *" id="fe" value="${S.form.email}"/>
+  </div>
+  <div class="vbox">
+    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
+    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
+    <div class="vtotal">$${tot().toFixed(2)} due</div>
+    <div class="vsub">$${sub()} products + $${SHIP} shipping</div>
+  </div>
+  <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
+  <button class="sbtn" id="sbtn" onclick="submit()">Submit Order →</button>
+  <p class="fnote">For experimental research use only.</p></div>`;
 }
 
-function saveOrder(){
-  const order = {
-    id: Date.now(),
-    round: state.roundNum,
-    date: new Date().toLocaleString(),
-    name: state.form.name,
-    phone: state.form.phone,
-    email: state.form.email,
-    items: cartItems(),
-    subtotal: subtotal(),
-    shipping: SHIPPING,
-    total: total(),
-  };
-  state.orders.push(order);
-  localStorage.setItem("bgm_orders",JSON.stringify(state.orders));
+function rConfirm(){
+  return hdr("Order Submitted!","~BgM's~ BioStack Community",false)+
+  `<div class="conf"><div class="conf-icon">✅</div><div class="conf-title">Order Received!</div>
+  <p class="conf-txt">Thanks ${S.form.name}! Your order has been received. You'll be contacted when it arrives.</p>
+  <div class="vbox">
+    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Complete Your Payment Now</div>
+    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
+    <div class="vtotal">Send $${tot().toFixed(2)}</div>
+  </div>
+  <div class="disc">⚠️ <strong>Venmo Note Required:</strong><br>Write: <strong>"Reimbursement group order"</strong></div>
+  <button class="sbtn green" onclick="newOrd()">Place Another Order</button></div>`;
 }
 
-function vivianSummary(){
-  // Consolidate all orders for current round
-  const roundOrders = state.orders.filter(o=>o.round===state.roundNum);
-  const totals={};
-  roundOrders.forEach(o=>{
-    o.items.forEach(i=>{
-      if(!totals[i.sku]) totals[i.sku]={sku:i.sku,price:i.price,qty:0};
-      totals[i.sku].qty+=i.qty;
-    });
-  });
-  let lines = Object.values(totals).map(t=>{
-    const lineTotal = t.price*t.qty;
-    const skuPad = t.sku.padEnd(8);
-    const qtyStr = (t.qty+" box").padEnd(7);
-    const priceStr = ("$"+t.price).padEnd(7);
-    return `${skuPad}= ${qtyStr}  ${priceStr}  $${lineTotal}`;
-  });
-  const grandTotal = Object.values(totals).reduce((s,t)=>s+t.price*t.qty,0);
-  lines.push("");
-  lines.push("GRAND TOTAL:           $"+grandTotal);
-  return lines.join("\n");
+function rAdmin(){
+  if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
+  const ro=S.orders.filter(o=>o.round===S.roundNum);
+  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map(o=>`<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div><div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div></div>`).join("");
+  return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
+  `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
+    <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
+    <input class="dinput" type="text" id="cd" placeholder="Close date (e.g. April 30, 2026)" value="${S.closeDate}"/>
+    <button class="savebtn" onclick="saveSt()">Save</button>
+  </div>
+  <div class="tabrow"><button class="tabbtn ${S.adminTab==="orders"?"on":""}" onclick="sat('orders')">📦 Orders (${ro.length})</button><button class="tabbtn ${S.adminTab==="vivian"?"on":""}" onclick="sat('vivian')">📋 Vivian Summary</button></div>
+  ${S.adminTab==="orders"?`<div class="asec"><h3>Orders — Group #${S.roundNum}</h3>${oh}</div>`:`<div class="asec"><h3>Vivian Order Summary</h3><div class="vbox2" id="vt">${vivian()}</div><button class="cpybtn" id="cpybtn" onclick="cpy()">📋 Copy to Clipboard</button></div>`}
+  <div style="text-align:right;margin-top:8px"><button class="lgout" onclick="alo()">Logout</button></div></div>`;
 }
 
-// ============================================================
-// RENDER
-// ============================================================
-function render(){
-  const app = document.getElementById("app");
-  if(state.screen==="browse") app.innerHTML = renderBrowse();
-  else if(state.screen==="checkout") app.innerHTML = renderCheckout();
-  else if(state.screen==="confirm") app.innerHTML = renderConfirm();
-  else if(state.screen==="admin") app.innerHTML = renderAdmin();
-  attachEvents();
+function bind(){
+  document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{
+    const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);
+    if(n===0)delete S.cart[s];else S.cart[s]=n;render();
+  }));
+  const si=document.getElementById("si");if(si)si.addEventListener("input",e=>{S.search=e.target.value;render();});
+  const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
+  const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
+  const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
+  ub();
 }
+function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
+function gc(){S.screen="checkout";render();}
+function gb(){S.screen="browse";render();}
+function ga(){S.screen="admin";render();}
+function alo(){S.adminAuth=false;S.screen="browse";render();}
+function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";render();}
+function sat(t){S.adminTab=t;render();}
+function submit(){if(!S.form.name||!S.form.phone||!S.form.email)return;saveOrd();S.screen="confirm";render();}
+function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;render();}else document.getElementById("aerr").textContent="Incorrect password";}
+function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value;render();}
+function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
-function renderHeader(title, subtitle, showBack=false){
-  return `<div class="header">
-    <div class="header-row">
-      ${showBack?`<button class="back-btn" onclick="goBack()">←</button>`:""}
-      <div style="flex:1">
-        <h1>${title}</h1>
-        <p>${subtitle}</p>
-      </div>
-      ${state.screen==="browse" && cartCount()>0 ? `<button class="cart-btn" onclick="goCheckout()">🛒 ${cartCount()} kit${cartCount()>1?"s":""}</button>`:""}
-      ${state.screen==="browse" ? `<button onclick="goAdmin()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;margin-left:8px">⚙</button>`:""}
-    </div>
-  </div>`;
-}
-
-function renderBrowse(){
-  if(!state.roundOpen){
-    return renderHeader("~BgM's~ BioStack Community","GROUP ORDER PORTAL")+
-    `<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
-  }
-
-  const g = grouped();
-  const cats = categories();
-
-  let sectionsHtml = "";
-  Object.entries(g).forEach(([cat,prods])=>{
-    const c = CAT_COLORS[cat]||{bg:"#f1f5f9",accent:"#475569"};
-    let rows = prods.map((p,i)=>{
-      const qty = state.cart[p.sku]||0;
-      return `<tr>
-        <td>
-          <span class="sku-tag" style="background:${c.bg};color:${c.accent}">${p.sku}</span>
-          <span class="prod-name">${p.name}</span>
-          <span class="prod-mg">${p.mg}</span>
-        </td>
-        <td class="right price-cell">$${p.price}</td>
-        <td class="right">
-          <div class="qty-row">
-            <button class="qty-btn minus ${qty>0?"active":""}" data-sku="${p.sku}" data-delta="-1">−</button>
-            <span class="qty-num">${qty}</span>
-            <button class="qty-btn plus" data-sku="${p.sku}" data-delta="1">+</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join("");
-
-    sectionsHtml += `
-      <div class="section-header" style="background:${c.bg};border-left-color:${c.accent}">
-        <span class="section-title" style="color:${c.accent}">${cat}</span>
-        <span class="section-count">${prods.length} item${prods.length!==1?"s":""}</span>
-      </div>
-      <table>
-        <thead><tr>
-          <th>SKU / Product</th>
-          <th class="right">Price</th>
-          <th class="right" style="width:90px">Qty</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
-  });
-
-  const catBtns = cats.map(c=>`<button class="cat-btn ${state.activeCategory===c?"active":""}" data-cat="${c}">${c}</button>`).join("");
-
-  const cartBar = cartCount()>0 ? `
-    <div class="cart-bar">
-      <div class="cart-bar-text">
-        <div class="cart-bar-total">${cartCount()} kit${cartCount()>1?"s":""} · $${subtotal()}</div>
-        <div class="cart-bar-sub">+ $25 shipping = $${total()}</div>
-      </div>
-      <button class="checkout-btn" onclick="goCheckout()">Checkout →</button>
-    </div>` : "";
-
-  return `
-    ${renderHeader("~BgM's~ BioStack Community","2026 ZLZ PEPTIDE — GROUP ORDER #"+state.roundNum)}
-    <div class="round-badge">
-      <span>Group Order <strong>#${state.roundNum}</strong></span>
-      ${state.closeDate?`<span>Closes: <strong>${state.closeDate}</strong></span>`:`<span style="color:#22c55e;font-weight:700">● Open Now</span>`}
-    </div>
-    <div class="search-bar"><input type="search" placeholder="🔍  Search by name, SKU, or mg..." value="${state.search}" id="search-input"/></div>
-    <div class="cat-scroll">${catBtns}</div>
-    <div>${sectionsHtml}</div>
-    <div style="padding:12px 16px 100px;text-align:center;font-size:11px;color:#94a3b8">For experimental research use only. Not for human consumption.</div>
-    ${cartBar}`;
-}
-
-function renderCheckout(){
-  const items = cartItems();
-  const itemsHtml = items.map(item=>`
-    <div class="order-item">
-      <div class="order-item-left">
-        <div class="order-item-name"><span class="sku-tag" style="background:#e2e8f0;color:#475569">${item.sku}</span>${item.name}</div>
-        <div class="order-item-detail">${item.mg} · ${item.qty} kit${item.qty>1?"s":""}</div>
-      </div>
-      <div class="order-item-price">
-        $${(item.price*item.qty).toFixed(2)}
-        <div class="order-item-each">$${item.price} each</div>
-      </div>
-    </div>`).join("");
-
-  return `
-    ${renderHeader("Review & Checkout","~BgM's~ BioStack Community",true)}
-    <div class="page active">
-      <div class="card">
-        <div class="card-title">📋 Your Order</div>
-        ${itemsHtml}
-        <div class="total-row"><span>Subtotal</span><span>$${subtotal().toFixed(2)}</span></div>
-        <div class="total-row"><span>Shipping & Customs (flat)</span><span>$${SHIPPING}.00</span></div>
-        <div class="total-big"><span>Total Due</span><span>$${total().toFixed(2)}</span></div>
-      </div>
-      <div class="card">
-        <div class="card-title">👤 Your Info</div>
-        <input class="form-input" type="text" placeholder="Full Name *" id="inp-name" value="${state.form.name}"/>
-        <input class="form-input" type="tel" placeholder="Phone Number *" id="inp-phone" value="${state.form.phone}"/>
-        <input class="form-input" type="email" placeholder="Email Address *" id="inp-email" value="${state.form.email}"/>
-      </div>
-      <div class="venmo-box">
-        <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
-        <div class="venmo-handle">${VENMO}</div>
-        <div class="venmo-total">$${total().toFixed(2)} due</div>
-        <div class="venmo-sub">includes $${subtotal()} + $${SHIPPING} shipping</div>
-      </div>
-      <div class="disclaimer">
-        ⚠️ <strong>Important:</strong> When sending Venmo payment, write in the note field:<br>
-        <strong>"Reimbursement group order"</strong>
-      </div>
-      <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Submit Order →</button>
-      <p class="footer-note">For experimental research use only.</p>
-    </div>`;
-}
-
-function renderConfirm(){
-  return `
-    ${renderHeader("Order Submitted!","~BgM's~ BioStack Community")}
-    <div class="confirm-wrap">
-      <div class="confirm-icon">✅</div>
-      <div class="confirm-title">Order Received!</div>
-      <p class="confirm-text">Thanks ${state.form.name}! Your order has been received. You'll be contacted when your order arrives.</p>
-      <div class="venmo-box">
-        <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Complete Your Payment Now</div>
-        <div class="venmo-handle">${VENMO}</div>
-        <div class="venmo-total">Send $${total().toFixed(2)}</div>
-      </div>
-      <div class="disclaimer">
-        ⚠️ <strong>Venmo Note Required:</strong><br>
-        Write: <strong>"Reimbursement group order"</strong>
-      </div>
-      <button class="submit-btn green" onclick="newOrder()">Place Another Order</button>
-    </div>`;
-}
-
-function renderAdmin(){
-  if(!state.adminAuth){
-    return `${renderHeader("Admin","~BgM's~ BioStack Community",true)}
-    <div class="admin-login">
-      <h2>🔐 Admin Login</h2>
-      <p>Enter your admin password</p>
-      <input class="form-input" type="password" id="admin-pw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/>
-      <br><button class="submit-btn" style="max-width:200px;margin:0 auto" onclick="adminLogin()">Login</button>
-      <p id="admin-err" style="color:#dc2626;font-size:13px;margin-top:8px"></p>
-    </div>`;
-  }
-
-  const roundOrders = state.orders.filter(o=>o.round===state.roundNum);
-
-  const ordersHtml = roundOrders.length===0 ?
-    `<div class="no-orders">No orders yet for Group Order #${state.roundNum}</div>` :
-    roundOrders.map(o=>`
-      <div class="order-card">
-        <div class="order-card-header">
-          <span class="order-card-name">${o.name}</span>
-          <span class="order-card-total">$${o.total.toFixed(2)}</span>
-        </div>
-        <div class="order-card-info">${o.phone} · ${o.email} · ${o.date}</div>
-        <div class="order-card-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${(i.price*i.qty)}`).join(" | ")}</div>
-      </div>`).join("");
-
-  const summary = vivianSummary();
-
-  return `
-    ${renderHeader("Admin Panel","Group Order #"+state.roundNum,true)}
-    <div class="admin-wrap">
-      <div class="admin-section">
-        <h3>⚙️ Order Round Control</h3>
-        <div class="toggle-row">
-          <span class="toggle-label">Portal ${state.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span>
-          <label class="toggle">
-            <input type="checkbox" id="round-toggle" ${state.roundOpen?"checked":""}>
-            <span class="slider"></span>
-          </label>
-        </div>
-        <input class="date-input" type="text" id="close-date" placeholder="Close date (e.g. April 30, 2026)" value="${state.closeDate}"/>
-        <button class="save-btn" onclick="saveSettings()">Save</button>
-      </div>
-
-      <div class="tab-row">
-        <button class="tab-btn ${state.adminTab==="orders"?"active":""}" onclick="setAdminTab('orders')">📦 Orders (${roundOrders.length})</button>
-        <button class="tab-btn ${state.adminTab==="vivian"?"active":""}" onclick="setAdminTab('vivian')">📋 Vivian Summary</button>
-      </div>
-
-      ${state.adminTab==="orders" ? `
-        <div class="admin-section">
-          <h3>Orders — Group #${state.roundNum}</h3>
-          ${ordersHtml}
-        </div>` : `
-        <div class="admin-section">
-          <h3>Vivian Order Summary — Copy & Send</h3>
-          <div class="vivian-box" id="vivian-text">${summary}</div>
-          <button class="copy-btn" id="copy-btn" onclick="copyVivian()">📋 Copy to Clipboard</button>
-        </div>`}
-
-      <div style="text-align:right;margin-top:8px">
-        <button class="logout-btn" onclick="adminLogout()">Logout</button>
-      </div>
-    </div>`;
-}
-
-// ============================================================
-// EVENTS
-// ============================================================
-function attachEvents(){
-  // Qty buttons
-  document.querySelectorAll("[data-sku]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const sku = btn.dataset.sku;
-      const delta = parseInt(btn.dataset.delta);
-      const cur = state.cart[sku]||0;
-      const next = Math.max(0,cur+delta);
-      if(next===0) delete state.cart[sku];
-      else state.cart[sku]=next;
-      render();
-    });
-  });
-
-  // Search
-  const si = document.getElementById("search-input");
-  if(si) si.addEventListener("input",e=>{state.search=e.target.value;state.activeCategory="All";render()});
-
-  // Category buttons
-  document.querySelectorAll("[data-cat]").forEach(btn=>{
-    btn.addEventListener("click",()=>{state.activeCategory=btn.dataset.cat;state.search="";render()});
-  });
-
-  // Form inputs
-  ["name","phone","email"].forEach(f=>{
-    const el=document.getElementById("inp-"+f);
-    if(el) el.addEventListener("input",e=>{state.form[f]=e.target.value;updateSubmitBtn()});
-  });
-
-  updateSubmitBtn();
-}
-
-function updateSubmitBtn(){
-  const btn=document.getElementById("submit-btn");
-  if(!btn)return;
-  const ok = state.form.name&&state.form.phone&&state.form.email;
-  btn.disabled=!ok;
-}
-
-function goCheckout(){state.screen="checkout";render()}
-function goBack(){state.screen="browse";render()}
-function goAdmin(){state.screen="admin";render()}
-function adminLogout(){state.adminAuth=false;state.screen="browse";render()}
-function newOrder(){state.cart={};state.form={name:"",phone:"",email:""};state.screen="browse";render()}
-
-function setAdminTab(tab){state.adminTab=tab;render()}
-
-function submitOrder(){
-  if(!state.form.name||!state.form.phone||!state.form.email)return;
-  saveOrder();
-  state.screen="confirm";
-  render();
-}
-
-function adminLogin(){
-  const pw=document.getElementById("admin-pw").value;
-  if(pw===ADMIN_PASSWORD){state.adminAuth=true;render();}
-  else{document.getElementById("admin-err").textContent="Incorrect password";}
-}
-
-function saveSettings(){
-  state.roundOpen=document.getElementById("round-toggle").checked;
-  state.closeDate=document.getElementById("close-date").value;
-  render();
-}
-
-function copyVivian(){
-  const text=document.getElementById("vivian-text").innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=document.getElementById("copy-btn");
-    btn.textContent="✅ Copied!";
-    btn.classList.add("copied");
-    setTimeout(()=>{btn.textContent="📋 Copy to Clipboard";btn.classList.remove("copied")},2000);
-  });
-}
-
-// ============================================================
-// INIT
-// ============================================================
 render();
 </script>
 </body>
