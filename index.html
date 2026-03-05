@@ -404,7 +404,14 @@ function bind(){
     if(n===0)delete S.cart[s];else S.cart[s]=n;render();
   }));
   const jb=document.querySelector(".jump-bar");
-  if(jb)jb.addEventListener("wheel",e=>{e.preventDefault();jb.scrollLeft+=e.deltaY;},{passive:false});
+  if(jb){
+    jb.addEventListener("wheel",e=>{e.preventDefault();jb.scrollLeft+=e.deltaY;},{passive:false});
+    let isDown=false,startX,scrollLeft;
+    jb.addEventListener("mousedown",e=>{isDown=true;startX=e.pageX-jb.offsetLeft;scrollLeft=jb.scrollLeft;});
+    jb.addEventListener("mouseleave",()=>isDown=false);
+    jb.addEventListener("mouseup",()=>isDown=false);
+    jb.addEventListener("mousemove",e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-jb.offsetLeft;jb.scrollLeft=scrollLeft-(x-startX);});
+  }
   const si=document.getElementById("si");
   if(si){
     si.addEventListener("input",e=>{
