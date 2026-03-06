@@ -25,6 +25,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;min-height:1
 .search-bar input{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none}
 
 .closed-banner{background:#dc2626;color:#fff;text-align:center;padding:20px 16px;margin:16px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
+.tip-box{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:14px;padding:16px;margin:12px 0;color:#fff;}
+.tip-box .tip-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.tip-box .tip-desc{font-size:13px;opacity:0.9;margin-bottom:12px}
+.tip-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:15px;font-weight:700;color:#92400e;background:#fff;cursor:pointer}
+.conn-box{background:#4c1d95;border-radius:14px;padding:16px;margin:12px 0}
+.conn-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.conn-sub{font-size:12px;color:#ddd6fe;margin-bottom:10px}
+.conn-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;margin-bottom:8px}
+.conn-input{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;box-sizing:border-box}
 .jump-bar{display:flex;gap:7px;padding:8px 14px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid #e2e8f0;-webkit-overflow-scrolling:touch;cursor:grab}
 .jump-bar::-webkit-scrollbar{height:4px}
 .jump-bar::-webkit-scrollbar-track{background:#f1f5f9}
@@ -309,14 +318,14 @@ async function supaPost(table,data){
   await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});
 }
 
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders"};
+let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:""};
 
 function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
 function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
-function tot(){return sub()+SHIP;}
+function tot(){return sub()+SHIP+S.tip;}
 function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
 function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
-async function saveOrd(){const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,total:tot()};await supaPost("orders",o);}
+async function saveOrd(){const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,tip:S.tip,connection:S.connection,total:tot()};await supaPost("orders",o);}
 async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
 async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";});}}catch(e){}}
 async function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value||"";await fetch(SUPA_URL+"/rest/v1/settings?key=eq.round_open",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:String(S.roundOpen)})});await fetch(SUPA_URL+"/rest/v1/settings?key=eq.close_date",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:S.closeDate})});render();}
@@ -365,9 +374,44 @@ function rCheckout(){
     <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
     <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
     <div class="vtotal">$${tot().toFixed(2)} due</div>
-    <div class="vsub">$${sub()} products + $${SHIP} shipping</div>
+    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
   </div>
   <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
+  <div class="tip-box">
+    <div class="tip-title">💰 Optional Tip</div>
+    <div class="tip-desc">Leaving a tip is how the group buy organizer gets compensated for his time & efforts 🙂</div>
+    <select class="tip-select" id="tipsel">
+      <option value="0">No tip</option>
+      <option value="10">$10</option>
+      <option value="20">$20</option>
+      <option value="30">$30</option>
+      <option value="40">$40</option>
+      <option value="50">$50</option>
+      <option value="60">$60</option>
+      <option value="70">$70</option>
+      <option value="80">$80</option>
+      <option value="90">$90</option>
+      <option value="100">$100</option>
+    </select>
+  </div>
+  <div class="conn-box">
+    <div class="conn-title">🔗 Who is your contact to Boyd? *</div>
+    <div class="conn-sub">They will deliver your order to you.</div>
+    <select class="conn-select" id="connsel">
+      <option value="">-- Select --</option>
+      <option value="Self (I'll pick up directly)">Self (I'll pick up directly)</option>
+      <option value="Boyd">Boyd</option>
+      <option value="Bronson">Bronson</option>
+      <option value="Justin">Justin</option>
+      <option value="Dwayne">Dwayne</option>
+      <option value="Luke">Luke</option>
+      <option value="Jessica">Jessica</option>
+      <option value="Jared">Jared</option>
+      <option value="Heath">Heath</option>
+      <option value="Other">Other (type below)</option>
+    </select>
+    <input class="conn-input" type="text" id="connother" placeholder="Type name here if not listed above" value=""/>
+  </div>
   <button class="sbtn" id="sbtn" onclick="submit()">Submit Order →</button>
   <p class="fnote">For experimental research use only.</p></div>`;
 }
@@ -388,7 +432,7 @@ function rConfirm(){
 function rAdmin(){
   if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
   const ro=S.orders.filter(o=>o.round===S.roundNum);
-  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map(o=>`<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div><div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div></div>`).join("");
+  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map(o=>`<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div></div>`).join("");
   return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
     <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
@@ -437,6 +481,7 @@ function bind(){
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
   const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
+  const tipSel=document.getElementById("tipsel");if(tipSel)tipSel.addEventListener("change",e=>{S.tip=parseInt(e.target.value)||0;render();});
   ub();
 }
 function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
@@ -447,7 +492,20 @@ function jumpTo(name){S.search=name;render();}
 function alo(){S.adminAuth=false;S.screen="browse";render();}
 function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";render();}
 function sat(t){S.adminTab=t;if(t==="orders"&&S.adminAuth)loadOrders().then(()=>render());else render();}
-async function submit(){if(!S.form.name||!S.form.phone||!S.form.email)return;const btn=document.getElementById("sbtn");if(btn){btn.disabled=true;btn.textContent="Submitting...";}await saveOrd();S.screen="confirm";render();}
+async function submit(){
+  if(!S.form.name||!S.form.phone||!S.form.email)return;
+  const connSel=document.getElementById("connsel");
+  const connOther=document.getElementById("connother");
+  const tipSel=document.getElementById("tipsel");
+  if(tipSel)S.tip=parseInt(tipSel.value)||0;
+  let conn=connSel?connSel.value:"";
+  if(conn==="Other")conn=connOther?connOther.value.trim():"";
+  if(!conn){alert("Please select or enter your connection name.");return;}
+  S.connection=conn;
+  const btn=document.getElementById("sbtn");
+  if(btn){btn.disabled=true;btn.textContent="Submitting...";}
+  await saveOrd();S.screen="confirm";render();
+}
 function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;loadOrders().then(()=>render());}else document.getElementById("aerr").textContent="Incorrect password";}
 // saveSt is now defined above with Supabase
 function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
