@@ -117,6 +117,8 @@ input:checked+.sld:before{transform:translateX(22px)}
 .ocard-tot{font-weight:700;font-size:14px;color:#22c55e}
 .ocard-info{font-size:11px;color:#64748b;margin-bottom:6px}
 .ocard-items{font-size:12px;color:#475569;line-height:1.8}
+.ocard-footer{display:flex;justify-content:flex-end;margin-top:10px}
+.ocard-copy{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
 .vbox2{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
 .cpybtn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
 .cpybtn.done{background:#22c55e}
@@ -433,7 +435,10 @@ function rConfirm(){
 function rAdmin(){
   if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
   const ro=S.orders.filter(o=>o.round===S.roundNum);
-  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map(o=>`<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div></div>`).join("");
+  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
+    const copyText=`${o.name}\n${o.phone} · ${o.email}\n${o.connection?"Connection: "+o.connection+"\n":""}${o.tip>0?"Tip: $"+o.tip+"\n":""}Items: ${o.items.map(i=>`${i.sku} x${i.qty} $${i.price*i.qty}`).join(", ")}\nTotal: $${o.total.toFixed(2)}`;
+    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-copy" onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button></div></div>`;
+  }).join("");
   return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
     <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
