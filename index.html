@@ -331,7 +331,7 @@ async function loadSettings(){try{const data=await supaGet("settings","");if(Arr
 async function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value||"";await fetch(SUPA_URL+"/rest/v1/settings?key=eq.round_open",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:String(S.roundOpen)})});await fetch(SUPA_URL+"/rest/v1/settings?key=eq.close_date",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:S.closeDate})});render();}
 function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
 
-function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();window.scrollTo(0,0);bind();}
+function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
 
 function hdr(t,s,back){return`<div class="header"><div class="header-row">${back?`<button class="back-btn" onclick="gb()">←</button>`:""}<div style="flex:1"><h1>${t}</h1><p>${s}</p></div>${S.screen==="browse"&&cc()>0?`<button class="cart-btn" onclick="gc()">🛒 ${cc()} kit${cc()>1?"s":""}</button>`:""}${S.screen==="browse"?`<button class="admin-gear" onclick="ga()">⚙</button>`:""}</div></div>`;}
 
@@ -518,9 +518,9 @@ function bind(){
   ub();
 }
 function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
-function gc(){S.screen="checkout";S.tip=0;render();}
-function gb(){S.screen="browse";render();}
-function ga(){S.screen="admin";render();}
+function gc(){S.screen="checkout";S.tip=0;window.scrollTo(0,0);render();}
+function gb(){S.screen="browse";window.scrollTo(0,0);render();}
+function ga(){S.screen="admin";window.scrollTo(0,0);render();}
 function jumpTo(name){S.search=name;render();}
 function alo(){S.adminAuth=false;S.screen="browse";render();}
 function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";render();}
