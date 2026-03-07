@@ -449,28 +449,9 @@ function bind(){
   document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{
     const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);
     if(n===0)delete S.cart[s];else S.cart[s]=n;
-    // Update just this row without full re-render
-    const row=b.closest("tr");
-    if(row){
-      const qnum=row.querySelector(".qnum");
-      if(qnum)qnum.textContent=n;
-      const minus=row.querySelector(".qbtn.minus");
-      if(minus){if(n>0)minus.classList.add("on");else minus.classList.remove("on");}
-    }
-    // Update cart bar
-    const total=sub();const count=cc();
-    let bar=document.querySelector(".cart-bar");
-    if(count>0){
-      if(bar){
-        bar.querySelector(".cb-total").textContent=count+" kit"+(count>1?"s":"")+" · $"+total;
-        bar.querySelector(".cb-sub").textContent="+ $"+SHIP+" shipping = $"+tot();
-      } else {
-        bar=document.createElement("div");
-        bar.className="cart-bar";
-        bar.innerHTML=`<div><div class="cb-total">${count} kit${count>1?"s":""} · $${total}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button>`;
-        document.body.appendChild(bar);
-      }
-    } else {if(bar)bar.remove();}
+    const scrollY=window.scrollY;
+    render();
+    window.scrollTo(0,scrollY);
   }));
   const jb=document.querySelector(".jump-bar");
   if(jb){
@@ -497,7 +478,7 @@ function bind(){
         else if(noRes)noRes.outerHTML=`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${newRows}</tbody></table>`;
       }
       // Re-attach qty button events
-      document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;render();}));
+      document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
     });
     si.focus();
   }
