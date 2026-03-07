@@ -436,8 +436,8 @@ function rAdmin(){
   if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
   const ro=S.orders.filter(o=>o.round===S.roundNum);
   const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
-    const copyText=`${o.name}\n${o.phone} · ${o.email}\n${o.connection?"Connection: "+o.connection+"\n":""}${o.tip>0?"Tip: $"+o.tip+"\n":""}Items: ${o.items.map(i=>`${i.sku} x${i.qty} $${i.price*i.qty}`).join(", ")}\nTotal: $${o.total.toFixed(2)}`;
-    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(i=>`${i.sku} × ${i.qty} = $${i.price*i.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-copy" onclick="navigator.clipboard.writeText(${JSON.stringify(copyText)}).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button></div></div>`;
+    const copyText=`${o.name} | ${o.phone} | ${o.email}${o.connection?" | Via: "+o.connection:""}${o.tip>0?" | Tip: $"+o.tip:""} | ${o.items.map(x=>`${x.sku} x${x.qty} $${x.price*x.qty}`).join(", ")} | Total: $${o.total.toFixed(2)}`;
+    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(x=>`${x.sku} × ${x.qty} = $${x.price*x.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-copy" data-copy="${copyText.replace(/"/g,'&quot;')}">Copy</button></div></div>`;
   }).join("");
   return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
@@ -486,6 +486,7 @@ function bind(){
       document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
     });
   }
+  document.querySelectorAll(".ocard-copy").forEach(b=>b.addEventListener("click",()=>{navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1500);});}));
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
   const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
