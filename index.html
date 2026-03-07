@@ -363,36 +363,13 @@ function rCheckout(){
   `<div class="page"><div class="card"><div class="card-title">📋 Your Order</div>${ih}
     <div class="trow"><span>Subtotal</span><span>$${sub().toFixed(2)}</span></div>
     <div class="trow"><span>Shipping & Customs (flat fee)</span><span>$${SHIP}.00</span></div>
+    ${S.tip>0?`<div class="trow"><span>Tip</span><span>$${S.tip}.00</span></div>`:""}
     <div class="tbig"><span>Total Due</span><span>$${tot().toFixed(2)}</span></div>
   </div>
   <div class="card"><div class="card-title">👤 Your Info</div>
     <input class="finput" type="text" placeholder="Full Name *" id="fn" value="${S.form.name}"/>
     <input class="finput" type="tel" placeholder="Phone Number *" id="fp" value="${S.form.phone}"/>
     <input class="finput" type="email" placeholder="Email Address *" id="fe" value="${S.form.email}"/>
-  </div>
-  <div class="vbox">
-    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
-    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
-    <div class="vtotal">$${tot().toFixed(2)} due</div>
-    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
-  </div>
-  <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
-  <div class="tip-box">
-    <div class="tip-title">💰 Optional Tip</div>
-    <div class="tip-desc">Leaving a tip is how the group buy organizer gets compensated for his time & efforts 🙂</div>
-    <select class="tip-select" id="tipsel">
-      <option value="0">No tip</option>
-      <option value="10">$10</option>
-      <option value="20">$20</option>
-      <option value="30">$30</option>
-      <option value="40">$40</option>
-      <option value="50">$50</option>
-      <option value="60">$60</option>
-      <option value="70">$70</option>
-      <option value="80">$80</option>
-      <option value="90">$90</option>
-      <option value="100">$100</option>
-    </select>
   </div>
   <div class="conn-box">
     <div class="conn-title">🔗 Who is your contact to Boyd? *</div>
@@ -412,6 +389,30 @@ function rCheckout(){
     </select>
     <input class="conn-input" type="text" id="connother" placeholder="Type name here if not listed above" value=""/>
   </div>
+  <div class="tip-box">
+    <div class="tip-title">💰 Optional Tip</div>
+    <div class="tip-desc">Leaving a tip is how the group buy organizer gets compensated for his time & efforts 🙂</div>
+    <select class="tip-select" id="tipsel">
+      <option value="0" ${S.tip===0?"selected":""}>No tip</option>
+      <option value="10" ${S.tip===10?"selected":""}>$10</option>
+      <option value="20" ${S.tip===20?"selected":""}>$20</option>
+      <option value="30" ${S.tip===30?"selected":""}>$30</option>
+      <option value="40" ${S.tip===40?"selected":""}>$40</option>
+      <option value="50" ${S.tip===50?"selected":""}>$50</option>
+      <option value="60" ${S.tip===60?"selected":""}>$60</option>
+      <option value="70" ${S.tip===70?"selected":""}>$70</option>
+      <option value="80" ${S.tip===80?"selected":""}>$80</option>
+      <option value="90" ${S.tip===90?"selected":""}>$90</option>
+      <option value="100" ${S.tip===100?"selected":""}>$100</option>
+    </select>
+  </div>
+  <div class="vbox">
+    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
+    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
+    <div class="vtotal">$${tot().toFixed(2)} due</div>
+    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
+  </div>
+  <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
   <button class="sbtn" id="sbtn" onclick="submit()">Submit Order →</button>
   <p class="fnote">For experimental research use only.</p></div>`;
 }
@@ -447,7 +448,22 @@ function rAdmin(){
 function bind(){
   document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{
     const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);
-    if(n===0)delete S.cart[s];else S.cart[s]=n;render();
+    if(n===0)delete S.cart[s];else S.cart[s]=n;
+    // Update just this row without full re-render
+    const row=b.closest("tr");
+    if(row){
+      const qnum=row.querySelector(".qnum");
+      if(qnum)qnum.textContent=n;
+      const minus=row.querySelector(".qbtn.minus");
+      if(minus){if(n>0)minus.classList.add("on");else minus.classList.remove("on");}
+    }
+    // Update cart bar
+    const bar=document.querySelector(".cart-bar");
+    const total=sub();const count=cc();
+    if(count>0){
+      if(bar){bar.querySelector(".cb-total").textContent=count+" kit"+(count>1?"s":"")+" · $"+total;bar.querySelector(".cb-sub").textContent="+ $"+SHIP+" shipping = $"+tot();}
+      else{const pg=document.querySelector(".page")||document.querySelector("table")?.parentNode;if(pg){const nb=document.createElement("div");nb.className="cart-bar";nb.innerHTML=`<div><div class="cb-total">${count} kit${count>1?"s":""} · $${total}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button>`;document.body.appendChild(nb);}}
+    } else {if(bar)bar.remove();}
   }));
   const jb=document.querySelector(".jump-bar");
   if(jb){
