@@ -497,7 +497,17 @@ function bind(){
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
   const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
-  const tipSel=document.getElementById("tipsel");if(tipSel)tipSel.addEventListener("change",e=>{S.tip=parseInt(e.target.value)||0;render();});
+  const tipSel=document.getElementById("tipsel");
+  if(tipSel)tipSel.addEventListener("change",e=>{
+    S.tip=parseInt(e.target.value)||0;
+    // Update totals inline without re-rendering
+    const vtotal=document.querySelector(".vtotal");
+    const vsub=document.querySelector(".vsub");
+    const tbig=document.querySelector(".tbig span:last-child");
+    if(vtotal)vtotal.textContent="$"+tot().toFixed(2)+" due";
+    if(vsub)vsub.textContent="$"+sub()+" products + $"+SHIP+" shipping"+(S.tip>0?" + $"+S.tip+" tip":"");
+    if(tbig)tbig.textContent="$"+tot().toFixed(2);
+  });
   ub();
 }
 function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
