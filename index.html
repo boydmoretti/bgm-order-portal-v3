@@ -480,7 +480,6 @@ function bind(){
       // Re-attach qty button events
       document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
     });
-    si.focus();
   }
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
