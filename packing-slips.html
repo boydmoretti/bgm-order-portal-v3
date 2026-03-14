@@ -5,299 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BGM Packing Slips</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
+  h1 { text-align: center; color: #333; margin-bottom: 5px; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+  .controls { text-align: center; margin-bottom: 20px; }
+  .controls select { padding: 8px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #ccc; margin-right: 10px; }
+  .controls button { background: #0066cc; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 6px; cursor: pointer; }
+  .order-list { max-width: 700px; margin: 0 auto; }
+  .order-card { background: white; border-radius: 8px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+  .order-info h2 { margin: 0 0 4px 0; font-size: 20px; }
+  .order-info p { margin: 0; color: #666; font-size: 14px; }
+  .print-btn { background: #25a244; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; white-space: nowrap; }
+  .loading { text-align: center; font-size: 18px; color: #666; margin-top: 50px; }
 
-  body {
-    font-family: Arial, sans-serif;
-    background: #1a1a2e;
-    color: #eee;
-    padding: 20px;
-  }
-
-  h1 {
-    text-align: center;
-    color: #00d4aa;
-    margin-bottom: 20px;
-    font-size: 24px;
-  }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: bold;
-  }
-
-  .btn-green { background: #00d4aa; color: #000; }
-  .btn-blue { background: #4a9eff; color: #000; }
-  .btn-red { background: #ff4444; color: #fff; }
-
-  .order-card {
-    background: #16213e;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 14px;
-  }
-
-  .order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .customer-name {
-    font-size: 20px;
-    font-weight: bold;
-    color: #00d4aa;
-  }
-
-  .order-meta {
-    font-size: 13px;
-    color: #aaa;
-    margin-bottom: 8px;
-  }
-
-  .items-list {
-    margin-top: 8px;
-  }
-
-  .item-row {
-    padding: 4px 0;
-    font-size: 14px;
-    border-bottom: 1px solid #2a2a4a;
-  }
-
-  .totals {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #ccc;
-  }
-
-  /* LOGIN */
-  #login-screen {
-    max-width: 340px;
-    margin: 80px auto;
-    background: #16213e;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-  }
-
-  #login-screen h2 { margin-bottom: 20px; color: #00d4aa; }
-
-  #login-screen input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: #0f3460;
-    color: #fff;
-    font-size: 16px;
-    margin-bottom: 14px;
-  }
-
-  .error-msg { color: #ff4444; margin-top: 10px; font-size: 14px; }
-
-  /* PRINT STYLES */
   @media print {
-    body { background: #fff; color: #000; padding: 0; }
     .no-print { display: none !important; }
-    .print-page {
-      page-break-after: always;
-      padding: 30px;
-      font-family: Arial, sans-serif;
-    }
-    .print-page:last-child { page-break-after: auto; }
-    .print-name { font-size: 32px; font-weight: bold; margin-bottom: 6px; }
-    .print-meta { font-size: 16px; color: #444; margin-bottom: 16px; }
-    .print-divider { border-top: 2px solid #000; margin: 12px 0; }
-    .print-item { font-size: 18px; padding: 8px 0; border-bottom: 1px solid #ccc; }
-    .print-item-qty { font-weight: bold; }
-    .print-totals { font-size: 18px; margin-top: 14px; }
-    .print-total-line { padding: 4px 0; }
+    body { background: white; padding: 0; margin: 0; }
+    .print-area { display: block !important; }
   }
 
-  #print-area { display: none; }
-  @media print { #print-area { display: block; } #main-content { display: none; } }
+  .print-area { display: none; }
+
+  .slip { page-break-after: always; padding: 30px; max-width: 600px; margin: 0 auto; }
+  .slip-name { font-size: 32px; font-weight: bold; margin-bottom: 4px; }
+  .slip-meta { font-size: 14px; color: #555; margin-bottom: 16px; }
+  .slip-divider { border-top: 2px solid #333; margin: 12px 0; }
+  .slip-item { font-size: 20px; padding: 6px 0; border-bottom: 1px solid #eee; }
+  .slip-qty { font-weight: bold; color: #0066cc; margin-right: 8px; }
+  .slip-totals { margin-top: 16px; font-size: 16px; }
+  .slip-total-line { padding: 3px 0; }
+  .slip-grand-total { font-size: 22px; font-weight: bold; margin-top: 8px; }
+  .slip-contact { margin-top: 16px; font-size: 14px; color: #444; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <h2>🔒 BGM Admin</h2>
-  <input type="password" id="pass-input" placeholder="Enter password" />
-  <br>
-  <button class="btn btn-green" onclick="checkPass()">Enter</button>
-  <div class="error-msg" id="login-error"></div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div id="main-content" style="display:none;">
-  <h1>📦 BGM Packing Slips</h1>
-
-  <div class="controls no-print">
-    <button class="btn btn-green" onclick="loadOrders()">🔄 Refresh Orders</button>
-    <button class="btn btn-blue" onclick="printAll()">🖨️ Print All Orders</button>
-    <select id="round-filter" class="btn" style="background:#0f3460;color:#fff;" onchange="filterOrders()">
+<div class="no-print">
+  <h1>🧬 BGM Packing Slips</h1>
+  <p class="subtitle">Click a name to print their packing slip</p>
+  <div class="controls">
+    <select id="round-filter" onchange="filterOrders()">
       <option value="">All Rounds</option>
     </select>
+    <button onclick="printAll()">🖨️ Print All</button>
   </div>
-
-  <div id="order-count" style="color:#aaa;margin-bottom:14px;"></div>
-  <div id="orders-container"></div>
+  <div class="order-list" id="order-list">
+    <div class="loading">Loading orders...</div>
+  </div>
 </div>
 
-<!-- PRINT AREA -->
-<div id="print-area"></div>
+<div class="print-area" id="print-area"></div>
 
 <script>
-  const SUPABASE_URL = 'https://zilrgqnqoswtmvlmzdim.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4';
-  const ADMIN_PASS = 'bgm2024';
+const SUPABASE_URL = 'https://zilrgqnqoswtmvlmzdim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4';
 
-  let allOrders = [];
+let allOrders = [];
 
-  function checkPass() {
-    const val = document.getElementById('pass-input').value;
-    if (val === ADMIN_PASS) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-content').style.display = 'block';
-      loadOrders();
-    } else {
-      document.getElementById('login-error').textContent = 'Wrong password.';
-    }
-  }
-
-  document.getElementById('pass-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkPass();
-  });
-
-  async function loadOrders() {
-    document.getElementById('orders-container').innerHTML = '<p style="color:#aaa;">Loading orders...</p>';
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=round.desc,name.asc`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
-      });
-      allOrders = await res.json();
-      populateRoundFilter();
-      renderOrders(allOrders);
-    } catch(e) {
-      document.getElementById('orders-container').innerHTML = '<p style="color:red;">Error loading orders.</p>';
-    }
-  }
-
-  function populateRoundFilter() {
-    const rounds = [...new Set(allOrders.map(o => o.round).filter(Boolean))].sort((a,b) => b-a);
-    const sel = document.getElementById('round-filter');
-    sel.innerHTML = '<option value="">All Rounds</option>';
-    rounds.forEach(r => {
-      sel.innerHTML += `<option value="${r}">Round ${r}</option>`;
+async function loadOrders() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=name.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
+    allOrders = await res.json();
+    populateRoundFilter();
+    renderOrders(allOrders);
+  } catch(e) {
+    document.getElementById('order-list').innerHTML = '<div class="loading">Error loading orders.</div>';
   }
+}
 
-  function filterOrders() {
-    const round = document.getElementById('round-filter').value;
-    const filtered = round ? allOrders.filter(o => String(o.round) === round) : allOrders;
-    renderOrders(filtered);
-  }
+function populateRoundFilter() {
+  const rounds = [...new Set(allOrders.map(o => o.round).filter(Boolean))].sort();
+  const sel = document.getElementById('round-filter');
+  rounds.forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = 'Round ' + r; sel.appendChild(opt); });
+}
 
-  function parseItems(items) {
-    if (!items) return [];
-    if (typeof items === 'string') {
-      try { return JSON.parse(items); } catch { return []; }
-    }
-    return Array.isArray(items) ? items : [];
-  }
+function filterOrders() {
+  const round = document.getElementById('round-filter').value;
+  const filtered = round ? allOrders.filter(o => String(o.round) === round) : allOrders;
+  renderOrders(filtered);
+}
 
-  function renderOrders(orders) {
-    const container = document.getElementById('orders-container');
-    document.getElementById('order-count').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+function renderOrders(orders) {
+  const list = document.getElementById('order-list');
+  if (!orders.length) { list.innerHTML = '<div class="loading">No orders found.</div>'; return; }
+  list.innerHTML = orders.map(o => `
+    <div class="order-card">
+      <div class="order-info">
+        <h2>${o.name}</h2>
+        <p>Round ${o.round} &nbsp;·&nbsp; ${o.date} &nbsp;·&nbsp; $${o.total}</p>
+      </div>
+      <button class="print-btn" onclick="printOne(${o.id})">🖨️ Print</button>
+    </div>
+  `).join('');
+}
 
-    if (orders.length === 0) {
-      container.innerHTML = '<p style="color:#aaa;text-align:center;padding:40px;">No orders found.</p>';
-      return;
-    }
+function buildSlip(o) {
+  let items = [];
+  try { items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []); } catch(e) {}
+  return `
+    <div class="slip">
+      <div class="slip-name">${o.name}</div>
+      <div class="slip-meta">Round ${o.round} &nbsp;·&nbsp; ${o.date}</div>
+      <div class="slip-divider"></div>
+      ${items.map(item => `<div class="slip-item"><span class="slip-qty">${item.qty}x</span>${item.name}</div>`).join('')}
+      <div class="slip-divider"></div>
+      <div class="slip-totals">
+        <div class="slip-total-line">Subtotal: $${o.subtotal || 0}</div>
+        <div class="slip-total-line">Shipping: $${o.shipping || 0}</div>
+        ${o.tip ? `<div class="slip-total-line">Tip: $${o.tip}</div>` : ''}
+        <div class="slip-grand-total">TOTAL: $${o.total || 0}</div>
+      </div>
+      <div class="slip-divider"></div>
+      <div class="slip-contact">📞 ${o.phone || '—'} &nbsp;·&nbsp; ✉️ ${o.email || '—'}</div>
+    </div>
+  `;
+}
 
-    container.innerHTML = orders.map(order => {
-      const items = parseItems(order.items);
-      const itemsHtml = items.map(item =>
-        `<div class="item-row">• <strong>${item.qty || 1}x</strong> ${item.name || item.code || 'Item'} — $${item.lineTotal || item.price || 0}</div>`
-      ).join('');
+function printOne(id) {
+  const order = allOrders.find(o => o.id === id);
+  if (!order) return;
+  document.getElementById('print-area').innerHTML = buildSlip(order);
+  window.print();
+}
 
-      return `
-        <div class="order-card">
-          <div class="order-header">
-            <div class="customer-name">${order.name || 'Unknown'}</div>
-            <button class="btn btn-blue no-print" onclick="printOne(${order.id})">🖨️ Print</button>
-          </div>
-          <div class="order-meta">
-            Round ${order.round || '—'} &nbsp;|&nbsp; ${order.date || ''} &nbsp;|&nbsp; 📱 ${order.phone || '—'} &nbsp;|&nbsp; ✉️ ${order.email || '—'}
-            ${order.connection ? `&nbsp;|&nbsp; ${order.connection}` : ''}
-          </div>
-          <div class="items-list">${itemsHtml || '<em style="color:#888;">No items</em>'}</div>
-          <div class="totals">
-            Subtotal: $${order.subtotal || 0} &nbsp;|&nbsp; Shipping: $${order.shipping || 0}
-            ${order.tip ? `&nbsp;|&nbsp; Tip: $${order.tip}` : ''}
-            &nbsp;|&nbsp; <strong>TOTAL: $${order.total || 0}</strong>
-          </div>
-        </div>`;
-    }).join('');
-  }
+function printAll() {
+  const round = document.getElementById('round-filter').value;
+  const orders = round ? allOrders.filter(o => String(o.round) === round) : allOrders;
+  if (!orders.length) { alert('No orders to print.'); return; }
+  document.getElementById('print-area').innerHTML = orders.map(buildSlip).join('');
+  window.print();
+}
 
-  function buildPrintPage(order) {
-    const items = parseItems(order.items);
-    const itemsHtml = items.map(item =>
-      `<div class="print-item"><span class="print-item-qty">${item.qty || 1}x</span> &nbsp; ${item.name || item.code || 'Item'} &nbsp;&nbsp; $${item.lineTotal || item.price || 0}</div>`
-    ).join('');
-
-    return `
-      <div class="print-page">
-        <div class="print-name">${order.name || 'Unknown'}</div>
-        <div class="print-meta">Round ${order.round || '—'} &nbsp;|&nbsp; ${order.date || ''}</div>
-        <div class="print-meta">📱 ${order.phone || '—'} &nbsp;|&nbsp; ✉️ ${order.email || '—'}${order.connection ? ' &nbsp;|&nbsp; ' + order.connection : ''}</div>
-        <div class="print-divider"></div>
-        <div>${itemsHtml || '<div class="print-item">No items</div>'}</div>
-        <div class="print-divider"></div>
-        <div class="print-totals">
-          <div class="print-total-line">Subtotal: &nbsp; $${order.subtotal || 0}</div>
-          <div class="print-total-line">Shipping: &nbsp; $${order.shipping || 0}</div>
-          ${order.tip ? `<div class="print-total-line">Tip: &nbsp; $${order.tip}</div>` : ''}
-          <div class="print-total-line"><strong>TOTAL: &nbsp; $${order.total || 0}</strong></div>
-        </div>
-      </div>`;
-  }
-
-  function printOne(id) {
-    const order = allOrders.find(o => o.id === id);
-    if (!order) return;
-    document.getElementById('print-area').innerHTML = buildPrintPage(order);
-    window.print();
-  }
-
-  function printAll() {
-    const round = document.getElementById('round-filter').value;
-    const orders = round ? allOrders.filter(o => String(o.round) === round) : allOrders;
-    if (orders.length === 0) { alert('No orders to print.'); return; }
-    document.getElementById('print-area').innerHTML = orders.map(buildPrintPage).join('');
-    window.print();
-  }
+loadOrders();
 </script>
 </body>
 </html>
