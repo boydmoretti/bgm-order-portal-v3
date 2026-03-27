@@ -117,8 +117,9 @@ input:checked+.sld:before{transform:translateX(22px)}
 .ocard-tot{font-weight:700;font-size:14px;color:#22c55e}
 .ocard-info{font-size:11px;color:#64748b;margin-bottom:6px}
 .ocard-items{font-size:12px;color:#475569;line-height:1.8}
-.ocard-footer{display:flex;justify-content:flex-end;margin-top:10px}
+.ocard-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
 .ocard-copy{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.ocard-print{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
 .vbox2{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
 .cpybtn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
 .cpybtn.done{background:#22c55e}
@@ -136,6 +137,7 @@ const PASS="BgM2026!";
 const VENMO_HANDLE="@Boyd-Moretti";
 const VENMO_URL="https://venmo.com/Boyd-Moretti";
 const SHIP=25;
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 
 // ROW COLORS - no headers, just colored rows matching Vivian's groups
 // c = background color for that row
@@ -353,7 +355,7 @@ function rBrowse(){
   `<div class="round-badge"><span>Group Order <strong>#${S.roundNum}</strong></span>${S.closeDate?`<span>Closes: <strong>${S.closeDate}</strong></span>`:`<span class="open-dot">● Open Now</span>`}</div>
   <div class="search-bar"><input type="text" inputmode="search" placeholder="🔍  Search by name, SKU, or mg..." value="${S.search}" id="si"/></div>
   ${jumpBar}
-  ${list.length===0?`<div class="empty">No products found for "${S.search}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`:`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${rows}</tbody></table>`}
+  ${list.length===0?`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`:`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${rows}</tbody></table>`}
   <div style="padding:12px 16px 100px;text-align:center;font-size:11px;color:#94a3b8">For experimental research use only. Not for human consumption.</div>
   ${bar}`;
 }
@@ -422,7 +424,7 @@ function rCheckout(){
 function rConfirm(){
   return hdr("Order Submitted!","~BgM's~ BioStack Community",false)+
   `<div class="conf"><div class="conf-icon">✅</div><div class="conf-title">Order Received!</div>
-  <p class="conf-txt">Thanks ${S.form.name}! Your order has been received. You'll be contacted when it arrives.</p>
+  <p class="conf-txt">Thanks ${esc(S.form.name)}! Your order has been received. You'll be contacted when it arrives.</p>
   <div class="vbox">
     <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Complete Your Payment Now</div>
     <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
@@ -437,7 +439,7 @@ function rAdmin(){
   const ro=S.orders.filter(o=>o.round===S.roundNum);
   const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
     const copyText=`${o.name} | ${o.phone} | ${o.email}${o.connection?" | Via: "+o.connection:""}${o.tip>0?" | Tip: $"+o.tip:""} | ${o.items.map(x=>`${x.sku} x${x.qty} $${x.price*x.qty}`).join(", ")} | Total: $${o.total.toFixed(2)}`;
-    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${o.name}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${o.phone} · ${o.email} · ${o.date}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${o.connection}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(x=>`${x.sku} × ${x.qty} = $${x.price*x.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-copy" data-copy="${copyText.replace(/"/g,'&quot;')}">Copy</button></div></div>`;
+    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${esc(o.name)}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${esc(o.phone)} · ${esc(o.email)} · ${esc(o.date)}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${esc(o.connection)}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(x=>`${esc(x.sku)} × ${x.qty} = $${x.price*x.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-print" data-idx="${i}">🖨 Print</button><button class="ocard-copy" data-copy="${copyText.replace(/"/g,'&quot;')}">Copy</button></div></div>`;
   }).join("");
   return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
@@ -476,7 +478,7 @@ function bind(){
       const noRes=document.querySelector(".empty");
       const filtered=fl();
       if(filtered.length===0){
-        if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${S.search}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;
+        if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;
       } else {
         const newRows=filtered.map(p=>{const q=S.cart[p.sku]||0;return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;}).join("");
         if(tbody)tbody.innerHTML=newRows;
@@ -486,6 +488,35 @@ function bind(){
       document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
     });
   }
+  document.querySelectorAll(".ocard-print").forEach(b=>b.addEventListener("click",()=>{
+    const idx=parseInt(b.dataset.idx);
+    const ro=S.orders.filter(o=>o.round===S.roundNum);
+    const o=ro[idx];
+    if(!o)return;
+    const itemRows=o.items.map(x=>`<tr><td>${x.sku}</td><td>${x.name}</td><td>${x.mg}</td><td style="text-align:center">${x.qty}</td><td style="text-align:right">$${x.price}/kit</td><td style="text-align:right">$${x.price*x.qty}</td></tr>`).join("");
+    const win=window.open("","_blank");
+    win.document.write(`<!DOCTYPE html><html><head><title>Packing Slip - ${o.name}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#555;font-weight:normal;margin-bottom:20px}.info{margin-bottom:20px;font-size:14px;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#1e3a5f;color:#fff;padding:8px;text-align:left;font-size:13px}td{padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px}.totals{text-align:right;font-size:14px;line-height:2}.grand{font-size:18px;font-weight:bold;color:#1e3a5f}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px}@media print{button{display:none}}</style></head><body>
+    <h1>~BgM's~ BioStack Community</h1>
+    <h2>2026 ZLZ PEPTIDE — GROUP ORDER #${o.round} PACKING SLIP</h2>
+    <div class="info">
+      <strong>Name:</strong> ${o.name}<br>
+      <strong>Phone:</strong> ${o.phone}<br>
+      <strong>Email:</strong> ${o.email}<br>
+      <strong>Date:</strong> ${o.date}<br>
+      ${o.connection?`<strong>Connection:</strong> ${o.connection}<br>`:""}
+    </div>
+    <table><thead><tr><th>SKU</th><th>Product</th><th>Size</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table>
+    <div class="totals">
+      <div>Products: $${o.subtotal.toFixed(2)}</div>
+      <div>Shipping: $${o.shipping.toFixed(2)}</div>
+      ${o.tip>0?`<div>Tip: $${o.tip.toFixed(2)}</div>`:""}
+      <div class="grand">TOTAL DUE: $${o.total.toFixed(2)}</div>
+    </div>
+    <div class="footer">For experimental research use only. Not for human consumption.<br>Thank you for your order!</div>
+    <br><button onclick="window.print()" style="padding:10px 30px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">🖨 Print This Page</button>
+    </body></html>`);
+    win.document.close();
+  }));
   document.querySelectorAll(".ocard-copy").forEach(b=>b.addEventListener("click",()=>{navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1500);});}));
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
