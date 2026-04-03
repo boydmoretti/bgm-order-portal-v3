@@ -1,548 +1,2212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>~BgM's~ BioStack Community — Group Order Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;min-height:100vh}
-#app{max-width:640px;margin:0 auto;background:#f0f4f8;min-height:100vh}
+:root {
+  --bg: #070b12;
+  --bg-elevated: #0b1120;
+  --bg-card: #0f1826;
+  --bg-card-hover: #151f30;
+  --bg-input: #0d1624;
+  --border: #1a2840;
+  --border-light: #22334d;
+  --accent: #c8102e;
+  --accent-light: #e02040;
+  --accent-glow: rgba(200,16,46,0.15);
+  --accent-bg: rgba(200,16,46,0.08);
+  --success: #10b981;
+  --success-bg: rgba(16,185,129,0.1);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245,158,11,0.1);
+  --info: #3b82f6;
+  --text: #f0f4f8;
+  --text-secondary: #8fa3bb;
+  --text-muted: #4a6070;
+  --cat-glp1: #7c3aed;
+  --cat-gh: #0369a1;
+  --cat-bpc: #047857;
+  --cat-peptides: #4f46e5;
+  --cat-bio: #166534;
+  --cat-sarms: #b45309;
+  --cat-oils: #991b1b;
+  --cat-tablets: #9a3412;
+  --cat-supplies: #334155;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --header-h: 70px;
+  --bottom-bar-h: 72px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:15px;
+  -webkit-font-smoothing:antialiased;
+}
+/* ===== VIEWS ===== */
+.view{display:none}
+.view.active{display:block}
 
-.header{background:linear-gradient(135deg,#1e3a5f,#0f2542);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.4)}
-.header-row{display:flex;align-items:center;justify-content:space-between}
-.header h1{font-size:14px;font-weight:700}
-.header p{font-size:10px;opacity:.7;margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
-.cart-btn{background:#22c55e;color:#fff;border:none;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;margin-right:10px}
-.admin-gear{background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;margin-left:8px}
+/* ===== HEADER ===== */
+#header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:var(--header-h);
+  background:linear-gradient(180deg, #050a10 0%, #090e18 100%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;
+  box-shadow:0 2px 20px rgba(0,0,0,0.6);
+}
+.header-logo{
+  height:50px;width:50px;
+  border-radius:8px;
+  object-fit:cover;
+  flex-shrink:0;
+}
+.header-center{
+  flex:1;text-align:center;padding:0 8px;min-width:0;}
+.header-brand{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(13px,3.5vw,17px);
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:0.02em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header-sub{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(10px,2.5vw,12px);
+  font-weight:500;
+  color:var(--accent);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#cartBubble{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:6px 14px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+#cartBubble:hover{background:var(--accent-light);transform:scale(1.03)}
+#cartBubble.empty{background:var(--border);color:var(--text-muted)}
+#adminGearBtn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);width:36px;height:36px;
+  border-radius:50%;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+#adminGearBtn:hover{border-color:var(--accent);color:var(--accent)}
 
-.round-badge{background:#fff;margin:10px 14px 0;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:12px;color:#475569}
-.round-badge strong{color:#0f2542;font-size:13px}
-.open-dot{color:#22c55e;font-weight:700}
+/* ===== INFO BAR ===== */
+#infoBar{
+  margin-top:var(--header-h);
+  background:var(--bg-elevated);
+  border-bottom:1px solid var(--border);
+  padding:6px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.info-order{font-size:14px;font-weight:600;color:var(--text-secondary)}
+.info-order span{color:var(--accent);font-size:16px}
+.info-close{font-size:13px;color:var(--text-muted)}
+.info-close strong{color:var(--warning)}
 
-.search-bar{padding:10px 14px;background:#fff;border-bottom:1px solid #e2e8f0;margin-top:8px}
-.search-bar input{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none}
+/* ===== SEARCH ===== */
+#searchWrap{padding:8px 14px 6px;background:var(--bg)}
+#searchInput{
+  width:100%;
+  background:var(--bg-input);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:11px 16px 11px 42px;
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  font-size:15px;
+  outline:none;
+  transition:border-color 0.2s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%234a6070' viewBox='0 0 24 24'%3E%3Cpath d='M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z' stroke='%234a6070' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:14px center;
+}
+#searchInput::placeholder{color:var(--text-muted)}
+#searchInput:focus{border-color:var(--accent)}
 
-.closed-banner{background:#dc2626;color:#fff;text-align:center;padding:20px 16px;margin:16px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
-.tip-box{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:14px;padding:16px;margin:12px 0;color:#fff;}
-.tip-box .tip-title{font-size:16px;font-weight:800;margin-bottom:4px}
-.tip-box .tip-desc{font-size:13px;opacity:0.9;margin-bottom:12px}
-.tip-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:15px;font-weight:700;color:#92400e;background:#fff;cursor:pointer}
-.conn-box{background:#4c1d95;border-radius:14px;padding:16px;margin:12px 0}
-.conn-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
-.conn-sub{font-size:12px;color:#ddd6fe;margin-bottom:10px}
-.conn-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;margin-bottom:8px}
-.conn-input{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;box-sizing:border-box}
-.jump-bar{display:flex;gap:7px;padding:8px 14px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid #e2e8f0;-webkit-overflow-scrolling:touch;cursor:grab}
-.jump-bar::-webkit-scrollbar{height:4px}
-.jump-bar::-webkit-scrollbar-track{background:#f1f5f9}
-.jump-bar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
-.jump-btn{padding:5px 12px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;background:#f1f5f9;color:#475569;flex-shrink:0}
-.jump-btn:active{background:#1e3a5f;color:#fff}
+/* ===== CATEGORY TABS ===== */
+#catTabs{
+  display:flex;
+  overflow-x:auto;
+  padding:5px 14px;
+  gap:8px;
+  scrollbar-width:none;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+#catTabs::-webkit-scrollbar{display:none}
+.cat-tab{
+  flex-shrink:0;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  color:var(--text-secondary);
+  border-radius:20px;
+  padding:6px 16px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+  letter-spacing:0.02em;
+}
+.cat-tab:hover{border-color:var(--accent);color:var(--text)}
+.cat-tab.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
 
-/* PRODUCT TABLE */
-table{width:100%;border-collapse:collapse;margin-top:8px}
-thead th{padding:6px 10px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;background:#f8fafc}
-th.r,td.r{text-align:right}
-tbody tr{border-bottom:1px solid rgba(0,0,0,0.05)}
-td{padding:7px 10px;font-size:13px;vertical-align:middle}
-.sku{display:inline-block;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;margin-right:4px;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.6)}
-.pname{font-weight:600;color:#1e293b}
-.pmg{font-size:11px;color:#94a3b8;display:block;margin-top:1px}
-.pprice{font-weight:700;color:#0f2542;white-space:nowrap}
+/* ===== PRODUCTS LIST ===== */
+#productList{
+  padding:6px 14px 100px;
+}
+.cat-header{
+  display:flex;align-items:center;gap:10px;
+  padding:18px 0 8px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;
+  color:var(--text-secondary);
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--border);
+  margin-bottom:4px;
+}
+.cat-header-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.product-card{
+  display:flex;align-items:center;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:11px 12px;
+  margin-bottom:6px;
+  transition:all 0.15s;
+  gap:10px;
+}
+.product-card:hover{border-color:var(--border-light);background:var(--bg-card-hover)}
+.product-card.in-cart{border-color:var(--success);background:rgba(16,185,129,0.04)}
+.product-card.oos{opacity:0.5}
+.product-card.not-avail{opacity:0.4}
+.sku-badge{
+  background:var(--bg-elevated);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:3px 7px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--text-secondary);
+  letter-spacing:0.04em;
+  white-space:nowrap;
+  flex-shrink:0;
+  min-width:42px;
+  text-align:center;
+}
+.product-info{flex:1;min-width:0}
+.product-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:600;
+  color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.product-spec{
+  font-size:12px;color:var(--text-muted);
+  margin-top:1px;
+}
+.product-price{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;
+  color:var(--text);
+  flex-shrink:0;
+  min-width:50px;
+  text-align:right;
+}
+.qty-controls{
+  display:flex;align-items:center;gap:0;
+  flex-shrink:0;
+}
+.qty-btn{
+  width:32px;height:32px;
+  border-radius:50%;border:none;
+  font-size:18px;font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+  line-height:1;
+}
+.qty-btn.minus{background:var(--border);color:var(--text-muted)}
+.qty-btn.minus.active{background:var(--accent);color:#fff}
+.qty-btn.minus:active{transform:scale(0.9)}
+.qty-btn.plus{background:var(--success);color:#fff}
+.qty-btn.plus:active{transform:scale(0.9)}
+.qty-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;opacity:0.4}
+.qty-num{
+  width:32px;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;
+  color:var(--text);
+}
+.status-badge{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;
+  padding:3px 8px;border-radius:4px;
+  letter-spacing:0.06em;
+  flex-shrink:0;
+}
+.badge-oos{background:rgba(220,38,38,0.2);color:#ef4444}
+.badge-na{background:rgba(100,116,139,0.2);color:#94a3b8}
 
-/* QTY BUTTONS */
-.qrow{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-.qbtn{width:29px;height:29px;border-radius:7px;border:none;cursor:pointer;font-size:19px;font-weight:700;display:flex;align-items:center;justify-content:center;-webkit-appearance:none}
-.qbtn.plus{background:#22c55e;color:#fff}
-.qbtn.minus{background:#e2e8f0;color:#aaa}
-.qbtn.minus.on{background:#dc2626;color:#fff}
-.qnum{min-width:22px;text-align:center;font-size:14px;font-weight:700;color:#0f2542}
+/* ===== BOTTOM STICKY BAR ===== */
+#bottomBar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:linear-gradient(180deg,#0d1422 0%,#080c14 100%);
+  border-top:1px solid var(--border);
+  padding:10px 16px;
+  z-index:99;
+  height:var(--bottom-bar-h);
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.5);
+}
+.bottom-info{}
+.bottom-total{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:800;color:var(--text);
+}
+.bottom-sub{font-size:12px;color:var(--text-muted)}
+#checkoutBtn{
+  background:var(--success);
+  color:#fff;border:none;
+  border-radius:var(--radius);
+  padding:12px 24px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.03em;
+  transition:all 0.2s;
+}
+#checkoutBtn:hover{background:#059669;transform:scale(1.02)}
+#checkoutBtn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;transform:none}
+.min-notice{
+  font-size:12px;
+  color:var(--warning);
+  font-weight:600;
+}
 
-/* CART BAR */
-.cart-bar{position:sticky;bottom:0;background:#0f2542;color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -2px 12px rgba(0,0,0,.3);z-index:100}
-.cb-total{font-weight:700;font-size:15px}
-.cb-sub{opacity:.6;font-size:11px;margin-top:1px}
-.co-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
+/* ===== CHECKOUT PAGE ===== */
+#view-checkout{padding-bottom:40px}
+.page-header{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,#050a10 0%,#090e18 100%);
+  border-bottom:1px solid var(--border);
+  padding:16px 16px;
+  display:flex;align-items:center;gap:14px;
+}
+.back-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);
+  width:36px;height:36px;
+  border-radius:50%;cursor:pointer;
+  font-size:20px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+  flex-shrink:0;
+}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:700;
+}
+.page-subtitle{
+  font-size:13px;color:var(--text-secondary);
+  font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:0.08em;text-transform:uppercase;
+}
+.checkout-body{padding:16px}
+.section-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+}
+.section-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:700;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.order-item-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.order-item-row:last-child{border-bottom:none}
+.order-item-name{color:var(--text-secondary)}
+.order-item-price{font-weight:600;color:var(--text)}
+.order-total-row{
+  display:flex;justify-content:space-between;
+  padding-top:10px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:800;
+}
+.order-subtotal{
+  display:flex;justify-content:space-between;
+  font-size:13px;color:var(--text-muted);
+  padding:4px 0;
+}
+.form-group{margin-bottom:12px}
+.form-label{
+  font-size:13px;font-weight:600;
+  color:var(--text-secondary);
+  display:block;margin-bottom:6px;
+  font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:0.03em;
+}
+.form-input{
+  width:100%;
+  background:var(--bg-input);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:11px 14px;
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  font-size:15px;
+  outline:none;
+  transition:border-color 0.2s;
+  -webkit-appearance:none;
+}
+.form-input::placeholder{color:var(--text-muted)}
+.form-input:focus{border-color:var(--accent)}
+.form-select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%238fa3bb' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%238fa3bb' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:36px;
+  cursor:pointer;
+}
+.connection-card{
+  background:var(--bg-elevated);
+  border:1px solid var(--accent);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+}
+.connection-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.connection-sub{font-size:13px;color:var(--text-secondary);margin-bottom:12px}
+.venmo-card{
+  background:var(--success-bg);
+  border:1px solid var(--success);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+  text-align:center;
+}
+.venmo-label{font-size:13px;color:var(--text-secondary);margin-bottom:6px}
+.venmo-handle{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:800;
+  color:var(--success);
+  cursor:pointer;
+  text-decoration:none;
+  display:block;
+  margin-bottom:6px;
+}
+.venmo-handle:hover{color:#34d399}
+.venmo-amount{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:700;color:var(--text);
+  margin-bottom:4px;
+}
+.venmo-breakdown{font-size:12px;color:var(--text-muted)}
+.venmo-note{
+  background:var(--warning-bg);
+  border:1px solid var(--warning);
+  border-radius:var(--radius-sm);
+  padding:10px 14px;
+  font-size:13px;
+  color:var(--warning);
+  margin-bottom:14px;
+  font-weight:500;
+}
+.submit-btn{
+  width:100%;
+  background:var(--accent);
+  color:#fff;border:none;
+  border-radius:var(--radius);
+  padding:16px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.04em;
+  transition:all 0.2s;
+  margin-bottom:20px;
+}
+.submit-btn:hover{background:var(--accent-light)}
+.submit-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed}
+.research-footer{
+  text-align:center;
+  font-size:12px;
+  color:var(--text-muted);
+  padding:0 0 20px;
+  font-style:italic;
+}
 
-/* CHECKOUT / CONFIRM PAGES */
-.page{padding:16px}
-.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.card-title{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-.oitem{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f8fafc;font-size:13px}
-.oname{font-weight:600;color:#1e293b}
-.odetail{font-size:11px;color:#94a3b8;margin-top:2px}
-.oprice{font-weight:700;color:#0f2542;text-align:right;flex-shrink:0;margin-left:8px}
-.oeach{font-size:10px;color:#94a3b8;font-weight:400}
-.trow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#475569}
-.tbig{display:flex;justify-content:space-between;padding:9px 0 0;font-size:16px;font-weight:700;color:#0f2542;border-top:1px solid #e2e8f0;margin-top:4px}
-.finput{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:10px;outline:none;-webkit-appearance:none}
-.vbox{background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
-.vhandle{font-size:22px;font-weight:700;color:#008069;letter-spacing:.5px;margin:6px 0;text-decoration:none;display:block}
-.vtotal{font-size:15px;font-weight:700;color:#0f2542;margin-top:6px}
-.vsub{font-size:11px;color:#64748b;margin-top:2px}
-.disc{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#92400e}
-.sbtn{width:100%;background:#0f2542;color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;-webkit-appearance:none}
-.sbtn:disabled{opacity:.4;cursor:not-allowed}
-.sbtn.green{background:#22c55e}
-.fnote{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;padding-bottom:20px}
+/* ===== CLOSED VIEW ===== */
+#view-closed{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:30px 24px 30px;text-align:center;margin-top:var(--header-h);
+}
+.closed-icon{font-size:40px;margin-bottom:12px}
+.closed-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:24px;font-weight:800;
+  color:var(--text);margin-bottom:6px;
+}
+.closed-msg{font-size:16px;color:var(--text-secondary);max-width:320px;line-height:1.5}
 
-/* CONFIRM */
-.conf{padding:32px 20px;text-align:center}
-.conf-icon{font-size:60px;margin-bottom:12px}
-.conf-title{font-size:22px;font-weight:700;color:#0f2542;margin-bottom:8px}
-.conf-txt{font-size:14px;color:#64748b;margin-bottom:20px;line-height:1.5}
+/* ===== ADMIN PANEL ===== */
+#view-admin{padding-bottom:60px}
+.admin-header{
+  background:linear-gradient(180deg,#050a10 0%,#090e18 100%);
+  border-bottom:1px solid var(--border);
+  padding:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.admin-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:700;
+}
+.admin-sub{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;color:var(--accent);
+  letter-spacing:0.08em;text-transform:uppercase;
+}
+.logout-btn{
+  background:var(--accent);color:#fff;
+  border:none;border-radius:var(--radius-sm);
+  padding:8px 16px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+  letter-spacing:0.04em;
+}
+.admin-body{padding:14px}
+.admin-section{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+}
+.admin-section-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.toggle-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+}
+.status-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--success);
+  display:inline-block;
+}
+.status-dot.closed{background:var(--accent)}
+.toggle-switch{
+  position:relative;width:52px;height:28px;
+  background:var(--border);border-radius:14px;
+  cursor:pointer;transition:background 0.2s;
+}
+.toggle-switch.on{background:var(--success)}
+.toggle-switch::after{
+  content:'';
+  position:absolute;
+  width:22px;height:22px;
+  background:#fff;border-radius:50%;
+  top:3px;left:3px;
+  transition:transform 0.2s;
+  box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch.on::after{transform:translateX(24px)}
+.admin-input{
+  width:100%;
+  background:var(--bg-input);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:10px 12px;
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  font-size:14px;
+  outline:none;
+  margin-bottom:10px;
+  -webkit-appearance:none;
+}
+.admin-input:focus{border-color:var(--accent)}
+.admin-input::placeholder{color:var(--text-muted)}
+.save-btn{
+  background:var(--accent);color:#fff;
+  border:none;border-radius:var(--radius-sm);
+  padding:9px 20px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;
+  letter-spacing:0.04em;transition:background 0.2s;
+}
+.save-btn:hover{background:var(--accent-light)}
+.markup-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.markup-input{
+  width:90px;
+  background:var(--bg-input);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:10px 12px;
+  color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;
+  outline:none;
+  text-align:center;
+}
+.markup-input:focus{border-color:var(--accent)}
+.markup-preview{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;color:var(--text-muted);
+  margin-top:4px;
+}
+.tab-row{
+  display:flex;gap:8px;margin-bottom:14px;
+}
+.admin-tab{
+  flex:1;
+  background:var(--bg-elevated);
+  border:1px solid var(--border);
+  color:var(--text-secondary);
+  border-radius:var(--radius-sm);
+  padding:10px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;font-weight:600;
+  cursor:pointer;text-align:center;
+  transition:all 0.2s;
+}
+.admin-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.order-card{
+  background:var(--bg-elevated);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-bottom:10px;
+}
+.order-card.repeat{border-color:var(--warning)}
+.order-card-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:6px;
+}
+.order-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;color:var(--text);
+}
+.order-total{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;color:var(--success);
+}
+.order-meta{font-size:12px;color:var(--text-muted);margin-bottom:8px}
+.order-items-text{
+  font-size:13px;color:var(--text-secondary);
+  line-height:1.6;margin-bottom:10px;
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  padding:8px;
+  border:1px solid var(--border);
+}
+.order-margin-row{
+  display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+}
+.margin-pill{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:4px 10px;
+  font-size:12px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;
+}
+.margin-pill.cost{color:var(--accent)}
+.margin-pill.margin{color:var(--success)}
+.order-btns{display:flex;gap:8px;flex-wrap:wrap}
+.order-btn{
+  padding:8px 14px;
+  border:none;border-radius:var(--radius-sm);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.03em;
+}
+.order-btn.customer{background:var(--info);color:#fff}
+.order-btn.alisa{background:var(--success);color:#fff}
+.order-btn.print{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary)}
+.order-btn:hover{opacity:0.85}
+.repeat-flag{
+  background:var(--warning-bg);
+  border:1px solid var(--warning);
+  border-radius:4px;
+  padding:4px 10px;
+  font-size:12px;
+  color:var(--warning);
+  font-weight:600;
+  font-family:'Barlow Condensed',sans-serif;
+  margin-bottom:8px;
+  display:inline-block;
+}
+.alisa-summary{
+  background:var(--bg-elevated);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;
+}
+.alisa-row{
+  display:flex;align-items:center;
+  padding:6px 0;
+  border-bottom:1px solid var(--border);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;
+}
+.alisa-row:last-child{border-bottom:none}
+.alisa-sku{
+  width:90px;color:var(--success);font-weight:700;flex-shrink:0;
+}
+.alisa-qty{
+  width:60px;color:var(--text-secondary);flex-shrink:0;
+}
+.alisa-price{
+  width:70px;color:var(--text-muted);flex-shrink:0;
+}
+.alisa-total{
+  text-align:right;flex:1;font-weight:700;color:var(--text);
+}
+.alisa-grand{
+  display:flex;justify-content:space-between;
+  padding:12px 0 0;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:800;
+  border-top:2px solid var(--border);
+  margin-top:6px;
+}
+.copy-summary-btn{
+  width:100%;margin-top:12px;
+  background:var(--success);color:#fff;border:none;
+  border-radius:var(--radius);padding:12px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;cursor:pointer;
+  transition:background 0.2s;letter-spacing:0.03em;
+}
+.copy-summary-btn:hover{background:#059669}
 
-/* ADMIN */
-.al{padding:40px 20px;text-align:center}
-.al h2{font-size:20px;font-weight:700;color:#0f2542;margin-bottom:6px}
-.al p{font-size:13px;color:#64748b;margin-bottom:20px}
-.aw{padding:14px}
-.asec{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.asec h3{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-.trow2{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tlbl{font-size:13px;font-weight:600;color:#1e293b}
-.tgl{position:relative;width:48px;height:26px;display:inline-block}
-.tgl input{opacity:0;width:0;height:0}
-.sld{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e2e8f0;border-radius:999px;transition:.3s}
-.sld:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-input:checked+.sld{background:#22c55e}
-input:checked+.sld:before{transform:translateX(22px)}
-.dinput{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none}
-.savebtn{background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
-.ocard{border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px}
-.ocard-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.ocard-name{font-weight:700;font-size:14px;color:#0f2542}
-.ocard-tot{font-weight:700;font-size:14px;color:#22c55e}
-.ocard-info{font-size:11px;color:#64748b;margin-bottom:6px}
-.ocard-items{font-size:12px;color:#475569;line-height:1.8}
-.ocard-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-.ocard-copy{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
-.ocard-print{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
-.vbox2{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
-.cpybtn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
-.cpybtn.done{background:#22c55e}
-.tabrow{display:flex;gap:8px;margin-bottom:14px}
-.tabbtn{flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#475569}
-.tabbtn.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-.lgout{background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer}
-.empty{text-align:center;color:#94a3b8;font-size:13px;padding:24px}
+/* Admin Products Section */
+.products-section{margin-top:14px}
+.prod-admin-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+}
+.prod-admin-sku{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;
+  color:var(--text-secondary);
+  width:65px;flex-shrink:0;
+}
+.prod-admin-name{
+  flex:1;font-size:13px;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.toggle-mini{
+  display:flex;align-items:center;gap:4px;flex-shrink:0;
+}
+.toggle-mini-btn{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;
+  padding:3px 8px;border-radius:4px;cursor:pointer;
+  border:1px solid;transition:all 0.15s;letter-spacing:0.03em;
+}
+.toggle-mini-btn.oos-btn{
+  background:transparent;border-color:var(--border);color:var(--text-muted);
+}
+.toggle-mini-btn.oos-btn.on{
+  background:rgba(220,38,38,0.15);border-color:var(--accent);color:var(--accent);
+}
+.toggle-mini-btn.na-btn{
+  background:transparent;border-color:var(--border);color:var(--text-muted);
+}
+.toggle-mini-btn.na-btn.on{
+  background:rgba(100,116,139,0.15);border-color:var(--text-secondary);color:var(--text-secondary);
+}
+.prod-search{
+  width:100%;
+  background:var(--bg-input);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:9px 12px;
+  color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;
+  outline:none;margin-bottom:12px;
+}
+.prod-search:focus{border-color:var(--accent)}
+.prod-search::placeholder{color:var(--text-muted)}
+.save-prod-btn{
+  width:100%;margin-top:12px;
+  background:var(--accent);color:#fff;border:none;
+  border-radius:var(--radius);padding:12px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;cursor:pointer;
+  transition:background 0.2s;
+}
+.save-prod-btn:hover{background:var(--accent-light)}
+
+/* ===== ADMIN LOGIN ===== */
+#adminLogin{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100vh;padding:40px 24px;
+}
+.login-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:32px 24px;
+  width:100%;max-width:340px;
+  text-align:center;
+}
+.login-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:24px;font-weight:700;
+  margin-bottom:20px;
+}
+.login-input{
+  width:100%;
+  background:var(--bg-input);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:12px 14px;
+  color:var(--text);
+  font-family:'Barlow',sans-serif;font-size:16px;
+  outline:none;text-align:center;
+  letter-spacing:0.1em;margin-bottom:14px;
+  -webkit-appearance:none;
+}
+.login-input:focus{border-color:var(--accent)}
+.login-btn{
+  width:100%;background:var(--accent);color:#fff;border:none;
+  border-radius:var(--radius);padding:13px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:700;cursor:pointer;
+  letter-spacing:0.04em;transition:background 0.2s;
+}
+.login-btn:hover{background:var(--accent-light)}
+.login-error{color:var(--accent);font-size:13px;margin-top:10px}
+
+/* ===== SUCCESS SCREEN ===== */
+#successOverlay{
+  display:none;
+  position:fixed;inset:0;z-index:200;
+  background:rgba(7,11,18,0.96);
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;text-align:center;
+}
+#successOverlay.show{display:flex}
+.success-icon{font-size:70px;margin-bottom:16px}
+.success-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:30px;font-weight:800;color:var(--success);
+  margin-bottom:8px;
+}
+.success-msg{font-size:15px;color:var(--text-secondary);max-width:300px;margin-bottom:24px;line-height:1.5}
+.success-close{
+  background:var(--bg-card);border:1px solid var(--border);
+  color:var(--text-secondary);border-radius:var(--radius);
+  padding:12px 28px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;
+  transition:all 0.2s;
+}
+.success-close:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ===== UTILITY ===== */
+.no-products{
+  text-align:center;padding:60px 20px;
+  color:var(--text-muted);font-size:15px;
+}
+@media(min-width:640px){
+  .product-card{padding:13px 16px}
+  #productList{padding:10px 20px 100px}
+  #searchWrap{padding:14px 20px 10px}
+  #catTabs{padding:10px 20px}
+  .checkout-body{padding:20px;max-width:600px;margin:0 auto}
+  .admin-body{max-width:640px;margin:0 auto}
+}
 </style>
 </head>
 <body>
-<div id="app"></div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-title">Order Submitted!</div>
+  <div class="success-msg" id="successMsg">Your order has been received. Pay via Venmo and send your screenshot to Boyd on WhatsApp.</div>
+  <button class="success-close" onclick="closeSuccess()">Done</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLogin" style="display:none">
+  <div class="login-card">
+    <div class="login-title">🔐 Admin Access</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPW()">
+    <button class="login-btn" onclick="checkPW()">Enter</button>
+    <div class="login-error" id="pwError"></div>
+  </div>
+</div>
+
+<!-- HEADER (shown on shop view) -->
+<div id="header">
+  <img src="data:image/jpeg;base64,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" class="header-logo" alt="BGM BioStack">
+  <div class="header-center">
+    <div class="header-brand">~BgM's~ BioStack Community</div>
+    <div class="header-sub" id="headerSub">2026 ALISA / SBF — GROUP ORDER #1</div>
+  </div>
+  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADIALgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD44+13X/PxN/32aPtd1/z8Tf8AfZqGigCb7Xdf8/E3/fZo+13X/PxN/wB9moaKAJvtd1/z8Tf99mj7Xdf8/E3/AH2ahooAm+13X/PxN/32aPtd1/z8Tf8AfZqGigCb7Xdf8/E3/fZo+13X/PxN/wB9moaKAJvtd1/z8Tf99mj7Xdf8/E3/AH2ahooAm+13X/PxN/32aPtd1/z8Tf8AfZqGigCb7Xdf8/E3/fZo+13X/PxN/wB9moaKAJvtd1/z8Tf99mj7Xdf8/E3/AH2ahooAm+13X/PxN/32aPtd1/z8Tf8AfZqGigCb7Xdf8/E3/fZo+13X/PxN/wB9moaKAJvtd1/z8Tf99mioaKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiilAJ6DNACUUpBHUEUlABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABWjpmkz3iecSIbcHDSvwPw9TS+GrCPUdZt7admSAtumZeoQctj3wKu+JNXNzdssEawQJ8sMKfdiTsB/j1NY1Jy5uSO56eEw1JUniK/w3sl3f+RIsWi2Q+4104/ikO1fyq3p1+Z5xFZWFux9PLGB9Sa5uwt7jUb+CzgBeaaQIg9STivSPGNhp/hTTv7GsHE0uMXFxjlyOoHoM5+uK5K6UbRbu2fQZTOeIjOrCKhThvZavyuQ2t14dulltNRt7fzlwFkgUqrev5fTmq3inwFFB4dutf02+g8u2kRZLZ2xIwbOGUdwMc4ribed2v1YE5LV6VqkzReEI1lJDOirg+nP9KxqKWGnHle/Q9PBzw+d4Ssq0EnBaSS1PKDwcUVJcY85sdM1HXrrU/OpKzaFAJOBWja6FqtzjyrKY55A2nJrT0uG30rQk1WVN99cORbbhlYkXq+O7EnA9ME+lUv7duzNvMshbOc7zmueVSbb9mj1aGEw1OKeKk03rZdiGfQtVh4ks5B+GKq3tnc2cgjuYjG5UMAcZwen0r1zwne3VzokUl3M7ysxK7nydvv3rzLxO7PfuzHJJyaww+KnUqOElsevnOQ4bBYOGJpSb5ujsZFS2tvLczCKFC7HsKbBE80yRRqWdyAoHUmvVvCNjpmi6Jc3PlpLeQfflYZ+f0X0A6Z7nPoK3xGIVGPmeZkuTyzKtZu0Fuzjf7ItdGTfqkQnuiMiBiQqehbHP4fnWBfzLPcvKqIm4/dRAqj6AdKv+Ir2S6vJHdyzMxLE9zWRToKTXNJ6szzSpRU/Y0I2jH736sKKKK3PJCiiigAoq3pGnXmq6jBp9hA89zO4SNF6sTXe2fwvfBjv9as4LkcGJXDEH0OKwrYmlR+NnrZbkmNzO7w0LpdbpL8Tzeiuz8RfDrXdKQzQoL2AfxRckfUVyRtbhZPLMMgfOMFTmnTr06qvB3McblWMwM+SvTcX+HyezN74fi1fXYobu4FtDMfKeYrnyw3BbHfGc1Dqfh7UV1aW3ji3orlRMflTGfvEnoO9QanpOo6D9kluwkbXMQmRA2WVSeNw7HvUcmr3EkXll2x0xnisrSc+em7pnoc9GGHWFxkXGUXftv3N74d2fleKBKrrJ9nJKuvQkdxT/AIg3bz6nImSxHy/X/JzV/wCH6C20+61CT+FCcn1/yP1rnr3WZ4b6Qh8ljkkgE/nXKuapiHLex9DP2WEyWnSk+X2jbfoXvAWnWtjqltrviGyabS7eTd5JbaZ2AyE+mcZpvi3xLNqEkqrsiidsiGMfKo7AfSug8O6/FrcUenanGs6gERE8FSeoHpmsL4oaDpekazG2hzTy2U8KPiYAMjkfMvHbPSqhJVK1qq16GOKw88HlXPgZXpv4n1v5nHnLH1JrZj8La6yK506ZNyCQBlwdp6HHUCtu30I6Bo1tqt8qi8ul328TDJjXs5Hr6f8A1qp+HtVvW1keXPLl3BJ3H5jnvXRPESabp9Dx8NlFKnOnHGNpz2S3V9r/AORJeQIdMTSNV+0adqNm5GJYzjy2GcFeoOeQehBrnRbp9uWGJzIpYAMVxn8K7P4narJd6hcRuVZi+ZHxlpHAxknqa5fwvF5urRM33UO8/Qc1NGb9k5l5lho/X4YbdppX8l+Gx3nhpwNbltwfliiEYH0xn+tcP4rQpqMi46MRXR+C7kvrrsTy5bP1IJqh4rsZLnxJ9liX5pJiB+Jrlofu67v2Poc1TxeURcN+doqeHIBY2T6tIMSsTFaj/a/ib8B+prpb9jY+EIY84adi59wP/r1hX0kc2qW9jbHNvBiOP3A6n8Tk1qeP5RFHBaqeIoQv4/5xRVvUqRv11JwCjg8FWcNoLlv3b3f9dDhLh98rH3qOrmk6deatqMNhYW7z3M7hI40GSxNdxa/CzUGQrc6jZwzjgxbwxB9OK9CriKVGym7HyGByfHZm5Sw9Pmtu9F+Z53RXU+IvAmv6MplktjPAP+WkXzAfX0rmfKk37djbs4xirp1oVFeDuc2Ly7FYOfs69Nxfmvy7jKKv6vpF/pQtzfQ+UbiISxgsCdp6Ejt9DRVxkpK6OarSnRk4VFZroyTw7rE+i3jXdsF80xsgYjlcjGR70xtYvzMZftD5Jz1rPoqHSg5czWp0QzDEwpKlCbUU7pLTVnc+HPiHqenKIpn82Mdm5H/1q2bv4kWZTzIdLtPtHZzGCQfxry2pIEDyqpOATiuWeX0G+a1j38NxhmtKn7JTv5tXZp6/qWpeIb+41K682ZvvSPt4UdOewFZUalpFUdSa9E8YW1mPDFnPo1gbWzKBZkEhfdKoGST79cdsmuX8OaS7y/2jejyLKEgkudrSHsqA8sfpwO9XSrR9m2lZI5swyuv9djCpLmlOzb6a9fRHS3Mg03wlBbfdkn+c/wC6OB+orgblzJMze9bXiXVmvZ2PAH3VUdFUcAD8KxIIZZ5RHEhdmPAApYWnyRcpdSs/xqxVWNGjrGKSR0HgGGWbWIxGDhWDH2AOf6V1Wtm1vPF1jb3Kl4I5E81R3AOSP1xUOmGw8K6BtDrPq1yMykfdgXsvu1c5Zaq0mvR3EkmSGHLH3rkmpVakqkdkj6HD1KWX4Glg6z96Uk5Ltrt/mdD8Wr97vWJZD8q4AVR0UdgPwxWf8NtL3SyatcALBCCVz/GV5wPpxzWx4xn0LUYYSX/eRE7zEOZRnjk8cfSq+nXI/si/u0iWCExrBDGn3UBPQfgCSe5JNRGbWH5EtWdVbCxlnLxEpJxim0l5L9DkPEtwZ7x2JySxJqzoCfZtKu71uC48qP8AHr+lURbzajqYhhUszN+XvWhr9zFDBHY2zAxQjaCP4m7tXc17saaPlacn7arjZ7K6Xm3/AJFjwRNjW0PrIP54rovFNvJp8tzqsyeWZh5VqT1bKjcw9gOM+prlPAwLavGcHCsGbAzwDk07xdqj3l27Fjg8KM/dHYVhOk5YiyPWwmPjQybmlvzOweEh9o16Mnkbx/OrvxDkJ1OYehx+grN8FzLFq0TMcDepP51t/ErTp4ZFvfLfyJjw+ON3cZ9eDTlZYpJkUOapkFSUd+a7Od8M63Lod1LdW6KZniaNXPVMjBI96Z/b2pCfzRcNnOetZqozZ2qWwCTgdqbXa6FOUnJrU+Wp5ni6VKNKFRqK1VtD0Xw78Sr61QQ3uJ06Yfnj61oX3j3QcfaLfQ7P7R2ZkB5+leVUVyyy2i5XWh71HjXM6dL2bkpebV2avifW7vXtVl1C8YNI57DAHoAO1FZVFdsYqC5VsfMV69TEVHVqO8nuFFFFUYhSqSrAjqKSigDq/Dfim405fLyjxnrHIu5Sex9j7jBqxfX2mahIZZknV26kTFv51xlO3N6muWWFi3daHvUs/rxpKlUSkl3OhaLQ0O7yZXP+1JSHV4LRStjBHB7oMt+Zrntzepq5otoL7U4LZmKo7gMfQZ5puikrzd0TTzOpUmoYemoyemiV9fMtRw6nqoZ4IXaMHDOThQfQk96S60DWbSyfUGs5WtYmVXnQFkQnoCw4GcVtePdTJ1Q21pbpaWVt+6trdB8saLx+LHqWPJJJqnZa0yeH7qyaaQi4YF4snZx0bGeW5P0qIznZSitDerhsM6k6Veb9ok9el+1jESeeVlj3E5OMV2mrY0/wxaWecNIDK/8AIfyNZPgPRTqepvdzfu7G0HmzyHooHb607xXeyanqLLbRs247Y41GSFHAH5VnWtOqoLZas7ctU8NgKmJnrKfux9Ov46Fc6haWlmY7JWVpF/euxG5vb2FYU8rSuWNa0WhlRm9u4rc/3AdzD8BVmPRtJc7f7RkU+pTitYzpU3fc4K2Fx2LiotKKWyul+Bn6bqRsrOWGNQryHmQfex6ewqhNIZHLHvXQa14R1Cw0Qa5E8Nzpxm8jzUkBIfGcFevTviubranyS9+PU83GrE0VHD11bl2RY0+c29yr9q9Jk8XW174WbRLszyWshWV1BA/eAY3f5/SvLqeJHAwGNRWw6qtPqjryzOquAhKmknGXRm1q93YwQSWemQCOJz87tzJIB0yew9hWFSkk9TSVrCHKrHnYrEOvPmskuy2CiiirOYKKKKACiiigAooooAKKKKACruj3Atr1JM4wetUqKmUVJWZrRqyo1FUjuj0nxjHpHia3tLrTzbWl5FFtuOSvnNnO/njv7fSuUj8PmNs3V7AiDrtbJP5VlQ3k8YwGOKJL2d+rGuWFGrBcsZaHv4rM8Dip+3q0vf66uzOhvtYjtNN/s2xJjtt25h3kb1NZMOrSQwMkQCM/33X7zexPp7CsxmLHJNJWsKEYrU4MRm9erNSi7JaLyRPJdSufvEUxZpFOQ5/Oo6K25Uec6027tm3Dqn/EmltXZizsCRnjA9vWsU9TSUVMKahe3U1xGLqYhRU/sqwUUUVZzBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//2Q==" class="header-logo" alt="BgM Logo">
+  <div class="header-right">
+    <button id="cartBubble" class="empty" onclick="goToCheckout()">🛒 0 kits</button>
+    <button id="adminGearBtn" onclick="openAdmin()">⚙️</button>
+  </div>
+</div>
+
+<!-- VIEW: CLOSED -->
+<div id="view-closed" class="view">
+  <div class="closed-icon">🔒</div>
+  <div class="closed-title">Portal Closed</div>
+  <div class="closed-msg" id="closedMsg">The group order is currently closed. Check back soon!</div>
+</div>
+
+<!-- VIEW: SHOP -->
+<div id="view-shop" class="view active">
+  <div id="infoBar">
+    <div class="info-order">Group Order <span id="infoOrderNum">#1</span></div>
+    <div class="info-close">Closes: <strong id="infoCloseDate">TBD</strong></div>
+  </div>
+  <div id="searchWrap">
+    <input id="searchInput" type="search" placeholder="🔍  Search by name, SKU, or mg..." oninput="renderProducts()">
+  </div>
+  <div id="catTabs"></div>
+  <div id="productList"></div>
+  <div id="bottomBar">
+    <div class="bottom-info">
+      <div class="bottom-total" id="bottomTotal">$0.00</div>
+      <div class="bottom-sub" id="bottomSub">Add 10 kits minimum</div>
+    </div>
+    <button id="checkoutBtn" disabled onclick="goToCheckout()">Checkout →</button>
+  </div>
+</div>
+
+<!-- VIEW: CHECKOUT -->
+<div id="view-checkout" class="view">
+  <div class="page-header">
+    <button class="back-btn" onclick="showView('shop')">←</button>
+    <div>
+      <div class="page-title">Review & Checkout</div>
+      <div class="page-subtitle">~BGM'S~ BioStack Community</div>
+    </div>
+  </div>
+  <div class="checkout-body">
+    <!-- Order Summary -->
+    <div class="section-card">
+      <div class="section-title">📋 Your Order</div>
+      <div id="checkoutItems"></div>
+      <div class="order-subtotal"><span>Subtotal</span><span id="coSubtotal"></span></div>
+      <div class="order-subtotal"><span>Shipping & Customs (flat fee)</span><span>$25.00</span></div>
+      <div class="order-total-row"><span>Total Due</span><span id="coTotal"></span></div>
+    </div>
+    <!-- Your Info -->
+    <div class="section-card">
+      <div class="section-title">👤 Your Info</div>
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input class="form-input" id="fName" placeholder="Full Name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number *</label>
+        <input class="form-input" id="fPhone" type="tel" placeholder="Phone Number" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input class="form-input" id="fEmail" type="email" placeholder="Email Address" required>
+      </div>
+    </div>
+    <!-- Connection -->
+    <div class="connection-card">
+      <div class="connection-title">🔗 Who is your contact to Boyd? *</div>
+      <div class="connection-sub">They will deliver your order to you.</div>
+      <select class="form-input form-select" id="fConnection">
+        <option value="">-- Select --</option>
+        <option>Self (I'll pick up directly)</option>
+        <option>Boyd</option>
+        <option>Bronson</option>
+        <option>Justin</option>
+        <option>Dwayne</option>
+        <option>Luke</option>
+        <option>Jessica</option>
+        <option>Jared</option>
+        <option>Other (type below)</option>
+      </select>
+      <input class="form-input" id="fConnectionOther" placeholder="Type name here if not listed above" style="margin-top:8px">
+    </div>
+    <!-- Venmo -->
+    <div class="venmo-card">
+      <div class="venmo-label">💳 Pay via Venmo After Submitting</div>
+      <a class="venmo-handle" href="https://venmo.com/Boyd-Moretti" target="_blank">@Boyd-Moretti 👆 Tap to Pay</a>
+      <div class="venmo-amount" id="venmoAmount">$0.00 due</div>
+      <div class="venmo-breakdown" id="venmoBreakdown"></div>
+    </div>
+    <div class="venmo-note">⚠️ Venmo note should say: <strong>"Reimbursement"</strong></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Submit Order →</button>
+    <div class="research-footer">For Research Purposes Only</div>
+  </div>
+</div>
+
+<!-- VIEW: ADMIN -->
+<div id="view-admin" class="view">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">⚙️ Admin Panel</div>
+      <div class="admin-sub" id="adminSub">GROUP ORDER #1</div>
+    </div>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+  </div>
+  <div class="admin-body">
+    <!-- Order Round Control -->
+    <div class="admin-section">
+      <div class="admin-section-title">⚙️ Order Round Control</div>
+      <div class="toggle-row">
+        <div class="toggle-label">
+          Portal <span class="status-dot" id="portalDot"></span>
+          <span id="portalStatusText">OPEN</span>
+        </div>
+        <div class="toggle-switch on" id="portalToggle" onclick="togglePortal()"></div>
+      </div>
+      <input class="admin-input" id="adminGroupNum" type="number" placeholder="Group Order Number (e.g. 1)" min="1">
+      <input class="admin-input" id="adminCloseDate" placeholder="Close date (e.g. April 5th)">
+      <button class="save-btn" onclick="saveSettings()">💾 Save Settings</button>
+      <button class="save-btn" style="background:var(--success);margin-left:8px" onclick="forceOpen()">🔓 Force Open</button>
+    </div>
+
+    <!-- Markup Control -->
+    <div class="admin-section">
+      <div class="admin-section-title">💰 Price Markup</div>
+      <div class="markup-row">
+        <input class="markup-input admin-input" id="markupInput" type="number" min="0" max="100" placeholder="0" oninput="updateMarkupPreview()">
+        <span style="font-family:'Barlow Condensed';font-size:18px;font-weight:700;color:var(--text-secondary)">% markup</span>
+        <button class="save-btn" onclick="saveMarkup()">Apply</button>
+      </div>
+      <div class="markup-preview" id="markupPreview">At 0% — customers see Alisa's base prices.</div>
+    </div>
+
+    <!-- Orders / Alisa Summary Tabs -->
+    <div class="tab-row">
+      <button class="admin-tab active" id="tabOrders" onclick="switchAdminTab('orders')">📦 Orders (<span id="orderCount">0</span>)</button>
+      <button class="admin-tab" id="tabSummary" onclick="switchAdminTab('summary')">📋 Alisa Summary</button>
+      <button class="admin-tab" id="tabProducts" onclick="switchAdminTab('products')">🔧 Products</button>
+    </div>
+
+    <!-- Orders Tab -->
+    <div id="adminTabOrders">
+      <div id="ordersList"></div>
+    </div>
+
+    <!-- Alisa Summary Tab -->
+    <div id="adminTabSummary" style="display:none">
+      <div class="alisa-summary">
+        <div id="alisaSummaryRows"></div>
+        <div class="alisa-grand">
+          <span>GRAND TOTAL:</span>
+          <span id="alisaGrandTotal" style="color:var(--accent)">$0</span>
+        </div>
+      </div>
+      <button class="copy-summary-btn" onclick="copyAlisaSummary()">📋 Copy to Clipboard</button>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="adminTabProducts" style="display:none">
+      <div class="admin-section">
+        <div class="admin-section-title">🔧 Product Status</div>
+        <input class="prod-search" id="prodSearch" placeholder="Search products..." oninput="renderAdminProducts()">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+          Toggle <strong style="color:var(--accent)">OOS</strong> = Out of Stock &nbsp;|&nbsp; <strong style="color:var(--text-secondary)">N/A</strong> = Not Available This Order
+        </div>
+        <div id="adminProductList"></div>
+        <button class="save-prod-btn" onclick="saveProductOverrides()">💾 Save Product Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-const PASS="BgM2026!";
-const VENMO_HANDLE="@Boyd-Moretti";
-const VENMO_URL="https://venmo.com/Boyd-Moretti";
-const SHIP=25;
-function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+// ============================================================
+// CONSTANTS
+// ============================================================
+const SUPABASE_URL = 'https://zilrgqnqoswtmvlmzdim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4';
+const ADMIN_PW = 'BgM2026!';
+const MIN_KITS = 1;
+const SHIPPING = 25;
 
-// ROW COLORS - no headers, just colored rows matching Vivian's groups
-// c = background color for that row
-const C={
-  sem:"#dbeafe",  // Semaglutide - blue
-  tir:"#fef9c3",  // Tirzepatide - yellow
-  ret:"#dcfce7",  // Retatrutide - green
-  kvn:"#ede9fe",  // KPV/VIP/Cagrilintide/BPC/CJC/TB/NAD - purple
-  bdy:"#ffedd5",  // Page 3 body (L-Carnitine thru Super Human Blend) - orange
-  pep:"#fce7f3",  // Page 4 peptides (Fat Blaster thru SS-31) - pink
-  ghr:"#e0f2fe",  // GHRP/Sermorelin/HGH/HCG/HMG/IGF - light blue
-  tes:"#fef3c7",  // Tesamorelin - amber
-  ipa:"#ecfdf5",  // Ipamorelin/Hexarelin - mint
-  ghk:"#fdf4ff",  // GHK-CU - lavender
-  kst:"#f0fdf4",  // KissPeptin/Thymalin/Thymosin Alpha - light green
-  mot:"#f7fee7",  // MOTS-c - lime
-  p6: "#f0f9ff",  // LL-37/Dermorphin/Glutathione/rest of p6 - sky
-  sup:"#f9fafb",  // Supplies - gray
-};
-
-// EXACT ORDER FROM VIVIAN'S ZLZ PRICE LIST - PAGE BY PAGE
-const P=[
-  // PAGE 1 - Semaglutide
-  {sku:"SM5",  name:"Semaglutide",            mg:"5mg*10vials",    price:40,  c:C.sem},
-  {sku:"SM10", name:"Semaglutide",            mg:"10mg*10vials",   price:63,  c:C.sem},
-  {sku:"SM15", name:"Semaglutide",            mg:"15mg*10vials",   price:74,  c:C.sem},
-  {sku:"SM20", name:"Semaglutide",            mg:"20mg*10vials",   price:89,  c:C.sem},
-  {sku:"SM30", name:"Semaglutide",            mg:"30mg*10vials",   price:109, c:C.sem},
-  // Tirzepatide
-  {sku:"TR5",  name:"Tirzepatide",            mg:"5mg*10vials",    price:43,  c:C.tir},
-  {sku:"TR10", name:"Tirzepatide",            mg:"10mg*10vials",   price:63,  c:C.tir},
-  {sku:"TR15", name:"Tirzepatide",            mg:"15mg*10vials",   price:80,  c:C.tir},
-  {sku:"TR20", name:"Tirzepatide",            mg:"20mg*10vials",   price:94,  c:C.tir},
-  {sku:"TR30", name:"Tirzepatide",            mg:"30mg*10vials",   price:114, c:C.tir},
-  {sku:"TR40", name:"Tirzepatide",            mg:"40mg*10vials",   price:143, c:C.tir},
-  {sku:"TR50", name:"Tirzepatide",            mg:"50mg*10vials",   price:171, c:C.tir},
-  {sku:"TR60", name:"Tirzepatide",            mg:"60mg*10vials",   price:186, c:C.tir},
-  {sku:"TR70", name:"Tirzepatide",            mg:"70mg*10vials",   price:204, c:C.tir},
-  {sku:"TR80", name:"Tirzepatide",            mg:"80mg*10vials",   price:231, c:C.tir},
-  {sku:"TR90", name:"Tirzepatide",            mg:"90mg*10vials",   price:258, c:C.tir},
-  {sku:"TR100",name:"Tirzepatide",            mg:"100mg*10vials",  price:286, c:C.tir},
-  {sku:"TR120",name:"Tirzepatide",            mg:"120mg*10vials",  price:312, c:C.tir},
-  // Retatrutide
-  {sku:"RT5",  name:"Retatrutide",            mg:"5mg*10vials",    price:73,  c:C.ret},
-  {sku:"RT10", name:"Retatrutide",            mg:"10mg*10vials",   price:109, c:C.ret},
-  {sku:"RT15", name:"Retatrutide",            mg:"15mg*10vials",   price:122, c:C.ret},
-  {sku:"RT20", name:"Retatrutide",            mg:"20mg*10vials",   price:136, c:C.ret},
-  {sku:"RT30", name:"Retatrutide",            mg:"30mg*10vials",   price:204, c:C.ret},
-  {sku:"RT40", name:"Retatrutide",            mg:"40mg*10vials",   price:244, c:C.ret},
-  {sku:"RT50", name:"Retatrutide",            mg:"50mg*10vials",   price:299, c:C.ret},
-  {sku:"RT60", name:"Retatrutide",            mg:"60mg*10vials",   price:353, c:C.ret},
-  // PAGE 2 - KPV thru NAD+
-  {sku:"KP10", name:"KPV",                   mg:"10mg*10vials",   price:71,  c:C.kvn},
-  {sku:"VP10", name:"VIP",                   mg:"10mg*10vials",   price:190, c:C.kvn},
-  {sku:"CS10", name:"Cagrilintide+Sema",     mg:"10mg*10vials",   price:176, c:C.kvn},
-  {sku:"CGL5", name:"Cagrilintide",          mg:"5mg*10vials",    price:122, c:C.kvn},
-  {sku:"CGL10",name:"Cagrilintide",          mg:"10mg*10vials",   price:230, c:C.kvn},
-  {sku:"BC5",  name:"BPC-157",               mg:"5mg*10vials",    price:41,  c:C.kvn},
-  {sku:"BC10", name:"BPC-157",               mg:"10mg*10vials",   price:68,  c:C.kvn},
-  {sku:"BB10", name:"BPC+TB Combo",          mg:"10mg*10vials",   price:122, c:C.kvn},
-  {sku:"BB20", name:"BPC+TB Combo",          mg:"20mg*10vials",   price:214, c:C.kvn},
-  {sku:"CND2", name:"CJC-1295 w/o DAC",      mg:"2mg*10vials",    price:41,  c:C.kvn},
-  {sku:"CND5", name:"CJC-1295 w/o DAC",      mg:"5mg*10vials",    price:95,  c:C.kvn},
-  {sku:"CND10",name:"CJC-1295 w/o DAC",      mg:"10mg*10vials",   price:185, c:C.kvn},
-  {sku:"CP10", name:"CJC-1295 w/o DAC + IPA",mg:"10mg*10vials",   price:122, c:C.kvn},
-  {sku:"CD2",  name:"CJC-1295 with DAC",     mg:"2mg*10vials",    price:81,  c:C.kvn},
-  {sku:"CD5",  name:"CJC-1295 with DAC",     mg:"5mg*10vials",    price:190, c:C.kvn},
-  {sku:"BT2",  name:"TB500",                 mg:"2mg*10vials",    price:49,  c:C.kvn},
-  {sku:"BT5",  name:"TB500",                 mg:"5mg*10vials",    price:95,  c:C.kvn},
-  {sku:"BT10", name:"TB500",                 mg:"10mg*10vials",   price:176, c:C.kvn},
-  {sku:"BBG70",name:"Glow Blend (BT+BPC+CU)",mg:"70mg*10vials",   price:231, c:C.kvn},
-  {sku:"K80",  name:"Klow Blend (BT+BC+CU+KP)",mg:"80mg*10vials", price:250, c:C.kvn},
-  {sku:"NJ100",name:"NAD+",                  mg:"100mg*10vials",  price:54,  c:C.kvn},
-  {sku:"NJ500",name:"NAD+",                  mg:"500mg*10vials",  price:95,  c:C.kvn},
-  {sku:"NJ1000",name:"NAD+",                 mg:"1000mg*10vials", price:176, c:C.kvn},
-  // PAGE 3 - Body composition
-  {sku:"LC216",name:"L-Carnitine Complex",   mg:"10ml*10vials",   price:81,  c:C.bdy},
-  {sku:"LC600",name:"L-Carnitine",           mg:"10ml*10vials",   price:40,  c:C.bdy},
-  {sku:"LB",   name:"Lemon Bottle",          mg:"10ml*10vials",   price:80,  c:C.bdy},
-  {sku:"ML10", name:"Melanotan-2",           mg:"10mg*10vials",   price:54,  c:C.bdy},
-  {sku:"MT10", name:"Melatonin",             mg:"10mg*10vials",   price:68,  c:C.bdy},
-  {sku:"MT1",  name:"Melanotan-1",           mg:"10mg*10vials",   price:68,  c:C.bdy},
-  {sku:"2AD",  name:"AOD9604",               mg:"2mg*10vials",    price:60,  c:C.bdy},
-  {sku:"5AD",  name:"AOD9604",               mg:"5mg*10vials",    price:109, c:C.bdy},
-  {sku:"SLU5", name:"SLUPP-332",             mg:"5mg*10vials",    price:100, c:C.bdy},
-  {sku:"SHB",  name:"Super Human Blend",     mg:"10ml*10vials",   price:85,  c:C.bdy},
-  // PAGE 4 - Peptides
-  {sku:"LC526",name:"Fat Blaster Blend",     mg:"10ml*10vials",   price:120, c:C.pep},
-  {sku:"P10",  name:"Pinealon",              mg:"10mg*10vials",   price:65,  c:C.pep},
-  {sku:"HA5",  name:"Hyaluronic Acid",       mg:"1ml*1vial",      price:35,  c:C.pep},
-  {sku:"MDT10",name:"Mazdutide",             mg:"10mg*10vials",   price:195, c:C.pep},
-  {sku:"P41",  name:"PT-141",                mg:"10mg*10vials",   price:62,  c:C.pep},
-  {sku:"GND2", name:"Gonadorelin",           mg:"2mg*10vials",    price:41,  c:C.pep},
-  {sku:"DS5",  name:"DSIP",                  mg:"5mg*10vials",    price:46,  c:C.pep},
-  {sku:"DS10", name:"DSIP",                  mg:"10mg*10vials",   price:92,  c:C.pep},
-  {sku:"DS15", name:"DSIP",                  mg:"15mg*10vials",   price:114, c:C.pep},
-  {sku:"SK5",  name:"Selank",                mg:"5mg*10vials",    price:49,  c:C.pep},
-  {sku:"SK10", name:"Selank",                mg:"10mg*10vials",   price:81,  c:C.pep},
-  {sku:"XA5",  name:"Semax",                 mg:"5mg*10vials",    price:49,  c:C.pep},
-  {sku:"XA10", name:"Semax",                 mg:"10mg*10vials",   price:81,  c:C.pep},
-  {sku:"OT2",  name:"Oxytocin",              mg:"2mg*10vials",    price:41,  c:C.pep},
-  {sku:"OT5",  name:"Oxytocin",              mg:"5mg*10vials",    price:68,  c:C.pep},
-  {sku:"OT10", name:"Oxytocin",              mg:"10mg*10vials",   price:125, c:C.pep},
-  {sku:"ET10", name:"Epithalon",             mg:"10mg*10vials",   price:38,  c:C.pep},
-  {sku:"ET50", name:"Epithalon",             mg:"50mg*10vials",   price:176, c:C.pep},
-  {sku:"AP5",  name:"Adipotide",             mg:"5mg*10vials",    price:176, c:C.pep},
-  {sku:"AR50", name:"AICAR",                 mg:"50mg*10vials",   price:67,  c:C.pep},
-  {sku:"2S10", name:"SS-31",                 mg:"10mg*10vials",   price:109, c:C.pep},
-  {sku:"2S50", name:"SS-31",                 mg:"50mg*10vials",   price:407, c:C.pep},
-  // PAGE 5 - Growth Hormone group
-  {sku:"G25",  name:"GHRP-2",                mg:"5mg*10vials",    price:27,  c:C.ghr},
-  {sku:"G210", name:"GHRP-2",                mg:"10mg*10vials",   price:54,  c:C.ghr},
-  {sku:"G65",  name:"GHRP-6",                mg:"5mg*10vials",    price:27,  c:C.ghr},
-  {sku:"G610", name:"GHRP-6",                mg:"10mg*10vials",   price:54,  c:C.ghr},
-  {sku:"SMO10",name:"Sermorelin",            mg:"10mg*10vials",   price:157, c:C.ghr},
-  {sku:"SMO5", name:"Sermorelin",            mg:"5mg*10vials",    price:76,  c:C.ghr},
-  {sku:"M10",  name:"HGH 191AA",             mg:"10iu*10vials",   price:49,  c:C.ghr},
-  {sku:"M12",  name:"HGH 191AA",             mg:"12iu*10vials",   price:65,  c:C.ghr},
-  {sku:"M15",  name:"HGH 191AA",             mg:"15iu*10vials",   price:73,  c:C.ghr},
-  {sku:"M24",  name:"HGH 191AA",             mg:"24iu*10vials",   price:125, c:C.ghr},
-  {sku:"M36",  name:"HGH 191AA",             mg:"36iu*10vials",   price:180, c:C.ghr},
-  {sku:"G10K", name:"HCG",                   mg:"10000IU*10vials",price:163, c:C.ghr},
-  {sku:"G5K",  name:"HCG",                   mg:"5000IU*10vials", price:87,  c:C.ghr},
-  {sku:"G75",  name:"HMG",                   mg:"75IU*10vials",   price:68,  c:C.ghr},
-  {sku:"IG01", name:"IGF-1 LR3",             mg:"0.1mg*10vials",  price:46,  c:C.ghr},
-  {sku:"IG1",  name:"IGF-1 LR3",             mg:"1mg*10vials",    price:200, c:C.ghr},
-  // Tesamorelin - its own color
-  {sku:"TSM2", name:"Tesamorelin",           mg:"2mg*10vials",    price:60,  c:C.tes},
-  {sku:"TSM5", name:"Tesamorelin",           mg:"5mg*10vials",    price:113, c:C.tes},
-  {sku:"TSM10",name:"Tesamorelin",           mg:"10mg*10vials",   price:200, c:C.tes},
-  {sku:"TSM20",name:"Tesamorelin",           mg:"20mg*10vials",   price:357, c:C.tes},
-  // Ipamorelin / Hexarelin
-  {sku:"IP5",  name:"Ipamorelin",            mg:"5mg*10vials",    price:41,  c:C.ipa},
-  {sku:"IP10", name:"Ipamorelin",            mg:"10mg*10vials",   price:81,  c:C.ipa},
-  {sku:"HX5",  name:"Hexarelin",             mg:"5mg*10vials",    price:95,  c:C.ipa},
-  // GHK-CU - its own color
-  {sku:"CU50", name:"GHK-CU",               mg:"50mg*10vials",   price:33,  c:C.ghk},
-  {sku:"CU100",name:"GHK-CU",               mg:"100mg*10vials",  price:65,  c:C.ghk},
-  // KissPeptin / Thymalin / Thymosin Alpha
-  {sku:"KS5",  name:"KissPeptin-10",         mg:"5mg*10vials",    price:68,  c:C.kst},
-  {sku:"KS10", name:"KissPeptin-10",         mg:"10mg*10vials",   price:130, c:C.kst},
-  {sku:"TY10", name:"Thymalin",              mg:"10mg*10vials",   price:68,  c:C.kst},
-  {sku:"TA5",  name:"Thymosin Alpha-1",      mg:"5mg*10vials",    price:109, c:C.kst},
-  {sku:"TA10", name:"Thymosin Alpha-1",      mg:"10mg*10vials",   price:176, c:C.kst},
-  // PAGE 6 - MOTS-c its own color
-  {sku:"MS10", name:"MOTS-c",               mg:"10mg*10vials",   price:71,  c:C.mot},
-  {sku:"MS20", name:"MOTS-c",               mg:"20mg*10vials",   price:136, c:C.mot},
-  {sku:"MS40", name:"MOTS-c",               mg:"40mg*10vials",   price:244, c:C.mot},
-  // Rest of page 6
-  {sku:"375",  name:"LL-37",                 mg:"5mg*10vials",    price:103, c:C.p6},
-  {sku:"DR5",  name:"Dermorphin",            mg:"5mg*10vials",    price:38,  c:C.p6},
-  {sku:"GTT600",name:"Glutathione",          mg:"600mg*10vials",  price:40,  c:C.p6},
-  {sku:"GTT",  name:"Glutathione",           mg:"1500mg*10vials", price:90,  c:C.p6},
-  // Supplies
-  {sku:"WA2",  name:"Bac Water",             mg:"2ml*10vials",    price:7,   c:C.sup},
-  {sku:"WA3",  name:"Bac Water",             mg:"3ml*10vials",    price:10,  c:C.sup},
-  {sku:"WA10", name:"Bac Water",             mg:"10ml*10vials",   price:11,  c:C.sup},
-  {sku:"AA3",  name:"Acetic Acid 0.6%",      mg:"3ml*10vials",    price:10,  c:C.sup},
-  {sku:"AA10", name:"Acetic Acid 0.6%",      mg:"10ml*10vials",   price:11,  c:C.sup},
-  // Rest of page 6
-  {sku:"5AM",  name:"5-Amino-1MQ",           mg:"5mg*10vials",    price:87,  c:C.p6},
-  {sku:"50AM", name:"5-Amino-1MQ",           mg:"50mg*10vials",   price:136, c:C.p6},
-  {sku:"CBL60",name:"Cerebrolysin",          mg:"60mg*6vials",    price:49,  c:C.p6},
-  {sku:"NP810",name:"SNAP-8",                mg:"10mg*10vials",   price:49,  c:C.p6},
-  {sku:"SUR10",name:"Suvratide",             mg:"10mg*10vials",   price:326, c:C.p6},
-  {sku:"B1210",name:"B12",                   mg:"10ml*10vials",   price:25,  c:C.p6},
-  {sku:"B12",  name:"B12",                   mg:"2ml*10vials",    price:10,  c:C.p6},
-  {sku:"F410", name:"FOXO4-DRI",             mg:"10mg*10vials",   price:380, c:C.p6},
-  {sku:"FM2",  name:"MGF",                   mg:"2mg*10vials",    price:65,  c:C.p6},
-  {sku:"FMP2", name:"PEG MGF",               mg:"2mg*10vials",    price:100, c:C.p6},
+// ============================================================
+// PRODUCT DATA — All prices are Alisa's base prices
+// ============================================================
+const CATEGORIES = [
+  {id:'all',    label:'All',           dot:'#94a3b8'},
+  {id:'glp1',   label:'GLP-1s',        dot:'#7c3aed'},
+  {id:'gh',     label:'GH / Growth',   dot:'#0369a1'},
+  {id:'bpc',    label:'BPC / TB',      dot:'#047857'},
+  {id:'peptides',label:'Peptides',     dot:'#4f46e5'},
+  {id:'bio',    label:'Bioregulators', dot:'#166534'},
+  {id:'sarms',  label:'SARMs',         dot:'#b45309'},
+  {id:'oils',   label:'Oils',          dot:'#991b1b'},
+  {id:'tablets',label:'Tablets',       dot:'#9a3412'},
+  {id:'supplies',label:'Supplies',     dot:'#334155'},
 ];
 
+const PRODUCTS = [
+// ---- GLP-1 / WEIGHT LOSS ----
+  {sku:'SM2',  name:'Semaglutide',   spec:'2mg × 10 vials',  base:27,  cat:'glp1'},
+  {sku:'SM5',  name:'Semaglutide',   spec:'5mg × 10 vials',  base:36,  cat:'glp1'},
+  {sku:'SM10', name:'Semaglutide',   spec:'10mg × 10 vials', base:50,  cat:'glp1'},
+  {sku:'SM15', name:'Semaglutide',   spec:'15mg × 10 vials', base:64,  cat:'glp1'},
+  {sku:'SM20', name:'Semaglutide',   spec:'20mg × 10 vials', base:78,  cat:'glp1'},
+  {sku:'SM30', name:'Semaglutide',   spec:'30mg × 10 vials', base:108, cat:'glp1'},
+  {sku:'TR5',  name:'Tirzepatide',   spec:'5mg × 10 vials',  base:35,  cat:'glp1'},
+  {sku:'TR10', name:'Tirzepatide',   spec:'10mg × 10 vials', base:51,  cat:'glp1'},
+  {sku:'TR15', name:'Tirzepatide',   spec:'15mg × 10 vials', base:62,  cat:'glp1'},
+  {sku:'TR20', name:'Tirzepatide',   spec:'20mg × 10 vials', base:84,  cat:'glp1'},
+  {sku:'TR30', name:'Tirzepatide',   spec:'30mg × 10 vials', base:107, cat:'glp1'},
+  {sku:'TR40', name:'Tirzepatide',   spec:'40mg × 10 vials', base:140, cat:'glp1'},
+  {sku:'TR50', name:'Tirzepatide',   spec:'50mg × 10 vials', base:169, cat:'glp1'},
+  {sku:'TR60', name:'Tirzepatide',   spec:'60mg × 10 vials', base:197, cat:'glp1'},
+  {sku:'TR100',name:'Tirzepatide',   spec:'100mg × 10 vials',base:301, cat:'glp1'},
+  {sku:'RT5',  name:'Retatrutide',   spec:'5mg × 10 vials',  base:50,  cat:'glp1'},
+  {sku:'RT10', name:'Retatrutide',   spec:'10mg × 10 vials', base:78,  cat:'glp1'},
+  {sku:'RT15', name:'Retatrutide',   spec:'15mg × 10 vials', base:107, cat:'glp1'},
+  {sku:'RT20', name:'Retatrutide',   spec:'20mg × 10 vials', base:140, cat:'glp1'},
+  {sku:'RT30', name:'Retatrutide',   spec:'30mg × 10 vials', base:195, cat:'glp1'},
+  {sku:'RT40', name:'Retatrutide',   spec:'40mg × 10 vials', base:240, cat:'glp1'},
+  {sku:'RT50', name:'Retatrutide',   spec:'50mg × 10 vials', base:295, cat:'glp1'},
+  {sku:'RT60', name:'Retatrutide',   spec:'60mg × 10 vials', base:330, cat:'glp1'},
+  {sku:'LL5',  name:'Liraglutide',   spec:'5mg × 10 vials',  base:85,  cat:'glp1'},
+  {sku:'LL10', name:'Liraglutide',   spec:'10mg × 10 vials', base:135, cat:'glp1'},
+  {sku:'LL30', name:'Liraglutide',   spec:'30mg × 10 vials', base:251, cat:'glp1'},
+  {sku:'MDT5', name:'Mazdutide',     spec:'5mg × 10 vials',  base:93,  cat:'glp1'},
+  {sku:'MDT10',name:'Mazdutide',     spec:'10mg × 10 vials', base:185, cat:'glp1'},
+  {sku:'CGL5', name:'Cagrilintide',  spec:'5mg × 10 vials',  base:92,  cat:'glp1'},
+  {sku:'CGL10',name:'Cagrilintide',  spec:'10mg × 10 vials', base:170, cat:'glp1'},
+  {sku:'CGL20',name:'Cagrilintide',  spec:'20mg × 10 vials', base:295, cat:'glp1'},
+  {sku:'CS10', name:'Cagrilintide + Sema Combo', spec:'10mg × 10 vials', base:135, cat:'glp1'},
+  {sku:'RC10', name:'Retatrutide + Cagrilintide', spec:'10mg × 10 vials', base:165, cat:'glp1'},
+  {sku:'SUR10',name:'Survodutide',   spec:'10mg × 10 vials', base:271, cat:'glp1'},
+  {sku:'GP',   name:'GLP-1',         spec:'5mg × 10 vials',  base:103, cat:'glp1'},
+// ---- GH / GROWTH ----
+  {sku:'H06',  name:'HGH 191AA',     spec:'6iu × 10 vials',  base:46,  cat:'gh'},
+  {sku:'H10',  name:'HGH 191AA',     spec:'10iu × 10 vials', base:56,  cat:'gh'},
+  {sku:'H12',  name:'HGH 191AA',     spec:'12iu × 10 vials', base:67,  cat:'gh'},
+  {sku:'H15',  name:'HGH 191AA',     spec:'15iu × 10 vials', base:85,  cat:'gh'},
+  {sku:'H24',  name:'HGH 191AA',     spec:'24iu × 10 vials', base:126, cat:'gh'},
+  {sku:'H36',  name:'HGH 191AA',     spec:'36iu × 10 vials', base:192, cat:'gh'},
+  {sku:'FR2',  name:'HGH Fragment 176-191', spec:'2mg × 10 vials', base:53, cat:'gh'},
+  {sku:'FR5',  name:'HGH Fragment 176-191', spec:'5mg × 10 vials', base:99, cat:'gh'},
+  {sku:'FR10', name:'HGH Fragment 176-191', spec:'10mg × 10 vials',base:183,cat:'gh'},
+  {sku:'G25',  name:'GHRP-2',        spec:'5mg × 10 vials',  base:27,  cat:'gh'},
+  {sku:'G210', name:'GHRP-2',        spec:'10mg × 10 vials', base:54,  cat:'gh'},
+  {sku:'G65',  name:'GHRP-6',        spec:'5mg × 10 vials',  base:27,  cat:'gh'},
+  {sku:'G610', name:'GHRP-6',        spec:'10mg × 10 vials', base:54,  cat:'gh'},
+  {sku:'CND2', name:'CJC-1295 w/o DAC', spec:'2mg × 10 vials', base:42, cat:'gh'},
+  {sku:'CND5', name:'CJC-1295 w/o DAC', spec:'5mg × 10 vials', base:91, cat:'gh'},
+  {sku:'CND10',name:'CJC-1295 w/o DAC', spec:'10mg × 10 vials',base:180,cat:'gh'},
+  {sku:'CP10', name:'CJC-1295 + Ipamorelin', spec:'10mg × 10 vials', base:107, cat:'gh'},
+  {sku:'CP20', name:'CJC-1295 + Ipamorelin', spec:'20mg × 10 vials', base:201, cat:'gh'},
+  {sku:'CD2',  name:'CJC-1295 w/ DAC', spec:'2mg × 10 vials', base:92, cat:'gh'},
+  {sku:'CD5',  name:'CJC-1295 w/ DAC', spec:'5mg × 10 vials', base:197,cat:'gh'},
+  {sku:'CD10', name:'CJC-1295 w/ DAC', spec:'10mg × 10 vials',base:366,cat:'gh'},
+  {sku:'IP2',  name:'Ipamorelin',    spec:'2mg × 10 vials',  base:26,  cat:'gh'},
+  {sku:'IP5',  name:'Ipamorelin',    spec:'5mg × 10 vials',  base:42,  cat:'gh'},
+  {sku:'IP10', name:'Ipamorelin',    spec:'10mg × 10 vials', base:66,  cat:'gh'},
+  {sku:'HX2',  name:'Hexarelin',     spec:'2mg × 10 vials',  base:54,  cat:'gh'},
+  {sku:'HX5',  name:'Hexarelin',     spec:'5mg × 10 vials',  base:85,  cat:'gh'},
+  {sku:'SMO2', name:'Sermorelin',    spec:'2mg × 10 vials',  base:49,  cat:'gh'},
+  {sku:'SMO5', name:'Sermorelin',    spec:'5mg × 10 vials',  base:76,  cat:'gh'},
+  {sku:'SMO10',name:'Sermorelin',    spec:'10mg × 10 vials', base:153, cat:'gh'},
+  {sku:'SMO15',name:'Sermorelin',    spec:'15mg × 10 vials', base:239, cat:'gh'},
+  {sku:'IG01', name:'IGF-1LR3',      spec:'0.1mg × 10 vials',base:45,  cat:'gh'},
+  {sku:'IG1',  name:'IGF-1LR3',      spec:'1mg × 10 vials',  base:225, cat:'gh'},
+  {sku:'TSM2', name:'Tesamorelin',   spec:'2mg × 10 vials',  base:56,  cat:'gh'},
+  {sku:'TSM5', name:'Tesamorelin',   spec:'5mg × 10 vials',  base:101, cat:'gh'},
+  {sku:'TSM10',name:'Tesamorelin',   spec:'10mg × 10 vials', base:211, cat:'gh'},
+  {sku:'TSM20',name:'Tesamorelin',   spec:'20mg × 10 vials', base:390, cat:'gh'},
+  {sku:'TI18', name:'Tesamorelin + Ipamorelin', spec:'18mg × 10 vials', base:280, cat:'gh'},
+  {sku:'2AD',  name:'AOD9604',       spec:'2mg × 10 vials',  base:53,  cat:'gh'},
+  {sku:'5AD',  name:'AOD9604',       spec:'5mg × 10 vials',  base:93,  cat:'gh'},
+  {sku:'10AD', name:'AOD9604',       spec:'10mg × 10 vials', base:197, cat:'gh'},
+  {sku:'G10K', name:'HCG',           spec:'10000IU × 10 vials',base:163,cat:'gh'},
+  {sku:'G5K',  name:'HCG',           spec:'5000IU × 10 vials', base:85, cat:'gh'},
+  {sku:'G2K',  name:'HCG',           spec:'2000IU × 10 vials', base:55, cat:'gh'},
+  {sku:'G75',  name:'HMG',           spec:'75IU × 10 vials', base:68,  cat:'gh'},
+  {sku:'ISU',  name:'Insulin',       spec:'3ml × 10 vials',  base:239, cat:'gh'},
+  {sku:'MT10', name:'Melatonin',     spec:'10mg × 10 vials', base:56,  cat:'gh'},
+// ---- BPC / TB / HEALING ----
+  {sku:'BC2',  name:'BPC-157',       spec:'2mg × 10 vials',  base:26,  cat:'bpc'},
+  {sku:'BC5',  name:'BPC-157',       spec:'5mg × 10 vials',  base:44,  cat:'bpc'},
+  {sku:'BC10', name:'BPC-157',       spec:'10mg × 10 vials', base:65,  cat:'bpc'},
+  {sku:'BC20', name:'BPC-157',       spec:'20mg × 10 vials', base:115, cat:'bpc'},
+  {sku:'BT2',  name:'TB500',         spec:'2mg × 10 vials',  base:46,  cat:'bpc'},
+  {sku:'BT5',  name:'TB500',         spec:'5mg × 10 vials',  base:85,  cat:'bpc'},
+  {sku:'BT10', name:'TB500',         spec:'10mg × 10 vials', base:169, cat:'bpc'},
+  {sku:'BT20', name:'TB500',         spec:'20mg × 10 vials', base:310, cat:'bpc'},
+  {sku:'B10F', name:'TB500 Frag',    spec:'2mg × 10 vials',  base:85,  cat:'bpc'},
+  {sku:'BB4',  name:'BPC-157 + TB500', spec:'4mg × 10 vials',  base:66,  cat:'bpc'},
+  {sku:'BB10', name:'BPC-157 + TB500', spec:'10mg × 10 vials', base:116, cat:'bpc'},
+  {sku:'BB20', name:'BPC-157 + TB500', spec:'20mg × 10 vials', base:230, cat:'bpc'},
+  {sku:'BBG70',name:'BPC + GHK-CU + TB500', spec:'70mg × 10 vials', base:219, cat:'bpc'},
+  {sku:'KL80', name:'BPC + GHK-CU + TB500 + KPV', spec:'80mg × 10 vials', base:252, cat:'bpc'},
+  {sku:'KP5',  name:'KPV',           spec:'5mg × 10 vials',  base:39,  cat:'bpc'},
+  {sku:'KP10', name:'KPV',           spec:'10mg × 10 vials', base:59,  cat:'bpc'},
+  {sku:'CU50', name:'GHK-CU',        spec:'50mg × 10 vials', base:28,  cat:'bpc'},
+  {sku:'CU100',name:'GHK-CU',        spec:'100mg × 10 vials',base:43,  cat:'bpc'},
+  {sku:'GH50', name:'GHK Basic',     spec:'50mg × 10 vials', base:37,  cat:'bpc'},
+  {sku:'AU100',name:'AHK-CU',        spec:'100mg × 10 vials',base:75,  cat:'bpc'},
+// ---- PEPTIDES (MISC) ----
+  {sku:'MT1',  name:'Melanotan 1',   spec:'10mg × 10 vials', base:51,  cat:'peptides'},
+  {sku:'ML10', name:'Melanotan 2',   spec:'10mg × 10 vials', base:51,  cat:'peptides'},
+  {sku:'P41',  name:'PT-141 (Bremelanotide)', spec:'10mg × 10 vials', base:66, cat:'peptides'},
+  {sku:'GND2', name:'Gonadorelin',   spec:'2mg × 10 vials',  base:33,  cat:'peptides'},
+  {sku:'DS2',  name:'DSIP',          spec:'2mg × 10 vials',  base:27,  cat:'peptides'},
+  {sku:'DS5',  name:'DSIP',          spec:'5mg × 10 vials',  base:47,  cat:'peptides'},
+  {sku:'DS10', name:'DSIP',          spec:'10mg × 10 vials', base:71,  cat:'peptides'},
+  {sku:'DS15', name:'DSIP',          spec:'15mg × 10 vials', base:99,  cat:'peptides'},
+  {sku:'SK5',  name:'Selank',        spec:'5mg × 10 vials',  base:41,  cat:'peptides'},
+  {sku:'SK10', name:'Selank',        spec:'10mg × 10 vials', base:68,  cat:'peptides'},
+  {sku:'SK30', name:'Selank',        spec:'30mg × 10 vials', base:145, cat:'peptides'},
+  {sku:'XA5',  name:'Semax',         spec:'5mg × 10 vials',  base:41,  cat:'peptides'},
+  {sku:'XA10', name:'Semax',         spec:'10mg × 10 vials', base:62,  cat:'peptides'},
+  {sku:'XA30', name:'Semax',         spec:'30mg × 10 vials', base:135, cat:'peptides'},
+  {sku:'XS20', name:'Semax + Selank Combo', spec:'20mg × 10 vials', base:112, cat:'peptides'},
+  {sku:'NXA30',name:'NA Semax Amidate', spec:'30mg × 10 vials', base:155, cat:'peptides'},
+  {sku:'NSK30',name:'NA Selank Amidate', spec:'30mg × 10 vials', base:155, cat:'peptides'},
+  {sku:'OT2',  name:'Oxytocin',      spec:'2mg × 10 vials',  base:27,  cat:'peptides'},
+  {sku:'OT5',  name:'Oxytocin',      spec:'5mg × 10 vials',  base:47,  cat:'peptides'},
+  {sku:'OT10', name:'Oxytocin',      spec:'10mg × 10 vials', base:56,  cat:'peptides'},
+  {sku:'ET10', name:'Epithalon',     spec:'10mg × 10 vials', base:51,  cat:'peptides'},
+  {sku:'ET40', name:'Epithalon',     spec:'40mg × 10 vials', base:154, cat:'peptides'},
+  {sku:'ET50', name:'Epithalon',     spec:'50mg × 10 vials', base:185, cat:'peptides'},
+  {sku:'NET5', name:'N-Acetyl Epitalon Amidate', spec:'5mg × 10 vials', base:51, cat:'peptides'},
+  {sku:'TY10', name:'Thymalin',      spec:'10mg × 10 vials', base:76,  cat:'peptides'},
+  {sku:'TA2',  name:'Thymosin Alpha-1', spec:'2mg × 10 vials', base:54, cat:'peptides'},
+  {sku:'TA5',  name:'Thymosin Alpha-1', spec:'5mg × 10 vials', base:99, cat:'peptides'},
+  {sku:'TA10', name:'Thymosin Alpha-1', spec:'10mg × 10 vials',base:197,cat:'peptides'},
+  {sku:'MS10', name:'MOTS-c',        spec:'10mg × 10 vials', base:71,  cat:'peptides'},
+  {sku:'MS40', name:'MOTS-c',        spec:'40mg × 10 vials', base:251, cat:'peptides'},
+  {sku:'KS5',  name:'KissPeptin-10', spec:'5mg × 10 vials',  base:54,  cat:'peptides'},
+  {sku:'KS10', name:'KissPeptin-10', spec:'10mg × 10 vials', base:81,  cat:'peptides'},
+  {sku:'F410', name:'FOXO4',         spec:'10mg × 10 vials', base:431, cat:'peptides'},
+  {sku:'375',  name:'LL-37',         spec:'5mg × 10 vials',  base:98,  cat:'peptides'},
+  {sku:'AR50', name:'AICAR',         spec:'50mg × 10 vials', base:63,  cat:'peptides'},
+  {sku:'AR100',name:'AICAR',         spec:'100mg × 10 vials',base:99,  cat:'peptides'},
+  {sku:'AP2',  name:'Adipotide',     spec:'2mg × 10 vials',  base:95,  cat:'peptides'},
+  {sku:'AP5',  name:'Adipotide',     spec:'5mg × 10 vials',  base:204, cat:'peptides'},
+  {sku:'2S10', name:'SS-31',         spec:'10mg × 10 vials', base:85,  cat:'peptides'},
+  {sku:'2S50', name:'SS-31',         spec:'50mg × 10 vials', base:360, cat:'peptides'},
+  {sku:'AE1',  name:'ACE-031',       spec:'1mg × 10 vials',  base:81,  cat:'peptides'},
+  {sku:'RA10', name:'Ara-290',       spec:'10mg × 10 vials', base:76,  cat:'peptides'},
+  {sku:'NP810',name:'Snap-8',        spec:'10mg × 10 vials', base:42,  cat:'peptides'},
+  {sku:'VP5',  name:'VIP',           spec:'5mg × 10 vials',  base:95,  cat:'peptides'},
+  {sku:'VP10', name:'VIP',           spec:'10mg × 10 vials', base:160, cat:'peptides'},
+  {sku:'PE10', name:'PE 22-28',      spec:'10mg × 10 vials', base:71,  cat:'peptides'},
+  {sku:'TG20', name:'Testagen',      spec:'20mg × 10 vials', base:126, cat:'peptides'},
+  {sku:'PIN5', name:'Pinealon',      spec:'5mg × 10 vials',  base:42,  cat:'peptides'},
+  {sku:'PIN10',name:'Pinealon',      spec:'10mg × 10 vials', base:64,  cat:'peptides'},
+  {sku:'PIN20',name:'Pinealon',      spec:'20mg × 10 vials', base:103, cat:'peptides'},
+  {sku:'VI20', name:'Vilon',         spec:'20mg × 10 vials', base:119, cat:'peptides'},
+  {sku:'PN5',  name:'PNC-27',        spec:'5mg × 10 vials',  base:99,  cat:'peptides'},
+  {sku:'PN10', name:'PNC-27',        spec:'10mg × 10 vials', base:169, cat:'peptides'},
+  {sku:'P210', name:'P21',           spec:'10mg × 10 vials', base:80,  cat:'peptides'},
+  {sku:'PP10', name:'P21 Adamax',    spec:'10mg × 10 vials', base:310, cat:'peptides'},
+  {sku:'SLU5', name:'SLU-PP-332',    spec:'5mg × 10 vials',  base:121, cat:'peptides'},
+  {sku:'HU10', name:'Humanin',       spec:'10mg × 10 vials', base:210, cat:'peptides'},
+  {sku:'TER10',name:'Teriparatide',  spec:'10mg × 10 vials', base:210, cat:'peptides'},
+  {sku:'MA10', name:'Matrixyl',      spec:'10mg × 10 vials', base:35,  cat:'peptides'},
+  {sku:'PTD5', name:'PTD-DBM',       spec:'5mg × 10 vials',  base:265, cat:'peptides'},
+  {sku:'AD5',  name:'Adamax',        spec:'5mg × 10 vials',  base:172, cat:'peptides'},
+  {sku:'DR5',  name:'Dermorphin',    spec:'5mg × 10 vials',  base:36,  cat:'peptides'},
+  {sku:'GTT',  name:'Glutathione',   spec:'1500mg × 10 vials',base:108,cat:'peptides'},
+  {sku:'5AM',  name:'5-Amino-1MQ',   spec:'5mg × 10 vials',  base:32,  cat:'peptides'},
+  {sku:'10AM', name:'5-Amino-1MQ',   spec:'10mg × 10 vials', base:42,  cat:'peptides'},
+  {sku:'50AM', name:'5-Amino-1MQ',   spec:'50mg × 10 vials', base:65,  cat:'peptides'},
+  {sku:'CBL60',name:'Cerebrolysin',  spec:'60mg × 6 vials',  base:49,  cat:'peptides'},
+  {sku:'C60',  name:'Cerebrolysin (No Brand)', spec:'60mg × 10 vials', base:43, cat:'peptides'},
+  {sku:'HA5',  name:'Hyaluronic Acid', spec:'5mg × 10 vials', base:198, cat:'peptides'},
+  {sku:'E3K',  name:'EPO',           spec:'3000IU × 5 vials', base:122, cat:'peptides'},
+  {sku:'PRO20',name:'Alprostadil',   spec:'20mcg × 10 vials', base:132, cat:'peptides'},
+  {sku:'XT100',name:'Botulinum Toxin', spec:'100iu × 10 vials', base:165, cat:'peptides'},
+  {sku:'LB',   name:'Lemon Bottle',  spec:'10ml × 10 vials', base:103, cat:'peptides'},
+  {sku:'FM2',  name:'MGF',           spec:'2mg × 10 vials',  base:38,  cat:'peptides'},
+  {sku:'FMP2', name:'PEG MGF',       spec:'2mg × 10 vials',  base:95,  cat:'peptides'},
+// ---- BIOREGULATORS ----
+  {sku:'BR20', name:'Bronchogen',    spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'CA20', name:'Cardiogen',     spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'COR20',name:'Cortagen',      spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'LI20', name:'Livagen',       spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'PA20', name:'Pancragen',     spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'MAX20',name:'Prostamax',     spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'LAX20',name:'Cartalax',      spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'CH20', name:'Chonluten',     spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'CRY20',name:'Crystagen',     spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'OV20', name:'Ovagen',        spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'LON20',name:'Pinealon (20mg)',spec:'20mg × 10 vials', base:118, cat:'bio'},
+  {sku:'VE20', name:'Vesugen',       spec:'20mg × 10 vials', base:118, cat:'bio'},
+// ---- SARMs (tablets) ----
+  {sku:'L40',  name:'LGD-4033 / Ligandrol', spec:'10mg × 100 tablets', base:48, cat:'sarms'},
+  {sku:'R14',  name:'RAD-140',       spec:'10mg × 100 tablets', base:61,  cat:'sarms'},
+  {sku:'M6',   name:'MK-677 / Ibutamoren', spec:'10mg × 100 tablets', base:50, cat:'sarms'},
+  {sku:'S9',   name:'SR9009',        spec:'10mg × 100 tablets', base:61,  cat:'sarms'},
+  {sku:'M28',  name:'Ostarine / MK-2866', spec:'25mg × 100 tablets', base:44, cat:'sarms'},
+  {sku:'S040', name:'Andarine S4',   spec:'25mg × 100 tablets', base:44,  cat:'sarms'},
+  {sku:'G50',  name:'GW-501516 / Cardarine', spec:'10mg × 100 tablets', base:47, cat:'sarms'},
+  {sku:'Y1',   name:'YK-11',         spec:'10mg × 100 tablets', base:103, cat:'sarms'},
+  {sku:'A10',  name:'AICAR',         spec:'10mg × 100 tablets', base:74,  cat:'sarms'},
+// ---- OILS ----
+  {sku:'C250', name:'Testosterone Cypionate', spec:'250mg/ml × 10ml', base:20, cat:'oils'},
+  {sku:'E250', name:'Testosterone Enanthate', spec:'250mg/ml × 10ml', base:20, cat:'oils'},
+  {sku:'E300', name:'Testosterone Enanthate', spec:'300mg/ml × 10ml', base:25, cat:'oils'},
+  {sku:'TY300',name:'Testosterone Undecanoate',spec:'300mg/ml × 10ml',base:20, cat:'oils'},
+  {sku:'P100', name:'Testosterone Propionate',spec:'100mg/ml × 10ml', base:14, cat:'oils'},
+  {sku:'P200', name:'Testosterone Propionate',spec:'200mg/ml × 10ml', base:18, cat:'oils'},
+  {sku:'SP100',name:'Testosterone Suspension',spec:'100mg/ml × 10ml', base:18, cat:'oils'},
+  {sku:'BA100',name:'Test Base (TNE)',spec:'100mg/ml × 10ml',         base:18, cat:'oils'},
+  {sku:'S400', name:'Sustanon 400',  spec:'400mg/ml × 10ml',         base:26, cat:'oils'},
+  {sku:'S250', name:'Sustanon 250',  spec:'250mg/ml × 10ml',         base:23, cat:'oils'},
+  {sku:'S450', name:'Supertest 450', spec:'450mg/ml × 10ml',         base:30, cat:'oils'},
+  {sku:'T600', name:'Testo-600',     spec:'600mg/ml × 10ml',         base:30, cat:'oils'},
+  {sku:'R100', name:'Trenbolone Acetate',   spec:'100mg/ml × 10ml',  base:28, cat:'oils'},
+  {sku:'RY100',name:'Trenbolone Enanthate', spec:'100mg/ml × 10ml',  base:28, cat:'oils'},
+  {sku:'R200', name:'Trenbolone Enanthate', spec:'200mg/ml × 10ml',  base:44, cat:'oils'},
+  {sku:'H100', name:'Trenbolone Hexahydro (TrX-100)', spec:'100mg/ml × 10ml', base:60, cat:'oils'},
+  {sku:'RM200',name:'TrenMix-200',   spec:'200mg/ml × 10ml',         base:45, cat:'oils'},
+  {sku:'3R225',name:'TriTren 225',   spec:'225mg/ml × 10ml',         base:64, cat:'oils'},
+  {sku:'BR50', name:'Trenbolone Base',spec:'50mg/ml × 10ml',         base:25, cat:'oils'},
+  {sku:'B300', name:'Blend 300',     spec:'300mg/ml × 10ml',         base:53, cat:'oils'},
+  {sku:'B375', name:'Blend 375',     spec:'375mg/ml × 10ml',         base:60, cat:'oils'},
+  {sku:'B500', name:'Blend 500',     spec:'500mg/ml × 10ml',         base:85, cat:'oils'},
+  {sku:'M100', name:'Primobolan / Methenolone Enanthate', spec:'100mg/ml × 10ml', base:56, cat:'oils'},
+  {sku:'M200', name:'Primobolan / Methenolone Enanthate', spec:'200mg/ml × 10ml', base:100,cat:'oils'},
+  {sku:'N200', name:'Deca / Nandrolone Decanoate', spec:'200mg/ml × 10ml', base:28, cat:'oils'},
+  {sku:'N300', name:'Deca / Nandrolone Decanoate', spec:'300mg/ml × 10ml', base:36, cat:'oils'},
+  {sku:'NM300',name:'NandroMix-300', spec:'300mg/ml × 10ml',         base:36, cat:'oils'},
+  {sku:'PN100',name:'NPP-100 Nandrolone PP', spec:'100mg/ml × 10ml', base:24, cat:'oils'},
+  {sku:'PN200',name:'NPP-200 Nandrolone PP', spec:'200mg/ml × 10ml', base:35, cat:'oils'},
+  {sku:'SO50', name:'Winstrol Oil',  spec:'50mg/ml × 10ml',          base:18, cat:'oils'},
+  {sku:'SO100',name:'Winstrol Oil',  spec:'100mg/ml × 10ml',         base:18, cat:'oils'},
+  {sku:'SW50', name:'Winstrol Suspension', spec:'50mg/ml × 10ml',    base:18, cat:'oils'},
+  {sku:'SW100',name:'Winstrol Suspension', spec:'100mg/ml × 10ml',   base:24, cat:'oils'},
+  {sku:'U200', name:'Boldenone / EQ 200',  spec:'200mg/ml × 10ml',   base:25, cat:'oils'},
+  {sku:'U300', name:'Boldenone / EQ 300',  spec:'300mg/ml × 10ml',   base:30, cat:'oils'},
+  {sku:'U600', name:'Boldenone / EQ 600',  spec:'600mg/ml × 10ml',   base:39, cat:'oils'},
+  {sku:'BS250',name:'Boldenone Cypionate', spec:'250mg/ml × 10ml',   base:26, cat:'oils'},
+  {sku:'D100', name:'Masteron Propionate', spec:'100mg/ml × 10ml',   base:33, cat:'oils'},
+  {sku:'D200', name:'Masteron Enanthate',  spec:'200mg/ml × 10ml',   base:49, cat:'oils'},
+  {sku:'DM200',name:'Masteron Blend-200',  spec:'200mg/ml × 10ml',   base:49, cat:'oils'},
+  {sku:'DO50', name:'Dianabol (Oil)',       spec:'50mg/ml × 10ml',    base:25, cat:'oils'},
+  {sku:'OXO50',name:'Anadrol (Oil)',        spec:'50mg/ml × 10ml',    base:25, cat:'oils'},
+  {sku:'1T100',name:'DHB (1-Testosterone Cypionate)', spec:'100mg/ml × 10ml', base:38, cat:'oils'},
+  {sku:'MN50', name:'Trestolone / MENT',   spec:'50mg/ml × 10ml',    base:83, cat:'oils'},
+  {sku:'HD50', name:'Stanolone / DHT',     spec:'50mg/ml × 10ml',    base:23, cat:'oils'},
+  {sku:'SDO50',name:'Superdrol (Oil)',      spec:'50mg/ml × 10ml',    base:24, cat:'oils'},
+  {sku:'BM5',  name:'Metribolone',          spec:'5mg/ml × 10ml',    base:25, cat:'oils'},
+  {sku:'NJ100',name:'NAD+ 100mg (Oil)',     spec:'100mg/ml × 10ml',  base:25, cat:'oils'},
+  {sku:'RX225',name:'Ripex-225',            spec:'225mg/ml × 10ml',  base:39, cat:'oils'},
+  {sku:'EC100',name:'Estradiol Cypionate',  spec:'10mg/ml × 10ml',   base:25, cat:'oils'},
+  {sku:'LC120',name:'Lipo-C',               spec:'10ml',              base:24, cat:'oils'},
+  {sku:'LC216',name:'L-Carnitine Complex',  spec:'10ml',              base:29, cat:'oils'},
+  {sku:'LC500',name:'L-Carnitine 500mg',    spec:'10ml',              base:24, cat:'oils'},
+  {sku:'LC425',name:'Lipo-C Focus',         spec:'10ml',              base:36, cat:'oils'},
+  {sku:'LC526',name:'Lipo-C Fat Blaster',   spec:'10ml',              base:41, cat:'oils'},
+  {sku:'LC553',name:'Super Shred',          spec:'10ml',              base:36, cat:'oils'},
+  {sku:'RP226',name:'Relaxation PM',        spec:'10ml',              base:37, cat:'oils'},
+  {sku:'SHB',  name:'Super Human Blend',    spec:'10ml',              base:42, cat:'oils'},
+  {sku:'HHB',  name:'Healthy Hair / Skin / Nails', spec:'10ml',       base:42, cat:'oils'},
+  {sku:'LMX',  name:'Lipo Mino Mix',        spec:'10ml',              base:22, cat:'oils'},
+  {sku:'GAZ',  name:'Immunological Enhancement', spec:'10ml',         base:46, cat:'oils'},
+  {sku:'SHR',  name:'Shred',                spec:'10ml',              base:22, cat:'oils'},
+  {sku:'GGH',  name:'GHK-CU Blend',         spec:'10ml',              base:25, cat:'oils'},
+  {sku:'D320', name:'Vitamin D3',            spec:'10ml × 20000IU',   base:25, cat:'oils'},
+// ---- TABLETS ----
+  {sku:'CB40', name:'Clenbuterol',           spec:'40mcg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'CD50', name:'Clomiphene / Clomid',   spec:'50mg × 100 tabs',  base:31, cat:'tablets'},
+  {sku:'LZ25', name:'Letrozole / Femara',    spec:'2.5mg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'FX10', name:'Fluoxymesterone / Halotestin', spec:'10mg × 100 tabs', base:103, cat:'tablets'},
+  {sku:'D10',  name:'Dianabol',              spec:'10mg × 100 tabs',  base:25, cat:'tablets'},
+  {sku:'D20',  name:'Dianabol',              spec:'20mg × 100 tabs',  base:31, cat:'tablets'},
+  {sku:'D50',  name:'Dianabol',              spec:'50mg × 100 tabs',  base:55, cat:'tablets'},
+  {sku:'P10',  name:'Proviron / Mesterolone',spec:'10mg × 100 tabs',  base:29, cat:'tablets'},
+  {sku:'P25',  name:'Proviron / Mesterolone',spec:'25mg × 100 tabs',  base:8,  cat:'tablets'},
+  {sku:'M10',  name:'Primobolan (tabs)',      spec:'10mg × 100 tabs',  base:65, cat:'tablets'},
+  {sku:'M25',  name:'Primobolan (tabs)',      spec:'25mg × 100 tabs',  base:103,cat:'tablets'},
+  {sku:'M50',  name:'Primobolan (tabs)',      spec:'50mg × 100 tabs',  base:202,cat:'tablets'},
+  {sku:'SD10', name:'Superdrol',             spec:'10mg × 100 tabs',  base:46, cat:'tablets'},
+  {sku:'325',  name:'T3 / Liothyronine',     spec:'25mcg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'340',  name:'T3 / Liothyronine',     spec:'40mcg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'440',  name:'T4',                    spec:'40mcg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'X10',  name:'Anavar / Oxandrolone',  spec:'10mg × 100 tabs',  base:29, cat:'tablets'},
+  {sku:'X25',  name:'Anavar / Oxandrolone',  spec:'25mg × 100 tabs',  base:49, cat:'tablets'},
+  {sku:'X50',  name:'Anavar / Oxandrolone',  spec:'50mg × 100 tabs',  base:90, cat:'tablets'},
+  {sku:'OXP50',name:'Anadrol / Oxymetholone',spec:'50mg × 100 tabs',  base:54, cat:'tablets'},
+  {sku:'W10',  name:'Winstrol / Stanozolol', spec:'10mg × 100 tabs',  base:26, cat:'tablets'},
+  {sku:'W20',  name:'Winstrol / Stanozolol', spec:'20mg × 100 tabs',  base:34, cat:'tablets'},
+  {sku:'W50',  name:'Winstrol / Stanozolol', spec:'50mg × 100 tabs',  base:58, cat:'tablets'},
+  {sku:'CT10', name:'Turinabol',             spec:'10mg × 100 tabs',  base:29, cat:'tablets'},
+  {sku:'CT25', name:'Turinabol',             spec:'25mg × 100 tabs',  base:48, cat:'tablets'},
+  {sku:'CT50', name:'Turinabol',             spec:'50mg × 100 tabs',  base:86, cat:'tablets'},
+  {sku:'T20',  name:'Tamoxifen / Nolvadex',  spec:'20mg × 100 tabs',  base:24, cat:'tablets'},
+  {sku:'XE25', name:'Aromasin / Exemestane', spec:'25mg × 100 tabs',  base:53, cat:'tablets'},
+  {sku:'DEX1', name:'Anastrozole / Arimidex',spec:'1mg × 100 tabs',   base:23, cat:'tablets'},
+  {sku:'SD100',name:'Sildenafil / Viagra',   spec:'100mg × 100 tabs', base:23, cat:'tablets'},
+  {sku:'DT20', name:'Tadalafil / Cialis',    spec:'20mg × 100 tabs',  base:23, cat:'tablets'},
+  {sku:'B70',  name:'Cock Bombs',            spec:'70mg × 100 tabs',  base:31, cat:'tablets'},
+  {sku:'1TT10',name:'DHB 1-Test Cypionate',  spec:'10mg × 100 tabs',  base:46, cat:'tablets'},
+  {sku:'SB20', name:'Salbutamol',            spec:'20mg × 100 tabs',  base:26, cat:'tablets'},
+  {sku:'MSB10',name:'Methylstenbolone',      spec:'10mg × 100 tabs',  base:68, cat:'tablets'},
+  {sku:'T500', name:'Tesofensine',           spec:'500mcg × 100 tabs',base:55, cat:'tablets'},
+  {sku:'CG25', name:'Cabergoline',           spec:'0.25mg × 100 tabs',base:103,cat:'tablets'},
+  {sku:'FS5',  name:'Finasteride',           spec:'5mg × 100 tabs',   base:31, cat:'tablets'},
+  {sku:'FAN1', name:'Finasteride',           spec:'1mg × 100 tabs',   base:28, cat:'tablets'},
+  {sku:'DUT1', name:'Dutasteride',           spec:'1mg × 100 tabs',   base:31, cat:'tablets'},
+  {sku:'FB100',name:'Flibanserin',           spec:'100mg × 30 tabs',  base:24, cat:'tablets'},
+  {sku:'M1T10',name:'M1T (17a-Methyl-1-Test)',spec:'10mg × 100 tabs', base:37, cat:'tablets'},
+  {sku:'PDN10',name:'Prednisone',            spec:'10mg × 100 tabs',  base:24, cat:'tablets'},
+  {sku:'PND',  name:'DNP Capsule',           spec:'200mg × 50 caps',  base:91, cat:'tablets'},
+  {sku:'B157', name:'BPC-157 Capsule',       spec:'500mcg × 100 caps',base:91, cat:'tablets'},
+  {sku:'SM500',name:'Semaglutide Capsule',   spec:'500mcg × 25 caps', base:41, cat:'tablets'},
+  {sku:'TR500',name:'Tirzepatide Capsule',   spec:'500mcg × 25 caps', base:44, cat:'tablets'},
+  {sku:'AMQ50',name:'5-Amino-1MQ Capsule',   spec:'50mg × 25 caps',   base:59, cat:'tablets'},
+  {sku:'EC25', name:'Enclomiphene / Androxal',spec:'25mg × 100 tabs', base:110,cat:'tablets'},
+  {sku:'TM40', name:'Telmisartan',           spec:'40mg × 100 tabs',  base:36, cat:'tablets'},
+  {sku:'LV5',  name:'Ivermectin',            spec:'5mg × 100 tabs',   base:28, cat:'tablets'},
+  {sku:'SLU250',name:'SLU-PP-332',           spec:'250mcg × 100 tabs',base:36, cat:'tablets'},
+  {sku:'SLU1000',name:'SLU-PP-332',          spec:'1000mcg × 100 tabs',base:50,cat:'tablets'},
+  {sku:'SLU20',name:'SLU-PP-332',            spec:'20mg × 100 tabs',  base:151,cat:'tablets'},
+  {sku:'MD5',  name:'Minoxidil',             spec:'5mg × 100 tabs',   base:23, cat:'tablets'},
+  {sku:'KP500',name:'KPV Capsule',           spec:'500mcg × 100 caps',base:101,cat:'tablets'},
+  {sku:'BB500',name:'BPC-157 + TB500 Capsule',spec:'1000mcg × 100 caps',base:274,cat:'tablets'},
+  {sku:'MB20', name:'Methylene Blue',        spec:'20mg × 100 tabs',  base:44, cat:'tablets'},
+  {sku:'BAM50',name:'BAM-15 Capsule',        spec:'50mg × 60 caps',   base:245,cat:'tablets'},
+  {sku:'SB300',name:'SLU-PP-332 + BAM-15',   spec:'300mcg × 60 caps', base:60, cat:'tablets'},
+// ---- SUPPLIES ----
+  {sku:'WA10', name:'Bac Water',     spec:'10ml × 10 vials', base:12,  cat:'supplies'},
+  {sku:'BA10', name:'Bac Water',     spec:'10ml × 10 vials (labeled)', base:12, cat:'supplies'},
+  {sku:'BA05', name:'Bac Water',     spec:'5ml × 10 vials',  base:11,  cat:'supplies'},
+  {sku:'BA03', name:'Bac Water',     spec:'3ml × 10 vials',  base:8,   cat:'supplies'},
+  {sku:'AA10', name:'Acetic Acid Water', spec:'10ml × 10 vials', base:12, cat:'supplies'},
+  {sku:'B1201',name:'B12',           spec:'1mg/ml × 10ml',   base:7,   cat:'supplies'},
+  {sku:'B1210',name:'B12',           spec:'10mg/ml × 10ml',  base:17,  cat:'supplies'},
+];
+
+// ============================================================
 // STATE
-const SUPA_URL="https://zilrgqnqoswtmvlmzdim.supabase.co";
-const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4";
+// ============================================================
+let cart = {};
+let markup = 0;
+let settings = {};
+let productOverrides = {};
+let activeCat = 'all';
+let orders = [];
+let isAdminLoggedIn = false;
+let adminActiveTab = 'orders';
 
-async function supaGet(table,filter=""){
-  const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});
-  return res.json();
+// ============================================================
+// UTILITY
+// ============================================================
+function cPrice(base) {
+  return Math.round(base * (1 + markup / 100));
 }
-async function supaPost(table,data){
-  await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});
+function fmt(n) {
+  return '$' + Number(n).toFixed(2);
 }
-
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:""};
-
-function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
-function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
-function tot(){return sub()+SHIP+S.tip;}
-function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
-function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
-async function saveOrd(){const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,tip:S.tip,connection:S.connection,total:tot()};await supaPost("orders",o);}
-async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
-async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";});}}catch(e){}}
-async function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value||"";await fetch(SUPA_URL+"/rest/v1/settings?key=eq.round_open",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:String(S.roundOpen)})});await fetch(SUPA_URL+"/rest/v1/settings?key=eq.close_date",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:S.closeDate})});render();}
-function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
-
-function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
-
-function hdr(t,s,back){return`<div class="header"><div class="header-row">${back?`<button class="back-btn" onclick="gb()">←</button>`:""}<div style="flex:1"><h1>${t}</h1><p>${s}</p></div>${S.screen==="browse"&&cc()>0?`<button class="cart-btn" onclick="gc()">🛒 ${cc()} kit${cc()>1?"s":""}</button>`:""}${S.screen==="browse"?`<button class="admin-gear" onclick="ga()">⚙</button>`:""}</div></div>`;}
-
-function rBrowse(){
-  if(!S.roundOpen)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
-  const list=fl();
-  const rows=list.map(p=>{
-    const q=S.cart[p.sku]||0;
-    return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;
-  }).join("");
-  const bar=cc()>0?`<div class="cart-bar"><div><div class="cb-total">${cc()} kit${cc()>1?"s":""} · $${sub()}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button></div>`:"";
-  // Jump bar
-  const jumps=["Semaglutide","Tirzepatide","Retatrutide","KPV","BPC-157","CJC-1295","TB500","NAD+","L-Carnitine","AOD9604","Fat Blaster","Pinealon","DSIP","Selank","Semax","Oxytocin","Epithalon","SS-31","GHRP-2","GHRP-6","Sermorelin","HGH","HCG","IGF-1","Tesamorelin","Ipamorelin","GHK-CU","KissPeptin","Thymosin","MOTS-c","LL-37","Glutathione","Bac Water","5-Amino","B12","FOXO4","MGF"];
-  const jumpBar=`<div class="jump-bar">${jumps.map(j=>`<button class="jump-btn" onclick="jumpTo('${j}')">${j}</button>`).join("")}</div>`;
-
-  return hdr("~BgM's~ BioStack Community","2026 ZLZ PEPTIDE — GROUP ORDER #"+S.roundNum,false)+
-  `<div class="round-badge"><span>Group Order <strong>#${S.roundNum}</strong></span>${S.closeDate?`<span>Closes: <strong>${S.closeDate}</strong></span>`:`<span class="open-dot">● Open Now</span>`}</div>
-  <div class="search-bar"><input type="text" inputmode="search" placeholder="🔍  Search by name, SKU, or mg..." value="${S.search}" id="si"/></div>
-  ${jumpBar}
-  ${list.length===0?`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`:`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${rows}</tbody></table>`}
-  <div style="padding:12px 16px 100px;text-align:center;font-size:11px;color:#94a3b8">For experimental research use only.</div>
-  ${bar}`;
-}
-
-function rCheckout(){
-  const items=ci();
-  const ih=items.map(i=>`<div class="oitem"><div><div class="oname"><span class="sku">${i.sku}</span>${i.name}</div><div class="odetail">${i.mg} · ${i.qty} kit${i.qty>1?"s":""}</div></div><div class="oprice">$${(i.price*i.qty).toFixed(2)}<div class="oeach">$${i.price}/kit</div></div></div>`).join("");
-  return hdr("Review & Checkout","~BgM's~ BioStack Community",true)+
-  `<div class="page"><div class="card"><div class="card-title">📋 Your Order</div>${ih}
-    <div class="trow"><span>Subtotal</span><span>$${sub().toFixed(2)}</span></div>
-    <div class="trow"><span>Shipping & Customs (flat fee)</span><span>$${SHIP}.00</span></div>
-    ${S.tip>0?`<div class="trow"><span>Tip</span><span>$${S.tip}.00</span></div>`:""}
-    <div class="tbig"><span>Total Due</span><span>$${tot().toFixed(2)}</span></div>
-  </div>
-  <div class="card"><div class="card-title">👤 Your Info</div>
-    <input class="finput" type="text" placeholder="Full Name *" id="fn" value="${S.form.name}"/>
-    <input class="finput" type="tel" placeholder="Phone Number *" id="fp" value="${S.form.phone}"/>
-    <input class="finput" type="email" placeholder="Email Address *" id="fe" value="${S.form.email}"/>
-  </div>
-  <div class="conn-box">
-    <div class="conn-title">🔗 Who is your contact to Boyd? *</div>
-    <div class="conn-sub">They will deliver your order to you.</div>
-    <select class="conn-select" id="connsel">
-      <option value="">-- Select --</option>
-      <option value="Self (I'll pick up directly)">Self (I'll pick up directly)</option>
-      <option value="Boyd">Boyd</option>
-      <option value="Bronson">Bronson</option>
-      <option value="Justin">Justin</option>
-      <option value="Dwayne">Dwayne</option>
-      <option value="Luke">Luke</option>
-      <option value="Jessica">Jessica</option>
-      <option value="Jared">Jared</option>
-      <option value="Heath">Heath</option>
-      <option value="Other">Other (type below)</option>
-    </select>
-    <input class="conn-input" type="text" id="connother" placeholder="Type name here if not listed above" value=""/>
-  </div>
-  <div class="tip-box">
-    <div class="tip-title">💰 Optional Tip</div>
-    <div class="tip-desc">Leaving a tip is how the group buy organizer gets compensated for his time & efforts 🙂</div>
-    <select class="tip-select" id="tipsel">
-      <option value="0" ${S.tip===0?"selected":""}>No tip</option>
-      <option value="10" ${S.tip===10?"selected":""}>$10</option>
-      <option value="20" ${S.tip===20?"selected":""}>$20</option>
-      <option value="30" ${S.tip===30?"selected":""}>$30</option>
-      <option value="40" ${S.tip===40?"selected":""}>$40</option>
-      <option value="50" ${S.tip===50?"selected":""}>$50</option>
-      <option value="60" ${S.tip===60?"selected":""}>$60</option>
-      <option value="70" ${S.tip===70?"selected":""}>$70</option>
-      <option value="80" ${S.tip===80?"selected":""}>$80</option>
-      <option value="90" ${S.tip===90?"selected":""}>$90</option>
-      <option value="100" ${S.tip===100?"selected":""}>$100</option>
-    </select>
-  </div>
-  <div class="vbox">
-    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
-    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
-    <div class="vtotal">$${tot().toFixed(2)} due</div>
-    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
-  </div>
-  <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
-  <button class="sbtn" id="sbtn" onclick="submit()">Submit Order →</button>
-  <p class="fnote">For experimental research use only.</p></div>`;
-}
-
-function rConfirm(){
-  return hdr("Order Submitted!","~BgM's~ BioStack Community",false)+
-  `<div class="conf"><div class="conf-icon">✅</div><div class="conf-title">Order Received!</div>
-  <p class="conf-txt">Thanks ${esc(S.form.name)}! Your order has been received. You'll be contacted when it arrives.</p>
-  <div class="vbox">
-    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Complete Your Payment Now</div>
-    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
-    <div class="vtotal">Send $${tot().toFixed(2)}</div>
-  </div>
-  <div class="disc">⚠️ <strong>Venmo Note Required:</strong><br>Write: <strong>"Reimbursement group order"</strong></div>
-  <button class="sbtn green" onclick="newOrd()">Place Another Order</button></div>`;
-}
-
-function rAdmin(){
-  if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
-  const ro=S.orders.filter(o=>o.round===S.roundNum);
-  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
-    const copyText=`${o.name} | ${o.phone} | ${o.email}${o.connection?" | Via: "+o.connection:""}${o.tip>0?" | Tip: $"+o.tip:""} | ${o.items.map(x=>`${x.sku} x${x.qty} $${x.price*x.qty}`).join(", ")} | Total: $${o.total.toFixed(2)}`;
-    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${esc(o.name)}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${esc(o.phone)} · ${esc(o.email)} · ${esc(o.date)}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${esc(o.connection)}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-items">${o.items.map(x=>`${esc(x.sku)} × ${x.qty} = $${x.price*x.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-print" data-idx="${i}">🖨 Print</button><button class="ocard-copy" data-copy="${copyText.replace(/"/g,'&quot;')}">Copy</button></div></div>`;
-  }).join("");
-  return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
-  `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
-    <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
-    <input class="dinput" type="text" id="cd" placeholder="Close date (e.g. April 30, 2026)" value="${S.closeDate}"/>
-    <button class="savebtn" onclick="saveSt()">Save</button>
-  </div>
-  <div class="tabrow"><button class="tabbtn ${S.adminTab==="orders"?"on":""}" onclick="sat('orders')">📦 Orders (${ro.length})</button><button class="tabbtn ${S.adminTab==="vivian"?"on":""}" onclick="sat('vivian')">📋 Vivian Summary</button></div>
-  ${S.adminTab==="orders"?`<div class="asec"><h3>Orders — Group #${S.roundNum}</h3>${oh}</div>`:`<div class="asec"><h3>Vivian Order Summary</h3><div class="vbox2" id="vt">${vivian()}</div><button class="cpybtn" id="cpybtn" onclick="cpy()">📋 Copy to Clipboard</button></div>`}
-  <div style="text-align:right;margin-top:8px"><button class="lgout" onclick="alo()">Logout</button></div></div>`;
-}
-
-function bind(){
-  document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{
-    const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);
-    if(n===0)delete S.cart[s];else S.cart[s]=n;
-    const scrollY=window.scrollY;
-    render();
-    window.scrollTo(0,scrollY);
-  }));
-  const jb=document.querySelector(".jump-bar");
-  if(jb){
-    jb.addEventListener("wheel",e=>{e.preventDefault();jb.scrollLeft+=e.deltaY;},{passive:false});
-    let isDown=false,startX,scrollLeft;
-    jb.addEventListener("mousedown",e=>{isDown=true;startX=e.pageX-jb.offsetLeft;scrollLeft=jb.scrollLeft;});
-    jb.addEventListener("mouseleave",()=>isDown=false);
-    jb.addEventListener("mouseup",()=>isDown=false);
-    jb.addEventListener("mousemove",e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-jb.offsetLeft;jb.scrollLeft=scrollLeft-(x-startX);});
-  }
-  const si=document.getElementById("si");
-  if(si){
-    si.addEventListener("input",e=>{
-      S.search=e.target.value;
-      // Only update the table rows, not the whole page - keeps keyboard open
-      const tbody=document.querySelector("tbody");
-      const noRes=document.querySelector(".empty");
-      const filtered=fl();
-      if(filtered.length===0){
-        if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;
-      } else {
-        const newRows=filtered.map(p=>{const q=S.cart[p.sku]||0;return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;}).join("");
-        if(tbody)tbody.innerHTML=newRows;
-        else if(noRes)noRes.outerHTML=`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${newRows}</tbody></table>`;
-      }
-      // Re-attach qty button events
-      document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
-    });
-  }
-  document.querySelectorAll(".ocard-print").forEach(b=>b.addEventListener("click",()=>{
-    const idx=parseInt(b.dataset.idx);
-    const ro=S.orders.filter(o=>o.round===S.roundNum);
-    const o=ro[idx];
-    if(!o)return;
-    const itemRows=o.items.map(x=>`<tr><td>${x.sku}</td><td>${x.name}</td><td>${x.mg}</td><td style="text-align:center">${x.qty}</td><td style="text-align:right">$${x.price}/kit</td><td style="text-align:right">$${x.price*x.qty}</td></tr>`).join("");
-    const html=`<!DOCTYPE html><html><head><title>Packing Slip - ${o.name}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#555;font-weight:normal;margin-bottom:20px}.info{margin-bottom:20px;font-size:14px;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#1e3a5f;color:#fff;padding:8px;text-align:left;font-size:13px}td{padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px}.totals{text-align:right;font-size:14px;line-height:2}.grand{font-size:18px;font-weight:bold;color:#1e3a5f}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px}@media print{button{display:none}}</style></head><body><h1>~BgM's~ BioStack Community</h1><h2>2026 ZLZ PEPTIDE — GROUP ORDER #${o.round} PACKING SLIP</h2><div class="info"><strong>Name:</strong> ${o.name}<br><strong>Phone:</strong> ${o.phone}<br><strong>Email:</strong> ${o.email}<br><strong>Date:</strong> ${o.date}<br>${o.connection?`<strong>Connection:</strong> ${o.connection}<br>`:""}</div><table><thead><tr><th>SKU</th><th>Product</th><th>Size</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table><div class="totals"><div>Products: $${o.subtotal.toFixed(2)}</div><div>Shipping: $${o.shipping.toFixed(2)}</div>${o.tip>0?`<div>Tip: $${o.tip.toFixed(2)}</div>`:""}<div class="grand">TOTAL DUE: $${o.total.toFixed(2)}</div></div><div class="footer">For experimental research use only.<br>Thank you for your order!</div><br><button onclick="window.print()" style="padding:10px 30px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">Print This Page</button></body></html>`;
-    const blob=new Blob([html],{type:"text/html"});
-    const url=URL.createObjectURL(blob);
-    window.open(url,"_blank");
-  }));
-  document.querySelectorAll(".ocard-copy").forEach(b=>b.addEventListener("click",()=>{navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1500);});}));
-  const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
-  const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
-  const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
-  const tipSel=document.getElementById("tipsel");
-  if(tipSel)tipSel.addEventListener("change",e=>{
-    S.tip=parseInt(e.target.value)||0;
-    // Update totals inline without re-rendering
-    const vtotal=document.querySelector(".vtotal");
-    const vsub=document.querySelector(".vsub");
-    const tbig=document.querySelector(".tbig span:last-child");
-    if(vtotal)vtotal.textContent="$"+tot().toFixed(2)+" due";
-    if(vsub)vsub.textContent="$"+sub()+" products + $"+SHIP+" shipping"+(S.tip>0?" + $"+S.tip+" tip":"");
-    if(tbig)tbig.textContent="$"+tot().toFixed(2);
+function api(path, opts={}) {
+  return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...opts.headers
+    },
+    ...opts
   });
-  ub();
 }
-function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
-function gc(){S.screen="checkout";S.tip=0;window.scrollTo(0,0);render();}
-function gb(){S.screen="browse";window.scrollTo(0,0);render();}
-function ga(){S.screen="admin";window.scrollTo(0,0);render();}
-function jumpTo(name){S.search=name;render();}
-function alo(){S.adminAuth=false;S.screen="browse";render();}
-function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";render();}
-function sat(t){S.adminTab=t;if(t==="orders"&&S.adminAuth)loadOrders().then(()=>render());else render();}
-async function submit(){
-  if(!S.form.name||!S.form.phone||!S.form.email)return;
-  const connSel=document.getElementById("connsel");
-  const connOther=document.getElementById("connother");
-  const tipSel=document.getElementById("tipsel");
-  if(tipSel)S.tip=parseInt(tipSel.value)||0;
-  let conn=connSel?connSel.value:"";
-  if(conn==="Other")conn=connOther?connOther.value.trim():"";
-  if(!conn){alert("Please select or enter your connection name.");return;}
-  S.connection=conn;
-  const btn=document.getElementById("sbtn");
-  if(btn){btn.disabled=true;btn.textContent="Submitting...";}
-  await saveOrd();S.screen="confirm";render();
-}
-function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;loadOrders().then(()=>render());}else document.getElementById("aerr").textContent="Incorrect password";}
-// saveSt is now defined above with Supabase
-function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
-loadSettings().then(()=>render());
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  // Default to OPEN immediately — show products right away
+  buildCatTabs();
+  renderProducts();
+  updateCart();
+  showView('shop');
+
+  // Then check Supabase in the background
+  try {
+    const res = await api('eml_settings?id=eq.1');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
+        settings = data[0];
+        markup = settings.markup_percentage || 0;
+        productOverrides = settings.product_overrides || {};
+        const gNum = settings.group_order_number || 1;
+        const closeDate = settings.close_message || '';
+        document.getElementById('headerSub').textContent = `2026 ALISA / SBF — GROUP ORDER #${gNum}`;
+        document.getElementById('infoOrderNum').textContent = '#' + gNum;
+        document.getElementById('infoCloseDate').textContent = closeDate || 'TBD';
+        // Only close if Supabase explicitly says false
+        if (settings.is_open === false) {
+          document.getElementById('closedMsg').textContent = closeDate ? 'Next order closes: ' + closeDate : 'The group order is currently closed. Check back soon!';
+          showView('closed');
+          return;
+        }
+        // Re-render with correct markup and overrides
+        renderProducts();
+      }
+    }
+  } catch(e) {
+    // Supabase unreachable — stay open, that's fine
+    console.log('Settings load failed, staying open:', e);
+  }
+}
+
+// ============================================================
+// VIEWS
+// ============================================================
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('view-' + v);
+  if (el) el.classList.add('active');
+  const header = document.getElementById('header');
+  if (v === 'shop') {
+    header.style.display = 'flex';
+    document.getElementById('bottomBar').style.display = 'flex';
+  } else {
+    header.style.display = 'none';
+    document.getElementById('bottomBar').style.display = 'none';
+  }
+  window.scrollTo(0,0);
+}
+
+// ============================================================
+// CATEGORY TABS
+// ============================================================
+function buildCatTabs() {
+  const container = document.getElementById('catTabs');
+  container.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab' + (cat.id === activeCat ? ' active' : '');
+    btn.textContent = cat.label;
+    btn.onclick = () => { activeCat = cat.id; buildCatTabs(); renderProducts(); };
+    container.appendChild(btn);
+  });
+}
+
+// ============================================================
+// RENDER PRODUCTS
+// ============================================================
+function renderProducts() {
+  const list = document.getElementById('productList');
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  let filtered = PRODUCTS;
+  if (activeCat !== 'all') filtered = filtered.filter(p => p.cat === activeCat);
+  if (search) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(search) ||
+    p.sku.toLowerCase().includes(search) ||
+    p.spec.toLowerCase().includes(search)
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="no-products">No products found</div>';
+    return;
+  }
+
+  let html = '';
+  let lastCat = null;
+  filtered.forEach(p => {
+    const ov = productOverrides[p.sku] || {};
+    const isOOS = ov.isOOS || false;
+    const isNA = ov.isNA || false;
+    const qty = cart[p.sku] || 0;
+    const cp = cPrice(p.base);
+    const inCart = qty > 0;
+
+    if (activeCat === 'all' && p.cat !== lastCat) {
+      lastCat = p.cat;
+      const catObj = CATEGORIES.find(c => c.id === p.cat);
+      if (catObj) {
+        html += `<div class="cat-header">
+          <span class="cat-header-dot" style="background:${catObj.dot}"></span>
+          ${catObj.label}
+        </div>`;
+      }
+    }
+
+    let cardClass = 'product-card';
+    if (inCart) cardClass += ' in-cart';
+    if (isOOS) cardClass += ' oos';
+    if (isNA) cardClass += ' not-avail';
+
+    let statusBadge = '';
+    if (isOOS) statusBadge = '<span class="status-badge badge-oos">OOS</span>';
+    else if (isNA) statusBadge = '<span class="status-badge badge-na">N/A</span>';
+
+    const disabled = isOOS || isNA;
+
+    html += `<div class="${cardClass}" id="card-${p.sku}">
+      <span class="sku-badge">${p.sku}</span>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-spec">${p.spec}</div>
+      </div>
+      ${statusBadge}
+      <div class="product-price">${fmt(cp)}</div>
+      <div class="qty-controls">
+        <button class="qty-btn minus ${qty > 0 ? 'active' : ''}" onclick="changeQty('${p.sku}',-1)" ${qty===0||disabled?'disabled':''}>−</button>
+        <span class="qty-num">${qty}</span>
+        <button class="qty-btn plus" onclick="changeQty('${p.sku}',1)" ${disabled?'disabled':''}>+</button>
+      </div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+// ============================================================
+// CART
+// ============================================================
+function changeQty(sku, delta) {
+  const cur = cart[sku] || 0;
+  const next = Math.max(0, cur + delta);
+  if (next === 0) delete cart[sku]; else cart[sku] = next;
+  updateCart();
+  // Update just this card's controls for speed
+  const p = PRODUCTS.find(x => x.sku === sku);
+  if (!p) return;
+  const qty = cart[sku] || 0;
+  const card = document.getElementById('card-' + sku);
+  if (!card) return;
+  card.className = 'product-card' + (qty > 0 ? ' in-cart' : '');
+  const qtyNum = card.querySelector('.qty-num');
+  if (qtyNum) qtyNum.textContent = qty;
+  const minusBtn = card.querySelector('.qty-btn.minus');
+  if (minusBtn) {
+    minusBtn.disabled = qty === 0;
+    minusBtn.className = 'qty-btn minus' + (qty > 0 ? ' active' : '');
+  }
+}
+
+function getTotals() {
+  let kits = 0, customerTotal = 0, baseCost = 0;
+  Object.entries(cart).forEach(([sku, qty]) => {
+    const p = PRODUCTS.find(x => x.sku === sku);
+    if (!p) return;
+    kits += qty;
+    customerTotal += cPrice(p.base) * qty;
+    baseCost += p.base * qty;
+  });
+  return {kits, customerTotal, baseCost, margin: customerTotal - baseCost};
+}
+
+function updateCart() {
+  const {kits, customerTotal} = getTotals();
+  const bubble = document.getElementById('cartBubble');
+  const total = customerTotal + (kits > 0 ? SHIPPING : 0);
+
+  if (kits === 0) {
+    bubble.className = 'empty';
+    bubble.textContent = '🛒 0 kits';
+  } else {
+    bubble.className = '';
+    bubble.textContent = `🛒 ${kits} kit${kits!==1?'s':''}`;
+  }
+
+  document.getElementById('bottomTotal').textContent = kits > 0 ? fmt(total) : '$0.00';
+  const minReached = kits >= MIN_KITS;
+  document.getElementById('checkoutBtn').disabled = !minReached;
+
+  if (kits === 0) {
+    document.getElementById('bottomSub').textContent = 'Add items to your cart';
+  } else {
+    document.getElementById('bottomSub').textContent = `${kits} kit${kits!==1?'s':''} + ${fmt(SHIPPING)} shipping`;
+  }
+}
+
+// ============================================================
+// CHECKOUT
+// ============================================================
+function goToCheckout() {
+  const {kits, customerTotal} = getTotals();
+  if (kits < MIN_KITS) return;
+  const total = customerTotal + SHIPPING;
+
+  // Build order items
+  let itemsHtml = '';
+  Object.entries(cart).forEach(([sku, qty]) => {
+    const p = PRODUCTS.find(x => x.sku === sku);
+    if (!p) return;
+    const cp = cPrice(p.base);
+    itemsHtml += `<div class="order-item-row">
+      <span class="order-item-name"><strong>${sku}</strong> ${p.name} × ${qty}</span>
+      <span class="order-item-price">${fmt(cp * qty)}</span>
+    </div>`;
+  });
+
+  document.getElementById('checkoutItems').innerHTML = itemsHtml;
+  document.getElementById('coSubtotal').textContent = fmt(customerTotal);
+  document.getElementById('coTotal').textContent = fmt(total);
+  document.getElementById('venmoAmount').textContent = fmt(total) + ' due';
+  document.getElementById('venmoBreakdown').textContent = fmt(customerTotal) + ' products + ' + fmt(SHIPPING) + ' shipping';
+
+  showView('checkout');
+}
+
+async function submitOrder() {
+  const name = document.getElementById('fName').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  const email = document.getElementById('fEmail').value.trim();
+  const connection = document.getElementById('fConnection').value;
+  const connOther = document.getElementById('fConnectionOther').value.trim();
+  const finalConnection = connection === 'Other (type below)' ? connOther : connection;
+
+  if (!name || !phone || !email || !finalConnection) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const {kits, customerTotal, baseCost, margin} = getTotals();
+  const total = customerTotal + SHIPPING;
+
+  // Build items array
+  const items = Object.entries(cart).map(([sku, qty]) => {
+    const p = PRODUCTS.find(x => x.sku === sku);
+    return {
+      sku, name: p.name, spec: p.spec, qty,
+      customerPrice: cPrice(p.base),
+      basePrice: p.base,
+      lineTotal: cPrice(p.base) * qty,
+      baseLine: p.base * qty
+    };
+  });
+
+  // Check for repeat order
+  let isRepeat = false;
+  try {
+    const repRes = await api(`eml_orders?name=ilike.${encodeURIComponent(name)}&select=id`);
+    if (repRes.ok) {
+      const repData = await repRes.json();
+      if (repData && repData.length > 0) isRepeat = true;
+    }
+  } catch(e) {}
+
+  const orderData = {
+    date: new Date().toLocaleString(),
+    name, phone, email,
+    connection: finalConnection,
+    items: JSON.stringify(items),
+    subtotal: customerTotal,
+    customer_total: total,
+    your_cost: baseCost,
+    your_margin: margin,
+    group_order_number: settings.group_order_number || 1
+  };
+
+  try {
+    const res = await api('eml_orders', {
+      method: 'POST',
+      body: JSON.stringify(orderData)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(JSON.stringify(err));
+    }
+
+    // Clear form
+    document.getElementById('fName').value = '';
+    document.getElementById('fPhone').value = '';
+    document.getElementById('fEmail').value = '';
+    document.getElementById('fConnection').value = '';
+    document.getElementById('fConnectionOther').value = '';
+
+    // Show success
+    let msg = 'Your order has been received. Pay via Venmo @Boyd-Moretti and send your payment screenshot to Boyd on WhatsApp.';
+    if (isRepeat) msg = '✅ Order received! Note: Shipping removed — already paid on a previous order. Pay via Venmo @Boyd-Moretti.';
+    document.getElementById('successMsg').textContent = msg;
+    document.getElementById('successOverlay').classList.add('show');
+
+  } catch(e) {
+    alert('Error submitting order: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit Order →';
+  }
+}
+
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('show');
+  // Clear cart
+  cart = {};
+  updateCart();
+  renderProducts();
+  showView('shop');
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function openAdmin() {
+  if (!isAdminLoggedIn) {
+    // Hide all views and show login overlay
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('bottomBar').style.display = 'none';
+    document.getElementById('adminLogin').style.display = 'flex';
+  } else {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('bottomBar').style.display = 'none';
+    document.getElementById('view-admin').classList.add('active');
+    loadAdminData();
+  }
+}
+
+function checkPW() {
+  const pw = document.getElementById('pwInput').value.trim();
+  if (pw === ADMIN_PW) {
+    isAdminLoggedIn = true;
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('bottomBar').style.display = 'none';
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-admin').classList.add('active');
+    loadAdminData();
+  } else {
+    document.getElementById('pwError').textContent = 'Incorrect password. Try again.';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+async function forceOpen() {
+  try {
+    const res = await api('eml_settings?id=eq.1', {
+      method: 'PATCH',
+      body: JSON.stringify({ is_open: true })
+    });
+    if (res.ok) {
+      setPortalToggleUI(true);
+      settings.is_open = true;
+      alert('Portal forced OPEN! Refresh the main page to confirm.');
+    } else {
+      const err = await res.text();
+      alert('Error: ' + err);
+    }
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+function adminLogout() {
+  isAdminLoggedIn = false;
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  showView('shop');
+}
+
+async function loadAdminData() {
+  // Load settings
+  try {
+    const res = await api('eml_settings?id=eq.1');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
+        settings = data[0];
+        markup = settings.markup_percentage || 0;
+        productOverrides = settings.product_overrides || {};
+        const gNum = settings.group_order_number || 1;
+        document.getElementById('adminGroupNum').value = gNum;
+        document.getElementById('adminCloseDate').value = settings.close_message || '';
+        document.getElementById('markupInput').value = markup;
+        document.getElementById('adminSub').textContent = 'GROUP ORDER #' + gNum;
+        updateMarkupPreview();
+        const open = settings.is_open !== false;
+        const toggle = document.getElementById('portalToggle');
+        const dot = document.getElementById('portalDot');
+        const txt = document.getElementById('portalStatusText');
+        if (open) {
+          toggle.className = 'toggle-switch on';
+          dot.className = 'status-dot';
+          txt.textContent = 'OPEN';
+        } else {
+          toggle.className = 'toggle-switch';
+          dot.className = 'status-dot closed';
+          txt.textContent = 'CLOSED';
+        }
+      }
+    }
+  } catch(e) {}
+
+  // Load orders
+  await loadOrders();
+}
+
+async function loadOrders() {
+  try {
+    const res = await api('eml_orders?order=created_at.desc');
+    if (res.ok) {
+      orders = await res.json();
+      renderOrders();
+      renderAlisaSummary();
+    }
+  } catch(e) {}
+}
+
+function switchAdminTab(tab) {
+  adminActiveTab = tab;
+  ['orders','summary','products'].forEach(t => {
+    document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+  });
+  if (tab === 'products') renderAdminProducts();
+}
+
+function renderOrders() {
+  document.getElementById('orderCount').textContent = orders.length;
+  const container = document.getElementById('ordersList');
+  if (orders.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">No orders yet</div>';
+    return;
+  }
+
+  // Find repeat names
+  const nameCounts = {};
+  orders.forEach(o => { const k = o.name.toLowerCase(); nameCounts[k] = (nameCounts[k]||0)+1; });
+
+  container.innerHTML = orders.map(o => {
+    const isRepeat = nameCounts[o.name.toLowerCase()] > 1;
+    const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+    const itemsText = items.map(it => `${it.sku} × ${it.qty} = ${fmt(it.lineTotal)}`).join(' | ');
+    const margin = o.your_margin || 0;
+    const cost = o.your_cost || 0;
+
+    return `<div class="order-card ${isRepeat ? 'repeat' : ''}">
+      ${isRepeat ? '<div class="repeat-flag">⚠️ Repeat Order — Review Before Finalizing</div>' : ''}
+      <div class="order-card-header">
+        <div class="order-name">${o.name}</div>
+        <div class="order-total">${fmt(o.customer_total || 0)}</div>
+      </div>
+      <div class="order-meta">${o.phone} · ${o.email} · ${o.date}</div>
+      <div class="order-meta">🔗 Connection: <strong>${o.connection}</strong></div>
+      <div class="order-items-text">${itemsText}</div>
+      <div class="order-margin-row">
+        <span class="margin-pill cost">Cost: ${fmt(cost)}</span>
+        <span class="margin-pill margin">Margin: ${fmt(margin)}</span>
+      </div>
+      <div class="order-btns">
+        <button class="order-btn customer" onclick='copyForCustomer(${JSON.stringify(o)})'>📋 Copy for Customer</button>
+        <button class="order-btn alisa" onclick='copyForAlisa(${JSON.stringify(o)})'>📋 Copy for Alisa</button>
+        <button class="order-btn print" onclick='printOrder(${JSON.stringify(o)})'>🖨️ Print</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyForCustomer(order) {
+  const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+  const lines = [
+    `${order.name} — ${order.date}`,
+    `Connection: ${order.connection}`,
+    ``,
+    ...items.map(it => `${it.sku}  ${it.name} × ${it.qty}  ${fmt(it.lineTotal)}`),
+    ``,
+    `Shipping: ${fmt(SHIPPING)}`,
+    `─────────────────────`,
+    `TOTAL: ${fmt(order.customer_total || 0)}`,
+    ``,
+    `Pay via Venmo @Boyd-Moretti`,
+    `Note: Reimbursement`
+  ].join('\n');
+  navigator.clipboard.writeText(lines).then(() => alert('Copied for Customer!'));
+}
+
+function copyForAlisa(order) {
+  const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+  const lines = [
+    `ORDER — ${new Date().toLocaleDateString()}`,
+    ``,
+    ...items.map(it => `${it.sku.padEnd(10)} ${String(it.qty).padStart(2)} box   $${String(it.basePrice).padStart(4)}   $${it.baseLine}`),
+    ``,
+    `GRAND TOTAL:  $${items.reduce((s,it)=>s+it.baseLine,0)}`
+  ].join('\n');
+  navigator.clipboard.writeText(lines).then(() => alert('Copied for Alisa!'));
+}
+
+function printOrder(order) {
+  const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+  const w = window.open('','_blank');
+  w.document.write(`<html><head><title>Order - ${order.name}</title>
+  <style>body{font-family:monospace;padding:20px;color:#000;background:#fff}
+  h2{margin-bottom:4px}p{margin:2px 0;font-size:14px}
+  .item{border-bottom:1px solid #eee;padding:4px 0;display:flex;justify-content:space-between}
+  .total{margin-top:10px;font-weight:bold;font-size:16px;border-top:2px solid #000;padding-top:6px;display:flex;justify-content:space-between}
+  </style></head><body>
+  <h2>~BgM's~ BioStack Community</h2>
+  <h3>2026 ALISA / SBF — GROUP ORDER #${settings.group_order_number||1}</h3>
+  <hr>
+  <p><strong>${order.name}</strong></p>
+  <p>${order.phone} · ${order.email}</p>
+  <p>Connection: ${order.connection}</p>
+  <p>Date: ${order.date}</p>
+  <hr>
+  ${items.map(it=>`<div class="item"><span>${it.sku} ${it.name} × ${it.qty}</span><span>${fmt(it.lineTotal)}</span></div>`).join('')}
+  <div class="item"><span>Shipping</span><span>${fmt(SHIPPING)}</span></div>
+  <div class="total"><span>TOTAL DUE</span><span>${fmt(order.customer_total||0)}</span></div>
+  <br><p style="font-size:11px;color:#666">For Research Purposes Only</p>
+  </body></html>`);
+  w.document.close();
+  w.print();
+}
+
+function renderAlisaSummary() {
+  const totals = {};
+  orders.forEach(o => {
+    const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+    items.forEach(it => {
+      if (!totals[it.sku]) totals[it.sku] = {name: it.name, qty: 0, basePrice: it.basePrice, total: 0};
+      totals[it.sku].qty += it.qty;
+      totals[it.sku].total += it.baseLine;
+    });
+  });
+
+  const rows = Object.entries(totals).sort((a,b)=>a[0].localeCompare(b[0]));
+  const grand = rows.reduce((s,[,v])=>s+v.total,0);
+
+  document.getElementById('alisaSummaryRows').innerHTML = rows.map(([sku,v]) =>
+    `<div class="alisa-row">
+      <span class="alisa-sku">${sku}</span>
+      <span class="alisa-qty">= ${v.qty} box</span>
+      <span class="alisa-price">$${v.basePrice}</span>
+      <span class="alisa-total">$${v.total}</span>
+    </div>`
+  ).join('');
+  document.getElementById('alisaGrandTotal').textContent = fmt(grand);
+}
+
+function copyAlisaSummary() {
+  const totals = {};
+  orders.forEach(o => {
+    const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+    items.forEach(it => {
+      if (!totals[it.sku]) totals[it.sku] = {qty:0, basePrice: it.basePrice, total:0};
+      totals[it.sku].qty += it.qty;
+      totals[it.sku].total += it.baseLine;
+    });
+  });
+  const rows = Object.entries(totals).sort((a,b)=>a[0].localeCompare(b[0]));
+  const grand = rows.reduce((s,[,v])=>s+v.total,0);
+  const lines = [
+    `ORDER — ${new Date().toLocaleDateString()}`,
+    '',
+    ...rows.map(([sku,v]) => `${sku.padEnd(8)} = ${String(v.qty).padStart(2)} box   $${v.basePrice}   $${v.total}`),
+    '',
+    `GRAND TOTAL:  $${grand}`
+  ].join('\n');
+  navigator.clipboard.writeText(lines).then(() => alert('Alisa Summary Copied!'));
+}
+
+// ============================================================
+// ADMIN SETTINGS
+// ============================================================
+function togglePortal() {
+  // Read current visual state, not settings object
+  const currentlyOpen = document.getElementById('portalToggle').classList.contains('on');
+  setPortalToggleUI(!currentlyOpen);
+}
+
+function setPortalToggleUI(isOpen) {
+  const toggle = document.getElementById('portalToggle');
+  const dot = document.getElementById('portalDot');
+  const txt = document.getElementById('portalStatusText');
+  if (isOpen) {
+    toggle.className = 'toggle-switch on';
+    dot.className = 'status-dot';
+    txt.textContent = 'OPEN';
+  } else {
+    toggle.className = 'toggle-switch';
+    dot.className = 'status-dot closed';
+    txt.textContent = 'CLOSED';
+  }
+}
+
+async function saveSettings() {
+  const gNum = parseInt(document.getElementById('adminGroupNum').value) || 1;
+  const closeDate = document.getElementById('adminCloseDate').value.trim();
+  settings.group_order_number = gNum;
+  settings.close_message = closeDate;
+
+  try {
+    // Read open/close state from the actual toggle button UI - source of truth
+    const isOpenNow = document.getElementById('portalToggle').classList.contains('on');
+    const res = await api('eml_settings?id=eq.1', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        is_open: isOpenNow,
+        close_message: closeDate,
+        group_order_number: gNum
+      })
+    });
+    if (res.ok) {
+      document.getElementById('adminSub').textContent = 'GROUP ORDER #' + gNum;
+      document.getElementById('headerSub').textContent = `2026 ALISA / SBF — GROUP ORDER #${gNum}`;
+      document.getElementById('infoOrderNum').textContent = '#' + gNum;
+      document.getElementById('infoCloseDate').textContent = closeDate || 'TBD';
+      alert('Settings saved!');
+    } else throw new Error('Failed');
+  } catch(e) {
+    alert('Error saving settings: ' + e.message);
+  }
+}
+
+function updateMarkupPreview() {
+  const pct = parseFloat(document.getElementById('markupInput').value) || 0;
+  const example = Math.round(50 * (1 + pct/100));
+  document.getElementById('markupPreview').textContent = 
+    `At ${pct}% — a $50 item shows as $${example} to customers.`;
+}
+
+async function saveMarkup() {
+  const pct = parseFloat(document.getElementById('markupInput').value) || 0;
+  try {
+    const res = await api('eml_settings?id=eq.1', {
+      method: 'PATCH',
+      body: JSON.stringify({markup_percentage: pct})
+    });
+    if (res.ok) {
+      markup = pct;
+      renderProducts();
+      alert(`Markup set to ${pct}%. All prices updated!`);
+    } else throw new Error('Failed');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ============================================================
+// ADMIN PRODUCT OVERRIDES
+// ============================================================
+function renderAdminProducts() {
+  const search = document.getElementById('prodSearch').value.toLowerCase().trim();
+  let filtered = PRODUCTS;
+  if (search) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(search) ||
+    p.sku.toLowerCase().includes(search)
+  );
+
+  const container = document.getElementById('adminProductList');
+  container.innerHTML = filtered.map(p => {
+    const ov = productOverrides[p.sku] || {};
+    return `<div class="prod-admin-row">
+      <span class="prod-admin-sku">${p.sku}</span>
+      <span class="prod-admin-name">${p.name}</span>
+      <div class="toggle-mini">
+        <button class="toggle-mini-btn oos-btn ${ov.isOOS ? 'on' : ''}" onclick="toggleProdOOS('${p.sku}')">OOS</button>
+        <button class="toggle-mini-btn na-btn ${ov.isNA ? 'on' : ''}" onclick="toggleProdNA('${p.sku}')">N/A</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProdOOS(sku) {
+  if (!productOverrides[sku]) productOverrides[sku] = {};
+  productOverrides[sku].isOOS = !productOverrides[sku].isOOS;
+  renderAdminProducts();
+}
+
+function toggleProdNA(sku) {
+  if (!productOverrides[sku]) productOverrides[sku] = {};
+  productOverrides[sku].isNA = !productOverrides[sku].isNA;
+  renderAdminProducts();
+}
+
+async function saveProductOverrides() {
+  try {
+    const res = await api('eml_settings?id=eq.1', {
+      method: 'PATCH',
+      body: JSON.stringify({product_overrides: productOverrides})
+    });
+    if (res.ok) {
+      renderProducts();
+      alert('Product status saved!');
+    } else throw new Error('Failed');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
 </script>
 </body>
 </html>
