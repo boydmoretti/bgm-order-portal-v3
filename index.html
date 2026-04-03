@@ -1488,13 +1488,13 @@ function api(path, opts={}) {
 // INIT
 // ============================================================
 async function init() {
-  // Default to OPEN immediately — show products right away
+  // Always show shop immediately — no Supabase gate on page load
   buildCatTabs();
   renderProducts();
   updateCart();
   showView('shop');
 
-  // Then check Supabase in the background
+  // Load settings in background for markup, overrides, display info only
   try {
     const res = await api('eml_settings?id=eq.1');
     if (res.ok) {
@@ -1508,20 +1508,11 @@ async function init() {
         document.getElementById('headerSub').textContent = `2026 ALISA / SBF — GROUP ORDER #${gNum}`;
         document.getElementById('infoOrderNum').textContent = '#' + gNum;
         document.getElementById('infoCloseDate').textContent = closeDate || 'TBD';
-        // Only close if Supabase explicitly says false
-        if (settings.is_open === false) {
-          document.getElementById('closedMsg').textContent = closeDate ? 'Next order closes: ' + closeDate : 'The group order is currently closed. Check back soon!';
-          showView('closed');
-          return;
-        }
-        // Re-render with correct markup and overrides
+        // Re-render with correct markup and product overrides
         renderProducts();
       }
     }
-  } catch(e) {
-    // Supabase unreachable — stay open, that's fine
-    console.log('Settings load failed, staying open:', e);
-  }
+  } catch(e) {}
 }
 
 // ============================================================
