@@ -370,14 +370,7 @@ function rCheckout(){
       <option value="100" ${S.tip===100?"selected":""}>$100</option>
     </select>
   </div>
-  <div class="vbox">
-    <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Pay via Venmo After Submitting</div>
-    <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
-    <div class="vtotal">$${tot().toFixed(2)} due</div>
-    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
-  </div>
-  <div class="disc">⚠️ <strong>Important:</strong> Venmo note must say:<br><strong>"Reimbursement group order"</strong></div>
-  <div style="background:#1a2a1a;border:1px solid #2d4a2d;border-radius:10px;padding:14px 16px;margin:16px 0 12px;font-size:12px;color:#a8c8a8;line-height:1.6;">
+  <div style="background:#1a2a1a;border:1px solid #2d4a2d;border-radius:10px;padding:14px 16px;margin:0 0 14px;font-size:12px;color:#a8c8a8;line-height:1.6;">
     <div style="font-weight:700;color:#6dbf6d;margin-bottom:6px;">📦 Shipping & Order Policy</div>
     <div>✅ <strong style="color:#d0e8d0;">Free reship guaranteed</strong> if our package is seized or flagged by customs — one time per order, no questions asked.</div>
     <div style="margin-top:5px;">⚠️ <strong style="color:#d0e8d0;">Order at your own risk.</strong> All products are for research purposes only. By submitting you acknowledge you understand and accept all risks associated with your order.</div>
@@ -394,6 +387,7 @@ function rConfirm(){
     <div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💳 Complete Your Payment Now</div>
     <a href="${VENMO_URL}" target="_blank" class="vhandle">${VENMO_HANDLE} 👆 Tap to Pay</a>
     <div class="vtotal">Send $${tot().toFixed(2)}</div>
+    <div class="vsub">$${sub()} products + $${SHIP} shipping${S.tip>0?" + $"+S.tip+" tip":""}</div>
   </div>
   <div class="disc">⚠️ <strong>Venmo Note Required:</strong><br>Write: <strong>"Reimbursement group order"</strong></div>
   <button class="sbtn green" onclick="newOrd()">Place Another Order</button></div>`;
@@ -429,7 +423,7 @@ function bind(){
   const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
   const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
   const tipSel=document.getElementById("tipsel");
-  if(tipSel)tipSel.addEventListener("change",e=>{S.tip=parseInt(e.target.value)||0;const vtotal=document.querySelector(".vtotal");const vsub=document.querySelector(".vsub");const tbig=document.querySelector(".tbig span:last-child");if(vtotal)vtotal.textContent="$"+tot().toFixed(2)+" due";if(vsub)vsub.textContent="$"+sub()+" products + $"+SHIP+" shipping"+(S.tip>0?" + $"+S.tip+" tip":"");if(tbig)tbig.textContent="$"+tot().toFixed(2);});
+  if(tipSel)tipSel.addEventListener("change",e=>{S.tip=parseInt(e.target.value)||0;const tbig=document.querySelector(".tbig span:last-child");if(tbig)tbig.textContent="$"+tot().toFixed(2);});
   ub();
 }
 function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
