@@ -51,6 +51,7 @@ td{padding:7px 10px;font-size:13px;vertical-align:middle}
 .pname{font-weight:600;color:#1e293b}
 .pmg{font-size:11px;color:#94a3b8;display:block;margin-top:1px}
 .pprice{font-weight:700;color:#0f2542;white-space:nowrap}
+.oos-badge{display:inline-block;background:#dc2626;color:#fff;font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;letter-spacing:.3px}
 
 /* QTY BUTTONS */
 .qrow{display:flex;align-items:center;gap:5px;justify-content:flex-end}
@@ -59,6 +60,7 @@ td{padding:7px 10px;font-size:13px;vertical-align:middle}
 .qbtn.minus{background:#e2e8f0;color:#aaa}
 .qbtn.minus.on{background:#dc2626;color:#fff}
 .qnum{min-width:22px;text-align:center;font-size:14px;font-weight:700;color:#0f2542}
+.qbtn.plus.disabled{background:#e2e8f0;color:#ccc;cursor:not-allowed}
 
 /* CART BAR */
 .cart-bar{position:sticky;bottom:0;background:#0f2542;color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -2px 12px rgba(0,0,0,.3);z-index:100}
@@ -203,10 +205,8 @@ const P=[
   {sku:"MT1",name:"Melanotan-1",mg:"10mg*10vials",price:68,c:C.bdy},
   {sku:"2AD",name:"AOD9604",mg:"2mg*10vials",price:60,c:C.bdy},
   {sku:"5AD",name:"AOD9604",mg:"5mg*10vials",price:109,c:C.bdy},
-  {sku:"SLU5",name:"SLUPP-332",mg:"5mg*10vials",price:100,c:C.bdy},
   {sku:"SHB",name:"Super Human Blend",mg:"10ml*10vials",price:85,c:C.bdy},
   {sku:"LC526",name:"Fat Blaster Blend",mg:"10ml*10vials",price:120,c:C.pep},
-  {sku:"P10",name:"Pinealon",mg:"10mg*10vials",price:65,c:C.pep},
   {sku:"HA5",name:"Hyaluronic Acid",mg:"1ml*1vial",price:35,c:C.pep},
   {sku:"MDT10",name:"Mazdutide",mg:"10mg*10vials",price:195,c:C.pep},
   {sku:"P41",name:"PT-141",mg:"10mg*10vials",price:62,c:C.pep},
@@ -263,19 +263,16 @@ const P=[
   {sku:"375",name:"LL-37",mg:"5mg*10vials",price:103,c:C.p6},
   {sku:"DR5",name:"Dermorphin",mg:"5mg*10vials",price:38,c:C.p6},
   {sku:"GTT600",name:"Glutathione",mg:"600mg*10vials",price:40,c:C.p6},
-  {sku:"GTT",name:"Glutathione",mg:"1500mg*10vials",price:90,c:C.p6},
-  {sku:"WA2",name:"Bac Water",mg:"2ml*10vials",price:7,c:C.sup},
-  {sku:"WA3",name:"Bac Water",mg:"3ml*10vials",price:10,c:C.sup},
-  {sku:"WA10",name:"Bac Water",mg:"10ml*10vials",price:11,c:C.sup},
-  {sku:"AA3",name:"Acetic Acid 0.6%",mg:"3ml*10vials",price:10,c:C.sup},
-  {sku:"AA10",name:"Acetic Acid 0.6%",mg:"10ml*10vials",price:11,c:C.sup},
+  {sku:"WA2",name:"Bac Water",mg:"2ml*10vials",price:7,c:C.sup,in_stock:false},
+  {sku:"WA3",name:"Bac Water",mg:"3ml*10vials",price:10,c:C.sup,in_stock:false},
+  {sku:"WA10",name:"Bac Water",mg:"10ml*10vials",price:11,c:C.sup,in_stock:false},
+  {sku:"AA3",name:"Acetic Acid 0.6%",mg:"3ml*10vials",price:10,c:C.sup,in_stock:false},
+  {sku:"AA10",name:"Acetic Acid 0.6%",mg:"10ml*10vials",price:11,c:C.sup,in_stock:false},
   {sku:"5AM",name:"5-Amino-1MQ",mg:"5mg*10vials",price:87,c:C.p6},
   {sku:"50AM",name:"5-Amino-1MQ",mg:"50mg*10vials",price:136,c:C.p6},
-  {sku:"CBL60",name:"Cerebrolysin",mg:"60mg*6vials",price:49,c:C.p6},
   {sku:"NP810",name:"SNAP-8",mg:"10mg*10vials",price:49,c:C.p6},
   {sku:"SUR10",name:"Suvratide",mg:"10mg*10vials",price:326,c:C.p6},
   {sku:"B1210",name:"B12",mg:"10ml*10vials",price:25,c:C.p6},
-  {sku:"B12",name:"B12",mg:"2ml*10vials",price:10,c:C.p6},
   {sku:"F410",name:"FOXO4-DRI",mg:"10mg*10vials",price:380,c:C.p6},
   {sku:"FM2",name:"MGF",mg:"2mg*10vials",price:65,c:C.p6},
   {sku:"FMP2",name:"PEG MGF",mg:"2mg*10vials",price:100,c:C.p6},
@@ -286,8 +283,9 @@ const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 async function supaGet(table,filter=""){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});return res.json();}
 async function supaPost(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});}
+async function supaUpsert(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});}
 
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:""};
+let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:"",waterOos:true};
 
 function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
 function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
@@ -296,8 +294,27 @@ function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
 function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
 async function saveOrd(){const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:sub(),shipping:SHIP,tip:S.tip,connection:S.connection,total:tot()};await supaPost("orders",o);}
 async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
-async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";});}}catch(e){}}
-async function saveSt(){S.roundOpen=document.getElementById("rtog").checked;S.closeDate=document.getElementById("cd").value||"";await fetch(SUPA_URL+"/rest/v1/settings?key=eq.round_open",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:String(S.roundOpen)})});await fetch(SUPA_URL+"/rest/v1/settings?key=eq.close_date",{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({value:S.closeDate})});render();}
+async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";if(r.key==="water_oos")S.waterOos=(r.value==="true");});}}catch(e){}}
+async function saveSt(){
+  S.roundOpen=document.getElementById("rtog").checked;
+  S.closeDate=document.getElementById("cd").value||"";
+  S.waterOos=!document.getElementById("wtog").checked;
+  await supaUpsert("settings",{key:"round_open",value:String(S.roundOpen)});
+  await supaUpsert("settings",{key:"close_date",value:S.closeDate});
+  await supaUpsert("settings",{key:"water_oos",value:String(S.waterOos)});
+  render();
+}
+
+function buildRow(p){
+  const q=S.cart[p.sku]||0;
+  const oos=p.in_stock===false&&S.waterOos;
+  const plusBtn=oos
+    ?`<button class="qbtn plus disabled" disabled>+</button>`
+    :`<button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button>`;
+  const oosTag=oos?`<span class="oos-badge">OOS</span>`:"";
+  return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span>${oosTag}<span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span>${plusBtn}</div></td></tr>`;
+}
+
 function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
 
 function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
@@ -307,9 +324,9 @@ function hdr(t,s,back){return`<div class="header"><div class="header-row">${back
 function rBrowse(){
   if(!S.roundOpen)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
   const list=fl();
-  const rows=list.map(p=>{const q=S.cart[p.sku]||0;return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;}).join("");
+  const rows=list.map(p=>buildRow(p)).join("");
   const bar=cc()>0?`<div class="cart-bar"><div><div class="cb-total">${cc()} kit${cc()>1?"s":""} · $${sub()}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button></div>`:"";
-  const jumps=["Semaglutide","Tirzepatide","Retatrutide","KPV","BPC-157","CJC-1295","TB500","NAD+","L-Carnitine","AOD9604","Fat Blaster","Pinealon","DSIP","Selank","Semax","Oxytocin","Epithalon","SS-31","GHRP-2","GHRP-6","Sermorelin","HGH","HCG","IGF-1","Tesamorelin","Ipamorelin","GHK-CU","KissPeptin","Thymosin","MOTS-c","LL-37","Glutathione","Bac Water","5-Amino","B12","FOXO4","MGF"];
+  const jumps=["Semaglutide","Tirzepatide","Retatrutide","KPV","BPC-157","CJC-1295","TB500","NAD+","L-Carnitine","AOD9604","Fat Blaster","DSIP","Selank","Semax","Oxytocin","Epithalon","SS-31","GHRP-2","GHRP-6","Sermorelin","HGH","HCG","IGF-1","Tesamorelin","Ipamorelin","GHK-CU","KissPeptin","Thymosin","MOTS-c","LL-37","Glutathione","Bac Water","5-Amino","B12","FOXO4","MGF"];
   const jumpBar=`<div class="jump-bar">${jumps.map(j=>`<button class="jump-btn" onclick="jumpTo('${j}')">${j}</button>`).join("")}</div>`;
   return hdr("~BgM's~ BioStack Community","2026 ZLZ PEPTIDE — GROUP ORDER #"+S.roundNum,false)+
   `<div class="round-badge"><span>Group Order <strong>#${S.roundNum}</strong></span>${S.closeDate?`<span>Closes: <strong>${S.closeDate}</strong></span>`:`<span class="open-dot">● Open Now</span>`}</div>
@@ -404,6 +421,8 @@ function rAdmin(){
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
     <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
     <input class="dinput" type="text" id="cd" placeholder="Close date (e.g. April 30, 2026)" value="${S.closeDate}"/>
+    <div class="trow2" style="margin-top:4px"><span class="tlbl">Bac Water &amp; Acetic Acid ${S.waterOos?"🔴 OOS":"🟢 Available"}</span><label class="tgl"><input type="checkbox" id="wtog" ${!S.waterOos?"checked":""}><span class="sld"></span></label></div>
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Toggle ON to make water items available for purchase</div>
     <button class="savebtn" onclick="saveSt()">Save</button>
   </div>
   <div class="tabrow"><button class="tabbtn ${S.adminTab==="orders"?"on":""}" onclick="sat('orders')">📦 Orders (${ro.length})</button><button class="tabbtn ${S.adminTab==="vivian"?"on":""}" onclick="sat('vivian')">📋 Vivian Summary</button></div>
@@ -416,7 +435,7 @@ function bind(){
   const jb=document.querySelector(".jump-bar");
   if(jb){jb.addEventListener("wheel",e=>{e.preventDefault();jb.scrollLeft+=e.deltaY;},{passive:false});let isDown=false,startX,scrollLeft;jb.addEventListener("mousedown",e=>{isDown=true;startX=e.pageX-jb.offsetLeft;scrollLeft=jb.scrollLeft;});jb.addEventListener("mouseleave",()=>isDown=false);jb.addEventListener("mouseup",()=>isDown=false);jb.addEventListener("mousemove",e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-jb.offsetLeft;jb.scrollLeft=scrollLeft-(x-startX);});}
   const si=document.getElementById("si");
-  if(si){si.addEventListener("input",e=>{S.search=e.target.value;const tbody=document.querySelector("tbody");const noRes=document.querySelector(".empty");const filtered=fl();if(filtered.length===0){if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;}else{const newRows=filtered.map(p=>{const q=S.cart[p.sku]||0;return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span><span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span><button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button></div></td></tr>`;}).join("");if(tbody)tbody.innerHTML=newRows;else if(noRes)noRes.outerHTML=`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${newRows}</tbody></table>`;}document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));});}
+  if(si){si.addEventListener("input",e=>{S.search=e.target.value;const tbody=document.querySelector("tbody");const noRes=document.querySelector(".empty");const filtered=fl();if(filtered.length===0){if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;}else{const newRows=filtered.map(p=>buildRow(p)).join("");if(tbody)tbody.innerHTML=newRows;else if(noRes)noRes.outerHTML=`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${newRows}</tbody></table>`;}document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));});}
   document.querySelectorAll(".ocard-print").forEach(b=>b.addEventListener("click",()=>{const idx=parseInt(b.dataset.idx);const ro=S.orders.filter(o=>o.round===S.roundNum);const o=ro[idx];if(!o)return;const itemRows=o.items.map(x=>`<tr><td>${x.sku}</td><td>${x.name}</td><td>${x.mg}</td><td style="text-align:center">${x.qty}</td><td style="text-align:right">$${x.price}/kit</td><td style="text-align:right">$${x.price*x.qty}</td></tr>`).join("");const html=`<!DOCTYPE html><html><head><title>Packing Slip - ${o.name}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#555;font-weight:normal;margin-bottom:20px}.info{margin-bottom:20px;font-size:14px;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#1e3a5f;color:#fff;padding:8px;text-align:left;font-size:13px}td{padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px}.totals{text-align:right;font-size:14px;line-height:2}.grand{font-size:18px;font-weight:bold;color:#1e3a5f}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px}@media print{button{display:none}}</style></head><body><h1>~BgM's~ BioStack Community</h1><h2>2026 ZLZ PEPTIDE — GROUP ORDER #${o.round} PACKING SLIP</h2><div class="info"><strong>Name:</strong> ${o.name}<br><strong>Phone:</strong> ${o.phone}<br><strong>Email:</strong> ${o.email}<br><strong>Date:</strong> ${o.date}<br>${o.connection?`<strong>Connection:</strong> ${o.connection}<br>`:""}</div><table><thead><tr><th>SKU</th><th>Product</th><th>Size</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table><div class="totals"><div>Products: $${o.subtotal.toFixed(2)}</div><div>Shipping: $${o.shipping.toFixed(2)}</div>${o.tip>0?`<div>Tip: $${o.tip.toFixed(2)}</div>`:""}<div class="grand">TOTAL DUE: $${o.total.toFixed(2)}</div></div><div class="footer">For experimental research use only.<br>Thank you for your order!</div><br><button onclick="window.print()" style="padding:10px 30px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">Print This Page</button></body></html>`;const blob=new Blob([html],{type:"text/html"});const url=URL.createObjectURL(blob);window.open(url,"_blank");}));
   document.querySelectorAll(".ocard-copy").forEach(b=>b.addEventListener("click",()=>{navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1500);});}));
   const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
