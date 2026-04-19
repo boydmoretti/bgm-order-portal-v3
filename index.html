@@ -322,7 +322,7 @@ function render(){document.getElementById("app").innerHTML=S.screen==="browse"?r
 function hdr(t,s,back){return`<div class="header"><div class="header-row">${back?`<button class="back-btn" onclick="gb()">←</button>`:""}<div style="flex:1"><h1>${t}</h1><p>${s}</p></div>${S.screen==="browse"&&cc()>0?`<button class="cart-btn" onclick="gc()">🛒 ${cc()} kit${cc()>1?"s":""}</button>`:""}${S.screen==="browse"?`<button class="admin-gear" onclick="ga()">⚙</button>`:""}</div></div>`;}
 
 function rBrowse(){
-  if(!S.roundOpen)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
+  if(true)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
   const list=fl();
   const rows=list.map(p=>buildRow(p)).join("");
   const bar=cc()>0?`<div class="cart-bar"><div><div class="cb-total">${cc()} kit${cc()>1?"s":""} · $${sub()}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gc()">Checkout →</button></div>`:"";
