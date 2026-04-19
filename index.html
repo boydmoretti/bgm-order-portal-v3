@@ -285,7 +285,7 @@ async function supaGet(table,filter=""){const res=await fetch(SUPA_URL+"/rest/v1
 async function supaPost(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});}
 async function supaUpsert(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});}
 
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:true,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:"",waterOos:true};
+let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:false,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:"",waterOos:true};
 
 function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
 function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
