@@ -353,17 +353,21 @@ async function saveOrd(){
   S.pendingTotals={productsTotal,ship,usdcTotal,venmoFee,venmoTotal:usdcTotal+venmoFee};
 }
 async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
-async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";if(r.key==="water_oos")S.waterOos=(r.value==="true");if(r.key==="venmo_surcharge_pct")S.venmoSurcharge=parseFloat(r.value)||10;});}}catch(e){}}
+async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";if(r.key==="water_oos")S.waterOos=(r.value==="true");if(r.key==="venmo_surcharge_pct")S.venmoSurcharge=parseFloat(r.value)||10;
+              if(r.key==="round_num")S.roundNum=parseInt(r.value)||S.roundNum;});}}catch(e){}}
 async function saveSt(){
   S.roundOpen=document.getElementById("rtog").checked;
   S.closeDate=document.getElementById("cd").value||"";
   S.waterOos=!document.getElementById("wtog").checked;
+  const rnEl=document.getElementById("rnum");
+  if(rnEl)S.roundNum=parseInt(rnEl.value)||S.roundNum;
   const vsEl=document.getElementById("vsi");
   if(vsEl)S.venmoSurcharge=parseFloat(vsEl.value)||10;
   await supaUpsert("settings",{key:"round_open",value:String(S.roundOpen)});
   await supaUpsert("settings",{key:"close_date",value:S.closeDate});
   await supaUpsert("settings",{key:"water_oos",value:String(S.waterOos)});
   await supaUpsert("settings",{key:"venmo_surcharge_pct",value:String(S.venmoSurcharge)});
+  await supaUpsert("settings",{key:"round_num",value:String(S.roundNum)});
   render();
 }
 
@@ -531,6 +535,8 @@ function rAdmin(){
   `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
     <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
     <input class="dinput" type="text" id="cd" placeholder="Close date (e.g. April 30, 2026)" value="${S.closeDate}"/>
+    <div class="trow2" style="margin-top:4px"><span class="tlbl">📋 Group Order #</span><input class="dinput" type="number" id="rnum" min="1" max="99" value="${S.roundNum}" style="width:70px;margin-bottom:0;text-align:center"/></div>
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Current group order number shown to customers.</div>
     <div class="trow2" style="margin-top:4px"><span class="tlbl">Bac Water &amp; Acetic Acid ${S.waterOos?"🔴 OOS":"🟢 Available"}</span><label class="tgl"><input type="checkbox" id="wtog" ${!S.waterOos?"checked":""}><span class="sld"></span></label></div>
     <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Toggle ON to make water items available for purchase</div>
     <div class="trow2" style="margin-top:4px"><span class="tlbl">💸 Venmo Surcharge %</span><input class="dinput" type="number" id="vsi" min="0" max="100" value="${S.venmoSurcharge}" style="width:90px;margin-bottom:0;text-align:center"/></div>
@@ -594,7 +600,7 @@ async function choosePay(method){
   window.scrollTo(0,0);render();
 }
 function backPay(){S.payChoice="";window.scrollTo(0,0);render();}
-function copyAddr(){navigator.clipboard.writeText(CRYPTO_ADDRESS).then(()=>{const b=event.target;b.textContent="✅ Copied!";setTimeout(()=>b.textContent="📋 Copy Wallet Address",1500);});}
+function copyAddr(){const btn=event.target;function showCopied(){btn.textContent="✅ Copied!";setTimeout(()=>btn.textContent="📋 Copy Wallet Address",1500);}function fallbackCopy(){const ta=document.createElement("textarea");ta.value=CRYPTO_ADDRESS;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");showCopied();}catch(e){alert("Copy failed — please copy manually:\n"+CRYPTO_ADDRESS);}document.body.removeChild(ta);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CRYPTO_ADDRESS).then(showCopied).catch(fallbackCopy);}else{fallbackCopy();}}
 function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;loadOrders().then(()=>render());}else document.getElementById("aerr").textContent="Incorrect password";}
 function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
