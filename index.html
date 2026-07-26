@@ -350,9 +350,8 @@ async function saveOrd(){
   const productsTotal=sub();
   const ship=shipFee();
   const usdcTotal=productsTotal+ship;
-  const o={round:S.roundNum,date:new Date().toLocaleString(),name:S.form.name,phone:S.form.phone,email:S.form.email,items:ci(),subtotal:productsTotal,shipping:ship,connection:S.connection,total:usdcTotal,payment_method:"pending",venmo_fee:0};
-  const saved=await supaPost("orders",o);
-  const id=(saved&&saved[0]&&saved[0].id)?saved[0].id:null;
+  const res=await fetch(SUPA_URL+"/rest/v1/rpc/submit_order_v3",{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_round:S.roundNum,p_date:new Date().toLocaleString(),p_name:S.form.name,p_phone:S.form.phone,p_email:S.form.email,p_items:ci(),p_connection:S.connection})});
+  const id=res.ok?await res.json():null;
   const venmoFee=Math.round(usdcTotal*(S.venmoSurcharge/100)*100)/100;
   S.pendingOrderId=id;
   S.pendingTotals={productsTotal,ship,usdcTotal,venmoFee,venmoTotal:usdcTotal+venmoFee};
