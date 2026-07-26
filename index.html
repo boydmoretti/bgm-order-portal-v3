@@ -374,6 +374,7 @@ async function saveSt(){
   await supaUpsertAuth("settings",{key:"venmo_surcharge_pct",value:String(S.venmoSurcharge)});
   await supaUpsertAuth("settings",{key:"round_num",value:String(S.roundNum)});
   render();
+  alert("Settings saved!");
 }
 
 function buildRow(p){
