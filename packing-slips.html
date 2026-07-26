@@ -40,7 +40,16 @@
 </head>
 <body>
 
-<div class="no-print">
+<div class="no-print" id="login-gate" style="max-width:340px;margin:80px auto;text-align:center;">
+  <h1>🔐 Admin Login</h1>
+  <p class="subtitle">Sign in to view packing slips</p>
+  <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box;"/>
+  <input type="password" id="login-pw" placeholder="Password" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box;"/>
+  <button onclick="doLogin()" style="background:#0066cc;color:white;border:none;padding:10px 24px;font-size:15px;border-radius:6px;cursor:pointer;width:100%;">Login</button>
+  <p id="login-err" style="color:#c0392b;font-size:13px;margin-top:8px;"></p>
+</div>
+
+<div class="no-print" id="main-view" style="display:none">
   <h1>🧬 BGM Packing Slips</h1>
   <p class="subtitle">Click a name to print their packing slip</p>
   <div class="controls">
@@ -61,12 +70,53 @@ const SUPABASE_URL = 'https://zilrgqnqoswtmvlmzdim.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4';
 
 let allOrders = [];
+let adminToken = sessionStorage.getItem('bgm_admin_token') || null;
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      adminToken = data.access_token;
+      sessionStorage.setItem('bgm_admin_token', adminToken);
+      showMain();
+    } else {
+      errEl.textContent = 'Incorrect email or password';
+    }
+  } catch (e) {
+    errEl.textContent = 'Login failed — check your connection.';
+  }
+}
+
+function showMain() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('main-view').style.display = 'block';
+  loadOrders();
+}
+
+if (adminToken) showMain();
 
 async function loadOrders() {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=name.asc`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${adminToken}` }
     });
+    if (res.status === 401) {
+      adminToken = null;
+      sessionStorage.removeItem('bgm_admin_token');
+      document.getElementById('login-gate').style.display = 'block';
+      document.getElementById('main-view').style.display = 'none';
+      document.getElementById('login-err').textContent = 'Session expired — please log in again.';
+      return;
+    }
     allOrders = await res.json();
     populateRoundFilter();
     renderOrders(allOrders);
@@ -138,7 +188,6 @@ function printAll() {
   window.print();
 }
 
-loadOrders();
 </script>
 </body>
 </html>

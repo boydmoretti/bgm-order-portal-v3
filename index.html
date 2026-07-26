@@ -173,7 +173,6 @@ input:checked+.sld:before{transform:translateX(22px)}
 <body>
 <div id="app"></div>
 <script>
-const PASS="BgM2026!";
 const VENMO_HANDLE="@Boyd-Moretti";
 const VENMO_URL="https://venmo.com/Boyd-Moretti";
 const CRYPTO_ADDRESS="0x85A165217426c4262BCb6812D6936BbE305F937B";
@@ -325,6 +324,20 @@ async function supaPost(table,data){const res=await fetch(SUPA_URL+"/rest/v1/"+t
 async function supaPatch(table,filter,data){await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});}
 async function supaUpsert(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});}
 
+let ADMIN_TOKEN=sessionStorage.getItem("bgm_admin_token")||null;
+function adminSessionExpired(){S.adminAuth=false;ADMIN_TOKEN=null;sessionStorage.removeItem("bgm_admin_token");S.screen="admin";render();}
+async function supaGetAuth(table,filter=""){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN}});if(res.status===401){adminSessionExpired();return [];}return res.json();}
+async function supaPatchAuth(table,filter,data){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});if(res.status===401)adminSessionExpired();}
+async function supaUpsertAuth(table,data){const res=await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});if(res.status===401)adminSessionExpired();}
+async function checkRepeat(){
+  try{
+    const res=await fetch(SUPA_URL+"/rest/v1/rpc/check_repeat_v3",{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_name:S.form.name,p_round:S.roundNum})});
+    if(!res.ok)return false;
+    const data=await res.json();
+    return data===true;
+  }catch(e){return false;}
+}
+
 let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:false,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:"",waterOos:true,venmoSurcharge:10,payChoice:"",pendingOrderId:null,pendingTotals:null,ackChecked:false,isRepeat:false};
 
 function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
@@ -333,14 +346,6 @@ function tot(){return sub()+shipFee();}
 function shipFee(){return S.isRepeat?0:SHIP;}
 function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
 function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
-async function checkRepeat(){
-  // Waive shipping only if this person already has a PAID order in the CURRENT round
-  try{
-    const q="name=ilike."+encodeURIComponent(S.form.name)+"&round=eq."+S.roundNum+"&payment_method=neq.pending&select=id";
-    const data=await supaGet("orders",q);
-    return Array.isArray(data)&&data.length>0;
-  }catch(e){return false;}
-}
 async function saveOrd(){
   const productsTotal=sub();
   const ship=shipFee();
@@ -352,7 +357,7 @@ async function saveOrd(){
   S.pendingOrderId=id;
   S.pendingTotals={productsTotal,ship,usdcTotal,venmoFee,venmoTotal:usdcTotal+venmoFee};
 }
-async function loadOrders(){try{const data=await supaGet("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
+async function loadOrders(){try{const data=await supaGetAuth("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
 async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";if(r.key==="water_oos")S.waterOos=(r.value==="true");if(r.key==="venmo_surcharge_pct")S.venmoSurcharge=parseFloat(r.value)||10;
               if(r.key==="round_num")S.roundNum=parseInt(r.value)||S.roundNum;});}}catch(e){}}
 async function saveSt(){
@@ -363,11 +368,11 @@ async function saveSt(){
   if(rnEl)S.roundNum=parseInt(rnEl.value)||S.roundNum;
   const vsEl=document.getElementById("vsi");
   if(vsEl)S.venmoSurcharge=parseFloat(vsEl.value)||10;
-  await supaUpsert("settings",{key:"round_open",value:String(S.roundOpen)});
-  await supaUpsert("settings",{key:"close_date",value:S.closeDate});
-  await supaUpsert("settings",{key:"water_oos",value:String(S.waterOos)});
-  await supaUpsert("settings",{key:"venmo_surcharge_pct",value:String(S.venmoSurcharge)});
-  await supaUpsert("settings",{key:"round_num",value:String(S.roundNum)});
+  await supaUpsertAuth("settings",{key:"round_open",value:String(S.roundOpen)});
+  await supaUpsertAuth("settings",{key:"close_date",value:S.closeDate});
+  await supaUpsertAuth("settings",{key:"water_oos",value:String(S.waterOos)});
+  await supaUpsertAuth("settings",{key:"venmo_surcharge_pct",value:String(S.venmoSurcharge)});
+  await supaUpsertAuth("settings",{key:"round_num",value:String(S.roundNum)});
   render();
 }
 
@@ -525,7 +530,7 @@ function rConfirm(){
 }
 
 function rAdmin(){
-  if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Enter your admin password</p><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
+  if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Sign in with your admin account</p><input class="finput" type="email" id="aemail" placeholder="Email" style="max-width:280px;margin:0 auto 8px"/><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
   const ro=S.orders.filter(o=>o.round===S.roundNum);
   const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
     const copyText=`${o.name} | ${o.phone} | ${o.email}${o.connection?" | Via: "+o.connection:""} | ${o.items.map(x=>`${x.sku} x${x.qty} $${x.price*x.qty}`).join(", ")} | Total: $${o.total.toFixed(2)} | Pay: ${o.payment_method==='venmo'?('Venmo (+$'+((o.venmo_fee||0).toFixed(2))+')'):(o.payment_method==='usdc'?'USDC':'Not chosen')}`;
@@ -566,9 +571,9 @@ function bind(){
 function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
 function gc(){S.screen="checkout";S.tip=0;window.scrollTo(0,0);render();}
 function gb(){S.screen="browse";window.scrollTo(0,0);render();}
-function ga(){S.screen="admin";window.scrollTo(0,0);render();}
+function ga(){S.screen="admin";if(ADMIN_TOKEN)S.adminAuth=true;window.scrollTo(0,0);render();if(S.adminAuth)loadOrders().then(()=>render());}
 function jumpTo(name){S.search=name;render();}
-function alo(){S.adminAuth=false;S.screen="browse";render();}
+function alo(){S.adminAuth=false;ADMIN_TOKEN=null;sessionStorage.removeItem("bgm_admin_token");S.screen="browse";render();}
 function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";S.payChoice="";S.pendingOrderId=null;S.pendingTotals=null;S.isRepeat=false;S.ackChecked=false;S.tip=0;render();}
 function sat(t){S.adminTab=t;if(t==="orders"&&S.adminAuth)loadOrders().then(()=>render());else render();}
 async function submit(){
@@ -601,7 +606,24 @@ async function choosePay(method){
 }
 function backPay(){S.payChoice="";window.scrollTo(0,0);render();}
 function copyAddr(){const btn=event.target;function showCopied(){btn.textContent="✅ Copied!";setTimeout(()=>btn.textContent="📋 Copy Wallet Address",1500);}function fallbackCopy(){const ta=document.createElement("textarea");ta.value=CRYPTO_ADDRESS;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");showCopied();}catch(e){alert("Copy failed — please copy manually:\n"+CRYPTO_ADDRESS);}document.body.removeChild(ta);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CRYPTO_ADDRESS).then(showCopied).catch(fallbackCopy);}else{fallbackCopy();}}
-function alog(){const pw=document.getElementById("apw").value;if(pw===PASS){S.adminAuth=true;loadOrders().then(()=>render());}else document.getElementById("aerr").textContent="Incorrect password";}
+async function alog(){
+  const email=document.getElementById("aemail").value.trim();
+  const pw=document.getElementById("apw").value;
+  const errEl=document.getElementById("aerr");
+  errEl.textContent="";
+  try{
+    const res=await fetch(SUPA_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
+    const data=await res.json();
+    if(res.ok&&data.access_token){
+      ADMIN_TOKEN=data.access_token;
+      sessionStorage.setItem("bgm_admin_token",ADMIN_TOKEN);
+      S.adminAuth=true;
+      loadOrders().then(()=>render());
+    }else{
+      errEl.textContent="Incorrect email or password";
+    }
+  }catch(e){errEl.textContent="Login failed — check your connection.";}
+}
 function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
 loadSettings().then(()=>render());
