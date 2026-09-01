@@ -1,616 +1,1277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>~BgM's~ BioStack Community — Group Order Portal</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>~BgM's~ BioStack Community</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;min-height:100vh}
-#app{max-width:640px;margin:0 auto;background:#f0f4f8;min-height:100vh}
+  :root {
+    --bg: #f2ecd9;
+    --surface: #f8f4e6;
+    --surface-2: #ece4cd;
+    --border: #d9cfb0;
+    --border-soft: #e3dac0;
+    --ink: #241f14;
+    --ink-dim: #4f4736;
+    --ink-faint: #746a52;
+    --accent: #b5432f;
+    --accent-dim: #8a331f;
+    --accent-ink: #fdfaf2;
+    --good: #256b40;
+    --good-bg: #dcecd7;
+    --warn: #8c4a18;
+    --warn-bg: #f3e2ce;
+    --bad: #c1121f;
+    --bad-bg: #f7dcdc;
+    --blue: #3f6690;
+    --blue-bg: #dde7ef;
+    --font-display: "Palatino Linotype", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  a { color: inherit; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+  .hidden { display: none !important; }
 
-.header{background:linear-gradient(135deg,#1e3a5f,#0f2542);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.4)}
-.header-row{display:flex;align-items:center;justify-content:space-between}
-.header h1{font-size:14px;font-weight:700}
-.header p{font-size:10px;opacity:.7;margin-top:2px;letter-spacing:.6px;text-transform:uppercase}
-.cart-btn{background:#22c55e;color:#fff;border:none;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;margin-right:10px}
-.admin-gear{background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;margin-left:8px}
+  /* header / plate */
+  header.plate { padding: 30px 0 20px; text-align: center; border-bottom: 1px solid var(--border); position: relative; animation: rise .6s ease-out both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+  .mark { font-family: var(--font-display); font-style: normal; font-size: 21px; color: var(--accent); letter-spacing: .18em; cursor: pointer; }
+  h1.wordmark { margin: 8px 0 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 5.6vw, 36px); letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+  .batch-line { margin-top: 10px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+  .status-row { margin-top: 16px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 3px; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-mono); border: 1px solid var(--border); }
+  .pill.open { color: var(--good); border-color: var(--good-bg); background: var(--good-bg); }
+  .pill.dot::before { content: "●"; font-size: 8px; }
+  .pill.plain { color: var(--ink-dim); }
 
-.round-badge{background:#fff;margin:10px 14px 0;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:12px;color:#475569}
-.round-badge strong{color:#0f2542;font-size:13px}
-.open-dot{color:#22c55e;font-weight:700}
+  /* closed view */
+  .closed-view { padding: 90px 20px; text-align: center; }
+  .closed-view .icon { font-size: 40px; margin-bottom: 14px; }
+  .closed-view h2 { font-family: var(--font-display); font-size: 26px; margin: 0 0 10px; }
+  .closed-view p { color: var(--ink-dim); font-size: 14.5px; }
 
-.search-bar{padding:10px 14px;background:#fff;border-bottom:1px solid #e2e8f0;margin-top:8px}
-.search-bar input{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none}
+  /* cart bar */
+  .cartbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; align-items: center; padding: 10px 20px; margin: 0 -20px; background: rgba(242,236,217,.92); backdrop-filter: blur(4px); border-bottom: 1px solid var(--border); }
+  .cart-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--ink); font-family: var(--font-mono); font-size: 13px; padding: 8px 14px; border-radius: 20px; cursor: pointer; }
+  .cart-pill .count { background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+  .cart-pill .amt { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .cart-pill[disabled] { opacity: .4; cursor: default; }
 
-.closed-banner{background:#dc2626;color:#fff;text-align:center;padding:20px 16px;margin:16px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
-.tip-box{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:14px;padding:16px;margin:12px 0;color:#fff;}
-.tip-box .tip-title{font-size:16px;font-weight:800;margin-bottom:4px}
-.tip-box .tip-desc{font-size:13px;opacity:0.9;margin-bottom:12px}
-.tip-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:15px;font-weight:700;color:#92400e;background:#fff;cursor:pointer}
-.conn-box{background:#4c1d95;border-radius:14px;padding:16px;margin:12px 0}
-.conn-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
-.conn-sub{font-size:12px;color:#ddd6fe;margin-bottom:10px}
-.conn-select{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;margin-bottom:8px}
-.conn-input{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px;color:#1e1b4b;background:#fff;box-sizing:border-box}
-.jump-bar{display:flex;gap:7px;padding:8px 14px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid #e2e8f0;-webkit-overflow-scrolling:touch;cursor:grab}
-.jump-bar::-webkit-scrollbar{height:4px}
-.jump-bar::-webkit-scrollbar-track{background:#f1f5f9}
-.jump-bar::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
-.jump-btn{padding:5px 12px;border-radius:999px;border:none;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;background:#f1f5f9;color:#475569;flex-shrink:0}
-.jump-btn:active{background:#1e3a5f;color:#fff}
+  .intro { padding: 18px 0 4px; color: var(--ink-dim); font-size: 14.5px; line-height: 1.6; text-align: center; }
+  .intro b { color: var(--ink); }
 
-/* PRODUCT TABLE */
-table{width:100%;border-collapse:collapse;margin-top:8px}
-thead th{padding:6px 10px;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0;background:#f8fafc}
-th.r,td.r{text-align:right}
-tbody tr{border-bottom:1px solid rgba(0,0,0,0.05)}
-td{padding:7px 10px;font-size:13px;vertical-align:middle}
-.sku{display:inline-block;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;margin-right:4px;background:rgba(0,0,0,0.08);color:rgba(0,0,0,0.6)}
-.pname{font-weight:600;color:#1e293b}
-.pmg{font-size:11px;color:#94a3b8;display:block;margin-top:1px}
-.pprice{font-weight:700;color:#0f2542;white-space:nowrap}
-.oos-badge{display:inline-block;background:#dc2626;color:#fff;font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;letter-spacing:.3px}
+  /* customer-facing flyer, full size, top of storefront */
+  .flyer-frame { margin-top: 18px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(36,31,20,.15); }
+  .flyer-frame img { display: block; width: 100%; height: auto; }
 
-/* QTY BUTTONS */
-.qrow{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-.qbtn{width:29px;height:29px;border-radius:7px;border:none;cursor:pointer;font-size:19px;font-weight:700;display:flex;align-items:center;justify-content:center;-webkit-appearance:none}
-.qbtn.plus{background:#22c55e;color:#fff}
-.qbtn.minus{background:#e2e8f0;color:#aaa}
-.qbtn.minus.on{background:#dc2626;color:#fff}
-.qnum{min-width:22px;text-align:center;font-size:14px;font-weight:700;color:#0f2542}
-.qbtn.plus.disabled{background:#e2e8f0;color:#ccc;cursor:not-allowed}
+  /* batch-info block */
+  .batch-info { padding: 18px 0 4px; }
+  .batch-info-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--good); background: var(--good-bg); border: 1px solid var(--good); border-radius: 20px; padding: 4px 11px; margin-bottom: 10px; }
+  .batch-info ul.info-bullets { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .batch-info ul.info-bullets li { font-size: 13.5px; color: var(--ink-dim); display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+  .batch-info ul.info-bullets li::before { content: "✓"; color: var(--good); font-weight: 700; flex: 0 0 auto; margin-top: 1px; }
 
-/* CART BAR */
-.cart-bar{position:sticky;bottom:0;background:#0f2542;color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -2px 12px rgba(0,0,0,.3);z-index:100}
-.cb-total{font-weight:700;font-size:15px}
-.cb-sub{opacity:.6;font-size:11px;margin-top:1px}
-.co-btn{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer}
+  /* product list — two-column photo card grid */
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 16px; padding-bottom: 130px; }
+  @media (max-width: 560px) { .card-grid { grid-template-columns: 1fr; } }
+  .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 14px 14px; display: flex; flex-direction: column; }
+  .pcard.oos { opacity: .5; }
+  .pcard .photo-wrap { aspect-ratio: 1 / 1; border-radius: 6px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .pcard .photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pcard .photo-wrap .no-photo { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); text-align: center; padding: 0 10px; }
+  .pcard .name { font-family: var(--font-display); font-size: 17px; font-weight: 700; text-align: center; }
+  .pcard .spec { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-faint); letter-spacing: .03em; text-align: center; margin-top: 2px; }
+  .tested { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 7px; font-size: 11px; letter-spacing: .04em; color: var(--good); font-family: var(--font-mono); }
+  .tested::before { content: "◆"; font-size: 9px; }
+  .untested { display: block; text-align: center; margin-top: 7px; font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); }
+  .oos-tag { display: block; text-align: center; margin-top: 7px; padding: 3px 9px; border-radius: 4px; background: var(--bad-bg); font-size: 12px; font-weight: 800; color: var(--bad); font-family: var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+  .price-block { text-align: center; margin-top: 10px; }
+  .price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 18px; color: var(--accent); }
+  .price .cents { font-size: 12px; color: var(--accent-dim); }
+  .qty { margin-top: 8px; display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .qty button { width: 30px; height: 30px; background: var(--surface-2); border: none; color: var(--ink-dim); font-family: var(--font-mono); font-size: 14px; cursor: pointer; }
+  .qty button:disabled { opacity: .3; cursor: not-allowed; }
+  .qty output { width: 30px; text-align: center; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; }
 
-/* CHECKOUT / CONFIRM PAGES */
-.page{padding:16px}
-.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.card-title{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-.oitem{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f8fafc;font-size:13px}
-.oname{font-weight:600;color:#1e293b}
-.odetail{font-size:11px;color:#94a3b8;margin-top:2px}
-.oprice{font-weight:700;color:#0f2542;text-align:right;flex-shrink:0;margin-left:8px}
-.oeach{font-size:10px;color:#94a3b8;font-weight:400}
-.trow{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#475569}
-.tbig{display:flex;justify-content:space-between;padding:9px 0 0;font-size:16px;font-weight:700;color:#0f2542;border-top:1px solid #e2e8f0;margin-top:4px}
-.finput{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:10px;outline:none;-webkit-appearance:none}
-.vbox{background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
-.vhandle{font-size:22px;font-weight:700;color:#008069;letter-spacing:.5px;margin:6px 0;text-decoration:none;display:block}
-.vtotal{font-size:15px;font-weight:700;color:#0f2542;margin-top:6px}
-.vsub{font-size:11px;color:#64748b;margin-top:2px}
-.disc{background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5;color:#92400e}
-.sbtn{width:100%;background:#0f2542;color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;-webkit-appearance:none}
-.sbtn:disabled{opacity:.4;cursor:not-allowed}
-.sbtn.green{background:#22c55e}
-.fnote{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;padding-bottom:20px}
+  .actionbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 20px 14px; box-shadow: 0 -8px 24px rgba(0,0,0,.35); }
+  .actionbar-inner { max-width: 720px; margin: 0 auto; }
+  .ledger-line { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-dim); padding: 2px 0; }
+  .ledger-line .amt { font-variant-numeric: tabular-nums; }
+  .ledger-line.total { color: var(--ink); font-size: 15px; padding-top: 6px; margin-top: 4px; border-top: 1px solid var(--border-soft); }
+  .ledger-line.total .amt { color: var(--accent); }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn { flex: 1; padding: 13px; border: none; border-radius: 3px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; cursor: pointer; text-align: center; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:disabled { background: var(--border); color: var(--ink-faint); cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink-dim); border: 1px solid var(--border); flex: 0 0 auto; padding: 13px 18px; }
 
-/* CONFIRM */
-.conf{padding:32px 20px;text-align:center}
-.conf-icon{font-size:60px;margin-bottom:12px}
-.conf-title{font-size:22px;font-weight:700;color:#0f2542;margin-bottom:8px}
-.conf-txt{font-size:14px;color:#64748b;margin-bottom:20px;line-height:1.5}
+  .flow-page { padding: 20px 0 140px; }
+  .flow-page h2.page-title { font-family: var(--font-display); font-size: 22px; margin: 0 0 16px; }
+  .read-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; margin-bottom: 10px; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; border-radius: 20px; }
+  h2.page-title.not-amazon { font-size: clamp(24px, 6vw, 32px); background: linear-gradient(90deg, var(--accent), var(--ink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-/* ADMIN */
-.al{padding:40px 20px;text-align:center}
-.al h2{font-size:20px;font-weight:700;color:#0f2542;margin-bottom:6px}
-.al p{font-size:13px;color:#64748b;margin-bottom:20px}
-.aw{padding:14px}
-.asec{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.asec h3{font-size:13px;font-weight:700;color:#0f2542;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
-.trow2{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tlbl{font-size:13px;font-weight:600;color:#1e293b}
-.tgl{position:relative;width:48px;height:26px;display:inline-block}
-.tgl input{opacity:0;width:0;height:0}
-.sld{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#e2e8f0;border-radius:999px;transition:.3s}
-.sld:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-input:checked+.sld{background:#22c55e}
-input:checked+.sld:before{transform:translateX(22px)}
-.dinput{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:8px;outline:none}
-.savebtn{background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
-.ocard{border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px}
-.ocard-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.ocard-name{font-weight:700;font-size:14px;color:#0f2542}
-.ocard-tot{font-weight:700;font-size:14px;color:#22c55e}
-.ocard-info{font-size:11px;color:#64748b;margin-bottom:6px}
-.ocard-items{font-size:12px;color:#475569;line-height:1.8}
-.ocard-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-.ocard-copy{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
-.ocard-print{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer}
-.vbox2{background:#1e293b;color:#a3e635;border-radius:10px;padding:14px;font-family:monospace;font-size:13px;line-height:1.9;white-space:pre;overflow-x:auto;margin-bottom:10px}
-.cpybtn{background:#475569;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%}
-.cpybtn.done{background:#22c55e}
-.tabrow{display:flex;gap:8px;margin-bottom:14px}
-.tabbtn{flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:#475569}
-.tabbtn.on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-.lgout{background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer}
-.empty{text-align:center;color:#94a3b8;font-size:13px;padding:24px}
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 16px 18px; margin-bottom: 12px; }
+  .card h3 { margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+  .card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-dim); }
+  .card.risk { border-color: var(--warn-bg); background: var(--warn-bg); }
+  .card.risk h3 { color: var(--warn); }
+  .card.risk p { color: var(--ink); }
+  .pay-line { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-soft); font-size: 13.5px; }
+  .pay-line:last-child { border-bottom: none; }
+  .pay-line .ok { color: var(--good); font-family: var(--font-mono); font-size: 12px; }
+  .pay-line .fee { color: var(--warn); font-family: var(--font-mono); font-size: 12px; }
 
-/* ===== PRE-CHECKOUT ACKNOWLEDGMENT ===== */
-#ackview{min-height:100vh;background:linear-gradient(160deg,#1a0033 0%,#0a0118 55%,#001a1a 100%);padding:0;}
-.ack-wrap{max-width:560px;margin:0 auto;padding:28px 20px 36px;}
-.ack-badge{display:inline-block;background:linear-gradient(90deg,#c8102e,#7c3aed);color:#fff;font-weight:800;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:16px;}
-.ack-h1{font-size:32px;font-weight:800;line-height:1.05;color:#fff;margin-bottom:8px;}
-.ack-h1 .glow{background:linear-gradient(90deg,#fbbf24,#f472b6,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-.ack-sub{font-size:15px;color:#c4b5fd;margin-bottom:24px;line-height:1.5;}
-.ack-card{background:rgba(255,255,255,0.04);border:1px solid rgba(167,139,250,0.25);border-radius:14px;padding:18px;margin-bottom:14px;}
-.ack-card.warn{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.07);}
-.ack-card.oos{border-color:rgba(236,72,153,0.6);background:rgba(236,72,153,0.07);}
-.ack-card.pay{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.06);}
-.ack-card.risk{border-color:rgba(200,16,46,0.45);background:rgba(200,16,46,0.07);}
-.ack-icon{font-size:26px;margin-bottom:6px;display:block;}
-.ack-ct{font-size:19px;font-weight:700;color:#fff;margin-bottom:6px;}
-.ack-cb{font-size:14px;color:#d8d4e8;line-height:1.55;}
-.ack-cb strong{color:#fff;}
-.ack-cb .hot{color:#fbbf24;font-weight:600;}
-.ack-pay-line{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:14px;color:#e9d5ff;}
-.ack-pay-line:last-child{border-bottom:none;}
-.ack-pay-line .tag{font-weight:700;font-size:15px;}
-.ack-pay-line .tag.free{color:#34d399;}
-.ack-pay-line .tag.fee{color:#fbbf24;}
-.ack-checkrow{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,0.06);border:2px solid rgba(167,139,250,0.4);border-radius:12px;padding:16px;margin:22px 0 16px;cursor:pointer;}
-.ack-checkrow.checked{border-color:#34d399;background:rgba(16,185,129,0.12);}
-.ack-checkbox{width:26px;height:26px;border-radius:6px;border:2px solid #a78bfa;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;margin-top:1px;}
-.ack-checkrow.checked .ack-checkbox{background:#10b981;border-color:#10b981;}
-.ack-checktext{font-size:15px;color:#fff;font-weight:500;line-height:1.4;}
-.ack-continue{width:100%;background:linear-gradient(90deg,#c8102e,#7c3aed);color:#fff;border:none;border-radius:12px;padding:17px;font-size:20px;font-weight:800;letter-spacing:0.04em;cursor:pointer;opacity:0.45;pointer-events:none;}
-.ack-continue.ready{opacity:1;pointer-events:auto;box-shadow:0 6px 24px rgba(124,58,237,0.4);}
-/* PAYMENT CHOICE on confirm */
-.paychoice-btn{width:100%;border-radius:12px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;margin-bottom:12px;line-height:1.3;}
-.paychoice-usdc{background:rgba(16,185,129,0.12);border:2px solid #10b981;color:#10b981;}
-.paychoice-venmo{background:rgba(0,140,255,0.1);border:2px solid #008CFF;color:#008CFF;}
-.erc-warn{background:#fef2f2;border:2px solid #dc2626;border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;}
-.addr-box{font-family:monospace;font-size:13px;font-weight:700;background:#f1f5f9;border:2px solid #22c55e;border-radius:8px;padding:12px;margin:8px 0;word-break:break-all;color:#0f172a;line-height:1.6;}
-.copy-btn{background:#166534;color:#fff;border:none;border-radius:6px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:15px;width:100%;margin-top:4px;}
-.back-pay-btn{background:transparent;border:1px solid #334155;color:#64748b;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;width:100%;margin-top:8px;}
+  .acknowledge-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+  .acknowledge-row input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); }
+  .acknowledge-row span { font-size: 13.5px; color: var(--ink); }
+
+  .summary-line { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; }
+  .summary-line .n { color: var(--ink-dim); }
+  .summary-line .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  .form-field { margin-bottom: 12px; }
+  .form-field label { display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); font-family: var(--font-mono); margin-bottom: 6px; }
+  .form-field input[type="text"], .form-field input[type="tel"], .form-field input[type="email"], .form-field select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--ink); font-family: var(--font-body); font-size: 15px; padding: 11px 12px; border-radius: 4px; }
+  .field-err { color: var(--warn); font-size: 12px; margin-top: 4px; }
+
+  .pay-panel { border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 14px; }
+  .pay-panel.usdc { border-color: var(--good-bg); background: var(--good-bg); }
+  .pay-panel.venmo { border-color: var(--blue-bg); background: var(--blue-bg); }
+  .pay-panel h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 18px; }
+  .pay-panel h3.usdc-h { color: var(--good); }
+  .pay-panel h3.venmo-h { color: var(--blue); }
+  .pay-panel .sub { font-size: 12.5px; color: var(--ink-dim); margin-bottom: 12px; }
+  .warn-box { background: var(--warn-bg); border: 1px solid var(--warn); color: var(--warn); font-family: var(--font-mono); font-size: 12px; padding: 9px 11px; border-radius: 3px; margin-bottom: 12px; letter-spacing: .02em; }
+  .wallet-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+  .wallet-row code { flex: 1; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink); word-break: break-all; }
+  .copy-btn { background: var(--surface-2); border: 1px solid var(--border); color: var(--ink-dim); font-family: var(--font-mono); font-size: 11px; padding: 6px 10px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+  .venmo-link-btn { display: block; text-align: center; text-decoration: none; background: var(--blue); color: var(--accent-ink); font-weight: 700; padding: 13px; border-radius: 4px; margin-top: 10px; font-family: var(--font-mono); letter-spacing: .05em; text-transform: uppercase; font-size: 13px; }
+  .after-pay-note { margin-top: 12px; font-size: 12.5px; color: var(--ink-dim); background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; }
+
+  /* admin */
+  .admin-login { max-width: 360px; margin: 90px auto; padding: 0 20px; }
+  .admin-login h2 { font-family: var(--font-display); font-size: 24px; text-align: center; margin-bottom: 20px; }
+  .admin-pad { padding: 22px 0 60px; }
+  .admin-topbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .admin-topbar .title { font-family: var(--font-display); font-size: 20px; }
+  .logout-btn { background: transparent; border: 1px solid var(--border); color: var(--ink-dim); font-family: var(--font-mono); font-size: 11px; padding: 7px 12px; border-radius: 3px; cursor: pointer; }
+  .admin-tabs { display: flex; gap: 2px; margin-bottom: 18px; border: 1px solid var(--border); border-radius: 4px; padding: 3px; flex-wrap: wrap; }
+  .admin-tabs button { flex: 1; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; background: transparent; color: var(--ink-faint); border: none; padding: 9px 6px; border-radius: 2px; cursor: pointer; }
+  .admin-tabs button.active { background: var(--surface-2); color: var(--accent); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 18px 20px; margin-bottom: 16px; }
+  .panel h2 { margin: 0 0 14px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+  .field-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border-soft); flex-wrap: wrap; }
+  .field-row:last-child { border-bottom: none; }
+  .field-row label { font-size: 13.5px; color: var(--ink-dim); }
+  .toggle-open { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; background: none; border: none; padding: 0; }
+  .toggle-open .sw { width: 32px; height: 18px; border-radius: 9px; position: relative; border: 1px solid var(--border); background: var(--surface-2); }
+  .toggle-open .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: var(--ink-faint); border-radius: 50%; transition: all .15s; }
+  .toggle-open.on { color: var(--good); }
+  .toggle-open.on .sw { background: var(--good-bg); border-color: var(--good); }
+  .toggle-open.on .sw::after { background: var(--good); left: 16px; }
+  input[type="number"], input.admin-input-text, textarea.admin-input, select.admin-input { background: var(--bg); border: 1px solid var(--border); color: var(--ink); font-family: var(--font-mono); font-size: 13px; padding: 7px 9px; border-radius: 3px; }
+  input[type="number"] { width: 90px; text-align: right; }
+  input.admin-input-text { width: 100%; max-width: 320px; }
+  textarea.admin-input { width: 100%; min-height: 140px; font-size: 12.5px; line-height: 1.6; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .slider-block { padding: 9px 0 4px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: 8px; }
+  .slider-readout { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-dim); }
+  .slider-readout b { color: var(--accent); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .preview-line { margin-top: 12px; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-faint); background: var(--surface-2); border: 1px dashed var(--border); border-radius: 3px; padding: 9px 11px; }
+  .preview-line b { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .save-btn { background: var(--accent); color: var(--accent-ink); border: none; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; padding: 9px 16px; border-radius: 3px; cursor: pointer; margin-top: 12px; }
+  .ghost-small-btn { background: transparent; border: 1px solid var(--border); color: var(--ink-dim); font-family: var(--font-mono); font-size: 11px; padding: 7px 12px; border-radius: 3px; cursor: pointer; }
+  table.summary { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 13px; }
+  table.summary th { text-align: left; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
+  table.summary th.num, table.summary td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.summary td { padding: 8px 0; border-bottom: 1px solid var(--border-soft); color: var(--ink-dim); }
+  table.summary td.pname { color: var(--ink); }
+  table.summary tfoot td { border-bottom: none; border-top: 1px solid var(--border); padding-top: 10px; color: var(--ink); font-weight: 700; }
+  table.summary tfoot td.num { color: var(--accent); }
+  .prod-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+  @media (max-width: 480px) { .prod-row { grid-template-columns: 1fr; } .prod-row > button { justify-self: start; } }
+  .prod-row .pn { font-size: 13.5px; }
+  .prod-row .pn .sp { color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; display: block; }
+  .mini-btn { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; padding: 5px 9px; border-radius: 3px; border: 1px solid var(--border); background: transparent; color: var(--ink-faint); cursor: pointer; }
+  .mini-btn.on { color: var(--good); border-color: var(--good); }
+  .mini-btn.del { color: var(--warn); }
+  .order-detail { border: 1px solid var(--border-soft); border-radius: 4px; margin-bottom: 8px; overflow: hidden; }
+  .order-detail summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; color: var(--ink); background: var(--surface-2); gap: 8px; }
+  .order-detail summary::-webkit-details-marker { display: none; }
+  .order-detail summary::after { content: "＋"; color: var(--ink-faint); font-family: var(--font-mono); }
+  .order-detail[open] summary::after { content: "－"; }
+  .order-detail .body { padding: 12px 14px; font-family: var(--font-mono); font-size: 12.5px; }
+  .order-detail .line { display: flex; justify-content: space-between; padding: 4px 0; color: var(--ink-dim); }
+  .order-detail .line.total { color: var(--ink); border-top: 1px solid var(--border-soft); margin-top: 4px; padding-top: 8px; }
+  .order-detail .line .v { font-variant-numeric: tabular-nums; }
+  .repeat-flag { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--warn); font-family: var(--font-mono); letter-spacing: .04em; white-space: nowrap; }
+  .fee-tag { font-size: 10.5px; color: var(--good); font-family: var(--font-mono); white-space: nowrap; }
+  .print-btn { margin-top: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; background: transparent; border: 1px solid var(--border); color: var(--ink-dim); padding: 6px 12px; border-radius: 3px; cursor: pointer; }
+  .batch-picker { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .batch-picker select { flex: 1; min-width: 180px; }
+  .err-msg { color: var(--warn); font-size: 13px; margin-top: 8px; }
+
+  footer.sig { text-align: center; padding: 24px 0 90px; font-size: 11px; color: var(--ink-faint); letter-spacing: .08em; text-transform: uppercase; font-family: var(--font-mono); }
+
+  #printSlip { display: none; }
+  @media print {
+    html, body { background: #fff !important; }
+    body > *:not(#printSlip) { display: none !important; }
+    #printSlip { display: block !important; position: static; width: 100%; padding: 20px; margin: 0; color: #000; background: #fff; }
+  }
+
+  @media (max-width: 420px) { .wrap { padding: 0 14px; } .cartbar { padding: 10px 14px; margin: 0 -14px; } }
 </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-const VENMO_HANDLE="@Boyd-Moretti";
-const VENMO_URL="https://venmo.com/Boyd-Moretti";
-const CRYPTO_ADDRESS="0x85A165217426c4262BCb6812D6936BbE305F937B";
-const SHIP=25;
-function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 
-const C={
-  sem:"#dbeafe",tir:"#fef9c3",ret:"#dcfce7",kvn:"#ede9fe",bdy:"#ffedd5",pep:"#fce7f3",
-  ghr:"#e0f2fe",tes:"#fef3c7",ipa:"#ecfdf5",ghk:"#fdf4ff",kst:"#f0fdf4",mot:"#f7fee7",
-  p6:"#f0f9ff",sup:"#f9fafb",
+<div id="app"></div>
+<div id="printSlip"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const SUPA_URL = "https://zilrgqnqoswtmvlmzdim.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4";
+const CRYPTO_ADDRESS = "0x85A165217426c4262BCb6812D6936BbE305F937B";
+const VENMO_HANDLE = "@Boyd-Moretti";
+
+// ============================================================
+// STATE
+// ============================================================
+let S = {
+  route: 'store',          // 'store' | 'admin'
+  step: 'browse',          // 'browse' | 'ack' | 'checkout' | 'payment'
+  batch: null,
+  products: [],
+  cart: {},                // product_id -> qty
+  form: { name: '', phone: '', email: '' },
+  contact: 'self',
+  contactOther: '',
+  ackChecked: false,
+  payChoice: null,
+  pendingOrder: null,
+  submitError: '',
+
+  adminToken: sessionStorage.getItem('v3_admin_token') || null,
+  adminTab: 'batch',
+  adminBatches: [],
+  adminSelectedBatchId: null,
+  adminProducts: [],
+  adminOrders: [],
+  adminBusy: false,
+  adminErr: '',
+  adminOpenOrderIds: new Set()
 };
 
-const P=[
-  {sku:"SM5",name:"Semaglutide",mg:"5mg*10vials",price:40,c:C.sem},
-  {sku:"SM10",name:"Semaglutide",mg:"10mg*10vials",price:63,c:C.sem},
-  {sku:"SM15",name:"Semaglutide",mg:"15mg*10vials",price:74,c:C.sem},
-  {sku:"SM20",name:"Semaglutide",mg:"20mg*10vials",price:89,c:C.sem},
-  {sku:"SM30",name:"Semaglutide",mg:"30mg*10vials",price:109,c:C.sem},
-  {sku:"TR5",name:"Tirzepatide",mg:"5mg*10vials",price:43,c:C.tir},
-  {sku:"TR10",name:"Tirzepatide",mg:"10mg*10vials",price:63,c:C.tir},
-  {sku:"TR15",name:"Tirzepatide",mg:"15mg*10vials",price:80,c:C.tir},
-  {sku:"TR20",name:"Tirzepatide",mg:"20mg*10vials",price:94,c:C.tir},
-  {sku:"TR30",name:"Tirzepatide",mg:"30mg*10vials",price:114,c:C.tir},
-  {sku:"TR40",name:"Tirzepatide",mg:"40mg*10vials",price:143,c:C.tir},
-  {sku:"TR50",name:"Tirzepatide",mg:"50mg*10vials",price:171,c:C.tir},
-  {sku:"TR60",name:"Tirzepatide",mg:"60mg*10vials",price:186,c:C.tir},
-  {sku:"TR100",name:"Tirzepatide",mg:"100mg*10vials",price:286,c:C.tir},
-  {sku:"TR120",name:"Tirzepatide",mg:"120mg*10vials",price:312,c:C.tir},
-  {sku:"RT5",name:"Retatrutide",mg:"5mg*10vials",price:73,c:C.ret},
-  {sku:"RT10",name:"Retatrutide",mg:"10mg*10vials",price:109,c:C.ret},
-  {sku:"RT15",name:"Retatrutide",mg:"15mg*10vials",price:122,c:C.ret},
-  {sku:"RT20",name:"Retatrutide",mg:"20mg*10vials",price:136,c:C.ret},
-  {sku:"RT30",name:"Retatrutide",mg:"30mg*10vials",price:204,c:C.ret},
-  {sku:"RT40",name:"Retatrutide",mg:"40mg*10vials",price:244,c:C.ret},
-  {sku:"RT50",name:"Retatrutide",mg:"50mg*10vials",price:299,c:C.ret},
-  {sku:"RT60",name:"Retatrutide",mg:"60mg*10vials",price:353,c:C.ret},
-  {sku:"KP5",name:"KPV",mg:"5mg*10vials",price:40,c:C.kvn},
-  {sku:"KP10",name:"KPV",mg:"10mg*10vials",price:71,c:C.kvn},
-  {sku:"VP10",name:"VIP",mg:"10mg*10vials",price:190,c:C.kvn},
-  {sku:"CS10",name:"Cagrilintide+Sema",mg:"10mg*10vials",price:176,c:C.kvn},
-  {sku:"CGL5",name:"Cagrilintide",mg:"5mg*10vials",price:122,c:C.kvn},
-  {sku:"CGL10",name:"Cagrilintide",mg:"10mg*10vials",price:230,c:C.kvn},
-  {sku:"BC5",name:"BPC-157",mg:"5mg*10vials",price:41,c:C.kvn},
-  {sku:"BC10",name:"BPC-157",mg:"10mg*10vials",price:68,c:C.kvn},
-  {sku:"BB10",name:"BPC+TB Combo",mg:"10mg*10vials",price:122,c:C.kvn},
-  {sku:"BB20",name:"BPC+TB Combo",mg:"20mg*10vials",price:214,c:C.kvn},
-  {sku:"CND2",name:"CJC-1295 w/o DAC",mg:"2mg*10vials",price:41,c:C.kvn},
-  {sku:"CND5",name:"CJC-1295 w/o DAC",mg:"5mg*10vials",price:95,c:C.kvn},
-  {sku:"CND10",name:"CJC-1295 w/o DAC",mg:"10mg*10vials",price:185,c:C.kvn},
-  {sku:"CP10",name:"CJC-1295 w/o DAC + IPA",mg:"10mg*10vials",price:122,c:C.kvn},
-  {sku:"CD2",name:"CJC-1295 with DAC",mg:"2mg*10vials",price:81,c:C.kvn},
-  {sku:"CD5",name:"CJC-1295 with DAC",mg:"5mg*10vials",price:190,c:C.kvn},
-  {sku:"BT2",name:"TB500",mg:"2mg*10vials",price:49,c:C.kvn},
-  {sku:"BT5",name:"TB500",mg:"5mg*10vials",price:95,c:C.kvn},
-  {sku:"BT10",name:"TB500",mg:"10mg*10vials",price:176,c:C.kvn},
-  {sku:"BBG70",name:"Glow Blend (BT+BPC+CU)",mg:"70mg*10vials",price:231,c:C.kvn},
-  {sku:"K80",name:"Klow Blend (BT+BC+CU+KP)",mg:"80mg*10vials",price:250,c:C.kvn},
-  {sku:"NJ100",name:"NAD+",mg:"100mg*10vials",price:54,c:C.kvn},
-  {sku:"NJ500",name:"NAD+",mg:"500mg*10vials",price:95,c:C.kvn},
-  {sku:"NJ1000",name:"NAD+",mg:"1000mg*10vials",price:176,c:C.kvn},
-  {sku:"ML10",name:"Melanotan-2",mg:"10mg*10vials",price:54,c:C.bdy},
-  {sku:"MT10",name:"Melatonin",mg:"10mg*10vials",price:68,c:C.bdy},
-  {sku:"MT1",name:"Melanotan-1",mg:"10mg*10vials",price:68,c:C.bdy},
-  {sku:"2AD",name:"AOD9604",mg:"2mg*10vials",price:60,c:C.bdy},
-  {sku:"5AD",name:"AOD9604",mg:"5mg*10vials",price:109,c:C.bdy},
-  {sku:"ADA5",name:"Adamax",mg:"5mg*10vials",price:80,c:C.bdy},
-  {sku:"P41",name:"PT-141",mg:"10mg*10vials",price:62,c:C.pep},
-  {sku:"GND2",name:"Gonadorelin",mg:"2mg*10vials",price:41,c:C.pep},
-  {sku:"DS5",name:"DSIP",mg:"5mg*10vials",price:46,c:C.pep},
-  {sku:"DS10",name:"DSIP",mg:"10mg*10vials",price:92,c:C.pep},
-  {sku:"DS15",name:"DSIP",mg:"15mg*10vials",price:114,c:C.pep},
-  {sku:"SK5",name:"Selank",mg:"5mg*10vials",price:49,c:C.pep},
-  {sku:"SK10",name:"Selank",mg:"10mg*10vials",price:81,c:C.pep},
-  {sku:"XA5",name:"Semax",mg:"5mg*10vials",price:49,c:C.pep},
-  {sku:"XA10",name:"Semax",mg:"10mg*10vials",price:81,c:C.pep},
-  {sku:"OT2",name:"Oxytocin",mg:"2mg*10vials",price:41,c:C.pep},
-  {sku:"OT5",name:"Oxytocin",mg:"5mg*10vials",price:68,c:C.pep},
-  {sku:"OT10",name:"Oxytocin",mg:"10mg*10vials",price:125,c:C.pep},
-  {sku:"ET10",name:"Epithalon",mg:"10mg*10vials",price:38,c:C.pep},
-  {sku:"ET50",name:"Epithalon",mg:"50mg*10vials",price:176,c:C.pep},
-  {sku:"AP5",name:"Adipotide",mg:"5mg*10vials",price:176,c:C.pep},
-  {sku:"AR50",name:"AICAR",mg:"50mg*10vials",price:67,c:C.pep},
-  {sku:"2S10",name:"SS-31",mg:"10mg*10vials",price:109,c:C.pep},
-  {sku:"2S50",name:"SS-31",mg:"50mg*10vials",price:407,c:C.pep},
-  {sku:"G25",name:"GHRP-2",mg:"5mg*10vials",price:27,c:C.ghr},
-  {sku:"G210",name:"GHRP-2",mg:"10mg*10vials",price:54,c:C.ghr},
-  {sku:"G65",name:"GHRP-6",mg:"5mg*10vials",price:27,c:C.ghr},
-  {sku:"G610",name:"GHRP-6",mg:"10mg*10vials",price:54,c:C.ghr},
-  {sku:"SMO10",name:"Sermorelin",mg:"10mg*10vials",price:157,c:C.ghr},
-  {sku:"SMO5",name:"Sermorelin",mg:"5mg*10vials",price:76,c:C.ghr},
-  {sku:"G10K",name:"HCG",mg:"10000IU*10vials",price:163,c:C.ghr},
-  {sku:"G5K",name:"HCG",mg:"5000IU*10vials",price:87,c:C.ghr},
-  {sku:"G75",name:"HMG",mg:"75IU*10vials",price:68,c:C.ghr},
-  {sku:"IG01",name:"IGF-1 LR3",mg:"0.1mg*10vials",price:46,c:C.ghr},
-  {sku:"IG1",name:"IGF-1 LR3",mg:"1mg*10vials",price:200,c:C.ghr},
-  {sku:"TSM2",name:"Tesamorelin",mg:"2mg*10vials",price:60,c:C.tes},
-  {sku:"TSM5",name:"Tesamorelin",mg:"5mg*10vials",price:113,c:C.tes},
-  {sku:"TSM10",name:"Tesamorelin",mg:"10mg*10vials",price:200,c:C.tes},
-  {sku:"TSM20",name:"Tesamorelin",mg:"20mg*10vials",price:357,c:C.tes},
-  {sku:"IP5",name:"Ipamorelin",mg:"5mg*10vials",price:41,c:C.ipa},
-  {sku:"IP10",name:"Ipamorelin",mg:"10mg*10vials",price:81,c:C.ipa},
-  {sku:"HX5",name:"Hexarelin",mg:"5mg*10vials",price:95,c:C.ipa},
-  {sku:"CU50",name:"GHK-CU",mg:"50mg*10vials",price:33,c:C.ghk},
-  {sku:"CU100",name:"GHK-CU",mg:"100mg*10vials",price:65,c:C.ghk},
-  {sku:"KS5",name:"KissPeptin-10",mg:"5mg*10vials",price:68,c:C.kst},
-  {sku:"KS10",name:"KissPeptin-10",mg:"10mg*10vials",price:130,c:C.kst},
-  {sku:"TY10",name:"Thymalin",mg:"10mg*10vials",price:68,c:C.kst},
-  {sku:"TA5",name:"Thymosin Alpha-1",mg:"5mg*10vials",price:109,c:C.kst},
-  {sku:"TA10",name:"Thymosin Alpha-1",mg:"10mg*10vials",price:176,c:C.kst},
-  {sku:"MS10",name:"MOTS-c",mg:"10mg*10vials",price:71,c:C.mot},
-  {sku:"MS20",name:"MOTS-c",mg:"20mg*10vials",price:136,c:C.mot},
-  {sku:"MS40",name:"MOTS-c",mg:"40mg*10vials",price:244,c:C.mot},
-  {sku:"375",name:"LL-37",mg:"5mg*10vials",price:103,c:C.p6},
-  {sku:"GTT600",name:"Glutathione",mg:"600mg*10vials",price:40,c:C.p6},
-  {sku:"WA3",name:"Bac Water",mg:"3ml*10vials",price:10,c:C.sup,in_stock:false},
-  {sku:"WA10",name:"Bac Water",mg:"10ml*10vials",price:11,c:C.sup,in_stock:false},
-  {sku:"AA3",name:"Acetic Acid 0.6%",mg:"3ml*10vials",price:10,c:C.sup,in_stock:false},
-  {sku:"AA10",name:"Acetic Acid 0.6%",mg:"10ml*10vials",price:11,c:C.sup,in_stock:false},
-  {sku:"5AM",name:"5-Amino-1MQ",mg:"5mg*10vials",price:87,c:C.p6},
-  {sku:"50AM",name:"5-Amino-1MQ",mg:"50mg*10vials",price:136,c:C.p6},
-  {sku:"NP810",name:"SNAP-8",mg:"10mg*10vials",price:49,c:C.p6},
-  {sku:"SUR10",name:"Suvratide",mg:"10mg*10vials",price:326,c:C.p6},
-  {sku:"F410",name:"FOXO4-DRI",mg:"10mg*10vials",price:380,c:C.p6},
-  {sku:"FM2",name:"MGF",mg:"2mg*10vials",price:65,c:C.p6},
-  {sku:"FMP2",name:"PEG MGF",mg:"2mg*10vials",price:100,c:C.p6},
-];
-
-const SUPA_URL="https://zilrgqnqoswtmvlmzdim.supabase.co";
-const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppbHJncW5xb3N3dG12bG16ZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODI4ODAsImV4cCI6MjA4ODE1ODg4MH0.rA-2ef_hcpfWruCHzd1YeZFuKV6ylRCg1VeoR8DrVO4";
-
-async function supaGet(table,filter=""){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});return res.json();}
-async function supaPost(table,data){const res=await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(data)});try{return await res.json();}catch(e){return null;}}
-async function supaPatch(table,filter,data){await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});}
-async function supaUpsert(table,data){await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});}
-
-let ADMIN_TOKEN=sessionStorage.getItem("bgm_admin_token")||null;
-function adminSessionExpired(){S.adminAuth=false;ADMIN_TOKEN=null;sessionStorage.removeItem("bgm_admin_token");S.screen="admin";render();}
-async function supaGetAuth(table,filter=""){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN}});if(res.status===401){adminSessionExpired();return [];}return res.json();}
-async function supaPatchAuth(table,filter,data){const res=await fetch(SUPA_URL+"/rest/v1/"+table+"?"+filter,{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(data)});if(res.status===401)adminSessionExpired();}
-async function supaUpsertAuth(table,data){const res=await fetch(SUPA_URL+"/rest/v1/"+table,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+ADMIN_TOKEN,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(data)});if(res.status===401)adminSessionExpired();}
-async function checkRepeat(){
-  try{
-    const res=await fetch(SUPA_URL+"/rest/v1/rpc/check_repeat_v3",{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_name:S.form.name,p_round:S.roundNum})});
-    if(!res.ok)return false;
-    const data=await res.json();
-    return data===true;
-  }catch(e){return false;}
+function toggleOrderOpen(id, isOpen) {
+  if (isOpen) S.adminOpenOrderIds.add(id); else S.adminOpenOrderIds.delete(id);
 }
 
-let S={screen:"browse",cart:{},form:{name:"",phone:"",email:""},search:"",roundOpen:false,roundNum:2,closeDate:"",orders:[],adminAuth:false,adminTab:"orders",tip:0,connection:"",waterOos:true,venmoSurcharge:10,payChoice:"",pendingOrderId:null,pendingTotals:null,ackChecked:false,isRepeat:false};
+// ============================================================
+// UTIL
+// ============================================================
+function money(n) { return '$' + Number(n || 0).toFixed(2); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function ci(){return P.filter(p=>S.cart[p.sku]>0).map(p=>({...p,qty:S.cart[p.sku]}));}
-function sub(){return ci().reduce((s,i)=>s+i.price*i.qty,0);}
-function tot(){return sub()+shipFee();}
-function shipFee(){return S.isRepeat?0:SHIP;}
-function cc(){return ci().reduce((s,i)=>s+i.qty,0);}
-function fl(){if(!S.search)return P;const q=S.search.toLowerCase();return P.filter(p=>p.name.toLowerCase().includes(q)||p.sku.toLowerCase().includes(q)||p.mg.toLowerCase().includes(q));}
-async function saveOrd(){
-  const productsTotal=sub();
-  const ship=shipFee();
-  const usdcTotal=productsTotal+ship;
-  const res=await fetch(SUPA_URL+"/rest/v1/rpc/submit_order_v3",{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_round:S.roundNum,p_date:new Date().toLocaleString(),p_name:S.form.name,p_phone:S.form.phone,p_email:S.form.email,p_items:ci(),p_connection:S.connection})});
-  const id=res.ok?await res.json():null;
-  const venmoFee=Math.round(usdcTotal*(S.venmoSurcharge/100)*100)/100;
-  S.pendingOrderId=id;
-  S.pendingTotals={productsTotal,ship,usdcTotal,venmoFee,venmoTotal:usdcTotal+venmoFee};
+function api(path, opts = {}) {
+  const { headers: extraHeaders, ...rest } = opts;
+  return fetch(SUPA_URL + '/rest/v1/' + path, {
+    ...rest,
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', ...extraHeaders }
+  });
 }
-async function loadOrders(){try{const data=await supaGetAuth("orders","order=id.desc");S.orders=Array.isArray(data)?data:[];}catch(e){S.orders=[];}}
-async function loadSettings(){try{const data=await supaGet("settings","");if(Array.isArray(data)){data.forEach(r=>{if(r.key==="round_open")S.roundOpen=(r.value==="true");if(r.key==="close_date")S.closeDate=r.value||"";if(r.key==="water_oos")S.waterOos=(r.value==="true");if(r.key==="venmo_surcharge_pct")S.venmoSurcharge=parseFloat(r.value)||10;
-              if(r.key==="round_num")S.roundNum=parseInt(r.value)||S.roundNum;});}}catch(e){}}
-async function saveSt(){
-  S.roundOpen=document.getElementById("rtog").checked;
-  S.closeDate=document.getElementById("cd").value||"";
-  S.waterOos=!document.getElementById("wtog").checked;
-  const rnEl=document.getElementById("rnum");
-  if(rnEl)S.roundNum=parseInt(rnEl.value)||S.roundNum;
-  const vsEl=document.getElementById("vsi");
-  if(vsEl)S.venmoSurcharge=parseFloat(vsEl.value)||10;
-  await supaUpsertAuth("settings",{key:"round_open",value:String(S.roundOpen)});
-  await supaUpsertAuth("settings",{key:"close_date",value:S.closeDate});
-  await supaUpsertAuth("settings",{key:"water_oos",value:String(S.waterOos)});
-  await supaUpsertAuth("settings",{key:"venmo_surcharge_pct",value:String(S.venmoSurcharge)});
-  await supaUpsertAuth("settings",{key:"round_num",value:String(S.roundNum)});
+function apiAuth(path, opts = {}) {
+  const { headers: extraHeaders, ...rest } = opts;
+  return fetch(SUPA_URL + '/rest/v1/' + path, {
+    ...rest,
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + S.adminToken, 'Content-Type': 'application/json', Prefer: 'return=representation', ...extraHeaders }
+  });
+}
+function storageAuth(path, opts = {}) {
+  const { headers: extraHeaders, ...rest } = opts;
+  return fetch(SUPA_URL + '/storage/v1/' + path, {
+    ...rest,
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + S.adminToken, ...extraHeaders }
+  });
+}
+function adminSessionExpired() {
+  S.adminToken = null;
+  sessionStorage.removeItem('v3_admin_token');
   render();
-  alert("Settings saved!");
 }
 
-function buildRow(p){
-  const q=S.cart[p.sku]||0;
-  const oos=p.in_stock===false&&S.waterOos;
-  const plusBtn=oos
-    ?`<button class="qbtn plus disabled" disabled>+</button>`
-    :`<button class="qbtn plus" data-s="${p.sku}" data-d="1">+</button>`;
-  const oosTag=oos?`<span class="oos-badge">OOS</span>`:"";
-  return `<tr style="background:${p.c}"><td><span class="sku">${p.sku}</span><span class="pname">${p.name}</span>${oosTag}<span class="pmg">${p.mg}</span></td><td class="r pprice">$${p.price}</td><td class="r"><div class="qrow"><button class="qbtn minus${q>0?" on":""}" data-s="${p.sku}" data-d="-1">−</button><span class="qnum">${q}</span>${plusBtn}</div></td></tr>`;
-}
-
-function vivian(){const ro=S.orders.filter(o=>o.round===S.roundNum);const t={};ro.forEach(o=>o.items.forEach(i=>{if(!t[i.sku])t[i.sku]={sku:i.sku,price:i.price,qty:0};t[i.sku].qty+=i.qty;}));const gt=Object.values(t).reduce((s,x)=>s+x.price*x.qty,0);const lines=Object.values(t).map(x=>x.sku.padEnd(8)+"= "+String(x.qty+" box").padEnd(8)+"$"+String(x.price).padEnd(7)+"$"+x.price*x.qty);lines.push("","GRAND TOTAL:                     $"+gt);return lines.join("\n");}
-
-function render(){document.getElementById("app").innerHTML=S.screen==="browse"?rBrowse():S.screen==="ack"?rAck():S.screen==="checkout"?rCheckout():S.screen==="confirm"?rConfirm():rAdmin();bind();}
-
-function hdr(t,s,back){return`<div class="header"><div class="header-row">${back?`<button class="back-btn" onclick="gb()">←</button>`:""}<div style="flex:1"><h1>${t}</h1><p>${s}</p></div>${S.screen==="browse"&&cc()>0?`<button class="cart-btn" onclick="gck()">🛒 ${cc()} kit${cc()>1?"s":""}</button>`:""}${S.screen==="browse"?`<button class="admin-gear" onclick="ga()">⚙</button>`:""}</div></div>`;}
-
-function rBrowse(){
-  if(!S.roundOpen)return hdr("~BgM's~ BioStack Community","GROUP ORDER PORTAL",false)+`<div class="closed-banner">🔒 The order portal is currently <strong>closed</strong>.<br>Check the WhatsApp group for the next open date!</div>`;
-  const list=fl();
-  const rows=list.map(p=>buildRow(p)).join("");
-  const bar=cc()>0?`<div class="cart-bar"><div><div class="cb-total">${cc()} kit${cc()>1?"s":""} · $${sub()}</div><div class="cb-sub">+ $${SHIP} shipping = $${tot()}</div></div><button class="co-btn" onclick="gck()">Checkout →</button></div>`:"";
-  const jumps=["Semaglutide","Tirzepatide","Retatrutide","KPV","BPC-157","CJC-1295","TB500","NAD+","L-Carnitine","AOD9604","Fat Blaster","DSIP","Selank","Semax","Oxytocin","Epithalon","SS-31","GHRP-2","GHRP-6","Sermorelin","HGH","HCG","IGF-1","Tesamorelin","Ipamorelin","GHK-CU","KissPeptin","Thymosin","MOTS-c","LL-37","Glutathione","Bac Water","5-Amino","B12","FOXO4","MGF"];
-  const jumpBar=`<div class="jump-bar">${jumps.map(j=>`<button class="jump-btn" onclick="jumpTo('${j}')">${j}</button>`).join("")}</div>`;
-  return hdr("~BgM's~ BioStack Community","2026 ZLZ PEPTIDE — GROUP ORDER #"+S.roundNum,false)+
-  `<div class="round-badge"><span>Group Order <strong>#${S.roundNum}</strong></span>${S.closeDate?`<span>Closes: <strong>${S.closeDate}</strong></span>`:`<span class="open-dot">● Open Now</span>`}</div>
-  <div class="search-bar"><input type="text" inputmode="search" placeholder="🔍  Search by name, SKU, or mg..." value="${S.search}" id="si"/></div>
-  ${jumpBar}
-  ${list.length===0?`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`:`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${rows}</tbody></table>`}
-  <div style="padding:12px 16px 100px;text-align:center;font-size:11px;color:#94a3b8">For experimental research use only.</div>
-  ${bar}`;
-}
-
-function rAck(){
-  return `<div id="ackview"><div class="ack-wrap">
-    <div class="ack-badge">⚡ Read Before You Order ⚡</div>
-    <div class="ack-h1">This isn't <span class="glow">Amazon.</span></div>
-    <div class="ack-sub">A few important things you must understand before placing your group order. Please read carefully.</div>
-
-    <div class="ack-card warn">
-      <span class="ack-icon">⏳</span>
-      <div class="ack-ct">Shipping Takes 8–10 Weeks</div>
-      <div class="ack-cb">These ship from overseas. Expect <strong>8 to 10 weeks minimum</strong> — sometimes <span class="hot">longer</span> if held at customs or if a package needs to be reshipped. This is normal. Order now for what you'll need months out. Occasionally packages arrive earlier than expected — consider it a bonus, but plan for the full 8–10 weeks so you're never caught short.</div>
-    </div>
-
-    <div class="ack-card oos">
-      <span class="ack-icon">🌍</span>
-      <div class="ack-ct">🌍 Out of Stock Items</div>
-      <div class="ack-cb">With the popularity of peptides exploding worldwide, items sell out fast and restocking takes time. If something you ordered is unavailable, it will ship as soon as it's back in stock — plan on an <strong>additional 4 weeks</strong> on top of our in-stock delivery time. This is out of my control, but I'll always keep you in the loop.</div>
-    </div>
-
-    <div class="ack-card">
-      <span class="ack-icon">📦</span>
-      <div class="ack-ct">Free Reship Guarantee</div>
-      <div class="ack-cb">If a package is seized or flagged at customs, you get <strong>one free reship</strong>, no questions asked. Note this adds more time to delivery.</div>
-    </div>
-
-    <div class="ack-card pay">
-      <span class="ack-icon">💳</span>
-      <div class="ack-ct">Payment Options</div>
-      <div class="ack-pay-line"><span>USDC (Ethereum Network)</span><span class="tag free">NO FEE ✓</span></div>
-      <div class="ack-pay-line"><span>Venmo</span><span class="tag fee">+${S.venmoSurcharge}% FEE</span></div>
-      <div class="ack-cb" style="margin-top:10px;">Crypto (USDC on Ethereum Network) is preferred and free. Venmo adds a <span class="hot">convenience fee</span> because of the extra manual work and time required to convert and forward your payment.</div>
-    </div>
-
-    <div class="ack-card risk">
-      <span class="ack-icon">🔬</span>
-      <div class="ack-ct">For Research Purposes Only</div>
-      <div class="ack-cb">All products are sold strictly <strong>for research purposes only</strong>. By continuing, you accept all responsibility and risk associated with your order.</div>
-    </div>
-
-    <div class="ack-checkrow${S.ackChecked?' checked':''}" onclick="toggleAck()">
-      <div class="ack-checkbox">${S.ackChecked?'✓':''}</div>
-      <div class="ack-checktext">I acknowledge and understand everything above.</div>
-    </div>
-
-    <button class="ack-continue${S.ackChecked?' ready':''}" onclick="ackContinue()">Continue to Checkout →</button>
-  </div></div>`;
-}
-
-function rCheckout(){
-  const items=ci();
-  const ih=items.map(i=>`<div class="oitem"><div><div class="oname"><span class="sku">${i.sku}</span>${i.name}</div><div class="odetail">${i.mg} · ${i.qty} kit${i.qty>1?"s":""}</div></div><div class="oprice">$${(i.price*i.qty).toFixed(2)}<div class="oeach">$${i.price}/kit</div></div></div>`).join("");
-  return hdr("Review & Checkout","~BgM's~ BioStack Community",true)+
-  `<div class="page"><div class="card"><div class="card-title">📋 Your Order</div>${ih}
-    <div class="trow"><span>Subtotal</span><span>$${sub().toFixed(2)}</span></div>
-    <div class="trow"><span>Shipping & Customs (flat fee)</span><span id="coShipRow">$${SHIP}.00</span></div>
-    <div class="tbig"><span>Total Due</span><span>$${tot().toFixed(2)}</span></div>
-  </div>
-  <div class="card"><div class="card-title">👤 Your Info</div>
-    <input class="finput" type="text" placeholder="Full Name *" id="fn" value="${S.form.name}"/>
-    <input class="finput" type="tel" placeholder="Phone Number *" id="fp" value="${S.form.phone}"/>
-    <input class="finput" type="email" placeholder="Email Address *" id="fe" value="${S.form.email}"/>
-  </div>
-  <div class="conn-box">
-    <div class="conn-title">🔗 Who is your contact to Boyd? *</div>
-    <div class="conn-sub">They will deliver your order to you.</div>
-    <select class="conn-select" id="connsel">
-      <option value="">-- Select --</option>
-      <option value="Self (I'll pick up directly)">Self (I'll pick up directly)</option>
-      <option value="Boyd">Boyd</option>
-      <option value="Bronson">Bronson</option>
-      <option value="Justin">Justin</option>
-      <option value="Dwayne">Dwayne</option>
-      <option value="Luke">Luke</option>
-      <option value="Jessica">Jessica</option>
-      <option value="Jared">Jared</option>
-      <option value="Heath">Heath</option>
-      <option value="Other">Other (type below)</option>
-    </select>
-    <input class="conn-input" type="text" id="connother" placeholder="Type name here if not listed above" value=""/>
-  </div>
-  <div style="background:#eef2ff;border:1px solid #7c3aed;border-radius:10px;padding:13px 16px;margin:0 0 14px;font-size:13px;color:#5b21b6;line-height:1.5;text-align:center;">
-    💳 <strong>Submit your order first</strong> — then choose how to pay (USDC or Venmo) on the next screen.
-  </div>
-  <button class="sbtn" id="sbtn" onclick="submit()">Submit Order →</button>
-  <p class="fnote">For experimental research use only.</p></div>`;
-}
-
-function rConfirm(){
-  const pt=S.pendingTotals||{productsTotal:sub(),ship:shipFee(),usdcTotal:tot(),venmoFee:0,venmoTotal:tot()};
-  const shipPart=pt.ship>0?("$"+pt.ship.toFixed(2)+" shipping"):"$0.00 shipping (already paid this round)";
-  let body;
-  if(S.payChoice==="usdc"){
-    body=`<div class="erc-warn"><div style="font-size:14px;color:#991b1b;font-weight:700;line-height:1.4">⚠️ SEND USDC ON ETHEREUM (ERC-20) ONLY</div><div style="font-size:12px;color:#991b1b;font-weight:500;margin-top:6px;line-height:1.4">Do NOT send on Polygon, BSC, Arbitrum, Solana, or any other network. Your funds will be PERMANENTLY LOST.</div></div>
-    <div class="vbox"><div style="font-size:13px;color:#166534;font-weight:600;margin-bottom:4px">💰 Send USDC (Ethereum Network)</div>
-    <div class="vtotal">Send $${pt.usdcTotal.toFixed(2)} USDC</div>
-    <div class="vsub">$${pt.productsTotal} products + ${shipPart}</div>
-    <div style="font-size:12px;color:#64748b;margin:8px 0 4px;font-weight:600">Send to this address:</div>
-    <div class="addr-box" id="addrBox">${CRYPTO_ADDRESS}</div>
-    <button class="copy-btn" onclick="copyAddr()">📋 Copy Wallet Address</button></div>
-    <div class="disc" style="background:#1a0a2e;border-color:#7c3aed;color:#e9d5ff">📲 <strong style="color:#fff">AFTER SENDING:</strong> Screenshot the Transaction Hash (TX ID) from your wallet and message it to Boyd to confirm.</div>
-    <button class="back-pay-btn" onclick="backPay()">← Back to payment options</button>`;
-  } else if(S.payChoice==="venmo"){
-    body=`<div class="vbox" style="border-color:#3b82f6;background:#f0f7ff"><div style="font-size:13px;color:#1e40af;font-weight:600;margin-bottom:6px">💸 Pay with Venmo</div>
-    <div class="vtotal" style="color:#1e40af;font-size:26px">Pay $${pt.venmoTotal.toFixed(2)}</div>
-    <div class="vsub">$${pt.productsTotal} products + ${shipPart} + $${pt.venmoFee.toFixed(2)} Venmo fee (${S.venmoSurcharge}%)</div>
-    <a href="venmo://paycharge?txn=pay&recipients=Boyd-Moretti&amount=${pt.venmoTotal.toFixed(2)}" class="vhandle" style="background:#008CFF;color:#fff;border-radius:8px;padding:13px;margin:10px 0">Open Venmo & Pay 👆</a>
-    <div style="font-size:12px;color:#64748b">Pays <strong>@Boyd-Moretti</strong> · Note: <strong>Reimbursement</strong></div></div>
-    <div class="disc" style="background:#1a0a2e;border-color:#7c3aed;color:#e9d5ff">📲 <strong style="color:#fff">AFTER PAYING:</strong> Send a payment screenshot to Boyd to confirm your order.</div>
-    <button class="back-pay-btn" onclick="backPay()">← Back to payment options</button>`;
-  } else {
-    body=`<div style="font-size:16px;font-weight:800;color:#0f2542;margin-bottom:4px">Choose Your Payment Method</div>
-    <div style="font-size:13px;color:#64748b;margin-bottom:14px">$${pt.productsTotal} products + ${shipPart}. Choose USDC (no fee) or Venmo (+${S.venmoSurcharge}%).</div>
-    <button class="paychoice-btn paychoice-usdc" onclick="choosePay('usdc')">✅ Pay with USDC<br><span style="font-size:12px;font-weight:500">Ethereum Network — No fee — $${pt.usdcTotal.toFixed(2)}</span></button>
-    <button class="paychoice-btn paychoice-venmo" onclick="choosePay('venmo')">💸 Pay with Venmo<br><span style="font-size:12px;font-weight:500">+${S.venmoSurcharge}% fee — $${pt.venmoTotal.toFixed(2)}</span></button>`;
+// ============================================================
+// INIT / DATA LOAD
+// ============================================================
+async function init() {
+  render();
+  try {
+    const [bRes, pRes] = await Promise.all([
+      api('rpc/get_active_v3_batch', { method: 'POST', body: '{}' }),
+      api('rpc/get_active_v3_products', { method: 'POST', body: '{}' })
+    ]);
+    const batches = await bRes.json();
+    S.batch = Array.isArray(batches) && batches[0] ? batches[0] : null;
+    const products = await pRes.json();
+    S.products = Array.isArray(products) ? products : [];
+  } catch (e) {
+    S.batch = null;
   }
-  return hdr("Order Submitted!","~BgM's~ BioStack Community",false)+
-  `<div class="conf"><div class="conf-icon">✅</div><div class="conf-title">Order Received!</div>
-  <p class="conf-txt">Thanks ${esc(S.form.name)}! Your order is saved. Now choose how to pay below.</p>
-  <div style="max-width:380px;margin:0 auto;text-align:left">${body}</div>
-  <button class="sbtn green" style="margin-top:16px" onclick="newOrd()">Place Another Order</button></div>`;
+  render();
 }
 
-function rAdmin(){
-  if(!S.adminAuth)return hdr("Admin","~BgM's~ BioStack Community",true)+`<div class="al"><h2>🔐 Admin Login</h2><p>Sign in with your admin account</p><input class="finput" type="email" id="aemail" placeholder="Email" style="max-width:280px;margin:0 auto 8px"/><input class="finput" type="password" id="apw" placeholder="Password" style="max-width:280px;margin:0 auto 12px"/><br><button class="sbtn" style="max-width:200px;margin:0 auto" onclick="alog()">Login</button><p id="aerr" style="color:#dc2626;font-size:13px;margin-top:8px"></p></div>`;
-  const ro=S.orders.filter(o=>o.round===S.roundNum);
-  const oh=ro.length===0?`<div class="empty">No orders yet for Group Order #${S.roundNum}</div>`:ro.map((o,i)=>{
-    const copyText=`${o.name} | ${o.phone} | ${o.email}${o.connection?" | Via: "+o.connection:""} | ${o.items.map(x=>`${x.sku} x${x.qty} $${x.price*x.qty}`).join(", ")} | Total: $${o.total.toFixed(2)} | Pay: ${o.payment_method==='venmo'?('Venmo (+$'+((o.venmo_fee||0).toFixed(2))+')'):(o.payment_method==='usdc'?'USDC':'Not chosen')}`;
-    return `<div class="ocard"><div class="ocard-hdr"><span class="ocard-name">${esc(o.name)}</span><span class="ocard-tot">$${o.total.toFixed(2)}</span></div><div class="ocard-info">${esc(o.phone)} · ${esc(o.email)} · ${esc(o.date)}</div>${o.connection?`<div class="ocard-info">🔗 Connection: <strong>${esc(o.connection)}</strong></div>`:""}${o.tip>0?`<div class="ocard-info">💰 Tip: <strong>$${o.tip}</strong></div>`:""}<div class="ocard-info" style="color:${(o.payment_method==='venmo')?'#008CFF':((o.payment_method==='usdc')?'#10b981':'#f59e0b')};font-weight:700">${(o.payment_method==='venmo')?('💸 VENMO (+$'+((o.venmo_fee||0).toFixed(2))+' fee)'):((o.payment_method==='usdc')?'✅ USDC (Ethereum)':'⏳ Payment not chosen yet')}</div><div class="ocard-items">${o.items.map(x=>`${esc(x.sku)} × ${x.qty} = $${x.price*x.qty}`).join(" | ")}</div><div class="ocard-footer"><button class="ocard-print" data-idx="${i}">🖨 Print</button><button class="ocard-copy" data-copy="${copyText.replace(/"/g,'&quot;')}">Copy</button></div></div>`;
-  }).join("");
-  return hdr("Admin Panel","Group Order #"+S.roundNum,true)+
-  `<div class="aw"><div class="asec"><h3>⚙️ Order Round Control</h3>
-    <div class="trow2"><span class="tlbl">Portal ${S.roundOpen?"🟢 OPEN":"🔴 CLOSED"}</span><label class="tgl"><input type="checkbox" id="rtog" ${S.roundOpen?"checked":""}><span class="sld"></span></label></div>
-    <input class="dinput" type="text" id="cd" placeholder="Close date (e.g. April 30, 2026)" value="${S.closeDate}"/>
-    <div class="trow2" style="margin-top:4px"><span class="tlbl">📋 Group Order #</span><input class="dinput" type="number" id="rnum" min="1" max="99" value="${S.roundNum}" style="width:70px;margin-bottom:0;text-align:center"/></div>
-    <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Current group order number shown to customers.</div>
-    <div class="trow2" style="margin-top:4px"><span class="tlbl">Bac Water &amp; Acetic Acid ${S.waterOos?"🔴 OOS":"🟢 Available"}</span><label class="tgl"><input type="checkbox" id="wtog" ${!S.waterOos?"checked":""}><span class="sld"></span></label></div>
-    <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Toggle ON to make water items available for purchase</div>
-    <div class="trow2" style="margin-top:4px"><span class="tlbl">💸 Venmo Surcharge %</span><input class="dinput" type="number" id="vsi" min="0" max="100" value="${S.venmoSurcharge}" style="width:90px;margin-bottom:0;text-align:center"/></div>
-    <div style="font-size:11px;color:#94a3b8;margin-bottom:10px">Venmo orders add this % on top of the full total.</div>
-    <button class="savebtn" onclick="saveSt()">Save</button>
-  </div>
-  <div class="tabrow"><button class="tabbtn ${S.adminTab==="orders"?"on":""}" onclick="sat('orders')">📦 Orders (${ro.length})</button><button class="tabbtn ${S.adminTab==="vivian"?"on":""}" onclick="sat('vivian')">📋 Vivian Summary</button></div>
-  ${S.adminTab==="orders"?`<div class="asec"><h3>Orders — Group #${S.roundNum}</h3>${oh}</div>`:`<div class="asec"><h3>Vivian Order Summary</h3><div class="vbox2" id="vt">${vivian()}</div><button class="cpybtn" id="cpybtn" onclick="cpy()">📋 Copy to Clipboard</button></div>`}
-  <div style="text-align:right;margin-top:8px"><button class="lgout" onclick="alo()">Logout</button></div></div>`;
+// ============================================================
+// CART
+// ============================================================
+function cartCount() { return Object.values(S.cart).reduce((a, b) => a + b, 0); }
+function cartSubtotal() {
+  return S.products.reduce((sum, p) => sum + (S.cart[p.id] || 0) * Number(p.price), 0);
+}
+function changeQty(id, d) {
+  const p = S.products.find(x => x.id === id);
+  if (!p || p.in_stock === false) return;
+  const cur = S.cart[id] || 0;
+  const next = Math.max(0, cur + d);
+  if (next === 0) delete S.cart[id]; else S.cart[id] = next;
+  render();
 }
 
-function bind(){
-  document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));
-  const jb=document.querySelector(".jump-bar");
-  if(jb){jb.addEventListener("wheel",e=>{e.preventDefault();jb.scrollLeft+=e.deltaY;},{passive:false});let isDown=false,startX,scrollLeft;jb.addEventListener("mousedown",e=>{isDown=true;startX=e.pageX-jb.offsetLeft;scrollLeft=jb.scrollLeft;});jb.addEventListener("mouseleave",()=>isDown=false);jb.addEventListener("mouseup",()=>isDown=false);jb.addEventListener("mousemove",e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-jb.offsetLeft;jb.scrollLeft=scrollLeft-(x-startX);});}
-  const si=document.getElementById("si");
-  if(si){si.addEventListener("input",e=>{S.search=e.target.value;const tbody=document.querySelector("tbody");const noRes=document.querySelector(".empty");const filtered=fl();if(filtered.length===0){if(tbody)tbody.closest("table").outerHTML=`<div class="empty">No products found for "${esc(S.search)}" — <button onclick="S.search='';render()" style="background:none;border:none;color:#1e3a5f;font-weight:700;cursor:pointer">Clear</button></div>`;}else{const newRows=filtered.map(p=>buildRow(p)).join("");if(tbody)tbody.innerHTML=newRows;else if(noRes)noRes.outerHTML=`<table><thead><tr><th>SKU / Product</th><th class="r">Price/Kit</th><th class="r" style="width:100px">Qty</th></tr></thead><tbody>${newRows}</tbody></table>`;}document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{const s=b.dataset.s,d=parseInt(b.dataset.d),n=Math.max(0,(S.cart[s]||0)+d);if(n===0)delete S.cart[s];else S.cart[s]=n;const scrollY=window.scrollY;render();window.scrollTo(0,scrollY);}));});}
-  document.querySelectorAll(".ocard-print").forEach(b=>b.addEventListener("click",()=>{const idx=parseInt(b.dataset.idx);const ro=S.orders.filter(o=>o.round===S.roundNum);const o=ro[idx];if(!o)return;const itemRows=o.items.map(x=>`<tr><td>${x.sku}</td><td>${x.name}</td><td>${x.mg}</td><td style="text-align:center">${x.qty}</td><td style="text-align:right">$${x.price}/kit</td><td style="text-align:right">$${x.price*x.qty}</td></tr>`).join("");const html=`<!DOCTYPE html><html><head><title>Packing Slip - ${o.name}</title><style>body{font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto}h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;color:#555;font-weight:normal;margin-bottom:20px}.info{margin-bottom:20px;font-size:14px;line-height:1.8}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#1e3a5f;color:#fff;padding:8px;text-align:left;font-size:13px}td{padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px}.totals{text-align:right;font-size:14px;line-height:2}.grand{font-size:18px;font-weight:bold;color:#1e3a5f}.footer{margin-top:30px;font-size:11px;color:#999;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px}@media print{button{display:none}}</style></head><body><h1>~BgM's~ BioStack Community</h1><h2>2026 ZLZ PEPTIDE — GROUP ORDER #${o.round} PACKING SLIP</h2><div class="info"><strong>Name:</strong> ${o.name}<br><strong>Phone:</strong> ${o.phone}<br><strong>Email:</strong> ${o.email}<br><strong>Date:</strong> ${o.date}<br>${o.connection?`<strong>Connection:</strong> ${o.connection}<br>`:""}</div><table><thead><tr><th>SKU</th><th>Product</th><th>Size</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table><div class="totals"><div>Products: $${o.subtotal.toFixed(2)}</div><div>Shipping: $${o.shipping.toFixed(2)}</div>${(o.venmo_fee&&o.venmo_fee>0)?`<div>Venmo Fee: $${o.venmo_fee.toFixed(2)}</div>`:""}<div class="grand">TOTAL DUE: $${o.total.toFixed(2)}</div><div style="font-size:13px;margin-top:6px">Payment: ${o.payment_method==='venmo'?'Venmo':(o.payment_method==='usdc'?'USDC (Ethereum)':'Not chosen')}</div></div><div class="footer">For experimental research use only.<br>Thank you for your order!</div><br><button onclick="window.print()" style="padding:10px 30px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">Print This Page</button></body></html>`;const blob=new Blob([html],{type:"text/html"});const url=URL.createObjectURL(blob);window.open(url,"_blank");}));
-  document.querySelectorAll(".ocard-copy").forEach(b=>b.addEventListener("click",()=>{navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1500);});}));
-  const fn=document.getElementById("fn");if(fn)fn.addEventListener("input",e=>{S.form.name=e.target.value;ub();});
-  const fp=document.getElementById("fp");if(fp)fp.addEventListener("input",e=>{S.form.phone=e.target.value;ub();});
-  const fe=document.getElementById("fe");if(fe)fe.addEventListener("input",e=>{S.form.email=e.target.value;ub();});
-  const tipSel=document.getElementById("tipsel");
-  if(tipSel)tipSel.addEventListener("change",e=>{S.tip=parseInt(e.target.value)||0;const tbig=document.querySelector(".tbig span:last-child");if(tbig)tbig.textContent="$"+tot().toFixed(2);});
-  ub();
-}
-function ub(){const b=document.getElementById("sbtn");if(b)b.disabled=!(S.form.name&&S.form.phone&&S.form.email);}
-function gc(){S.screen="checkout";S.tip=0;window.scrollTo(0,0);render();}
-function gb(){S.screen="browse";window.scrollTo(0,0);render();}
-function ga(){S.screen="admin";if(ADMIN_TOKEN)S.adminAuth=true;window.scrollTo(0,0);render();if(S.adminAuth)loadOrders().then(()=>render());}
-function jumpTo(name){S.search=name;render();}
-function alo(){S.adminAuth=false;ADMIN_TOKEN=null;sessionStorage.removeItem("bgm_admin_token");S.screen="browse";render();}
-function newOrd(){S.cart={};S.form={name:"",phone:"",email:""};S.screen="browse";S.payChoice="";S.pendingOrderId=null;S.pendingTotals=null;S.isRepeat=false;S.ackChecked=false;S.tip=0;render();}
-function sat(t){S.adminTab=t;if(t==="orders"&&S.adminAuth)loadOrders().then(()=>render());else render();}
-async function submit(){
-  if(!S.form.name||!S.form.phone||!S.form.email)return;
-  const connSel=document.getElementById("connsel");
-  const connOther=document.getElementById("connother");
-  let conn=connSel?connSel.value:"";
-  if(conn==="Other")conn=connOther?connOther.value.trim():"";
-  if(!conn){alert("Please select or enter your connection name.");return;}
-  S.connection=conn;
-  const btn=document.getElementById("sbtn");
-  if(btn){btn.disabled=true;btn.textContent="Submitting...";}
-  S.isRepeat=await checkRepeat();
-  await saveOrd();
-  S.payChoice="";
-  S.screen="confirm";render();
-}
-function gck(){if(cc()<1)return;S.ackChecked=false;S.screen="ack";window.scrollTo(0,0);render();}
-function toggleAck(){S.ackChecked=!S.ackChecked;render();}
-function ackContinue(){if(!S.ackChecked)return;S.screen="checkout";S.tip=0;window.scrollTo(0,0);render();}
-async function choosePay(method){
-  S.payChoice=method;
-  const pt=S.pendingTotals;
-  if(S.pendingOrderId!=null&&pt){
-    const fee=method==="venmo"?pt.venmoFee:0;
-    const finalTotal=method==="venmo"?pt.venmoTotal:pt.usdcTotal;
-    try{await supaPatch("orders","id=eq."+S.pendingOrderId,{payment_method:method,venmo_fee:fee,total:finalTotal});}catch(e){}
-  }
-  window.scrollTo(0,0);render();
-}
-function backPay(){S.payChoice="";window.scrollTo(0,0);render();}
-function copyAddr(){const btn=event.target;function showCopied(){btn.textContent="✅ Copied!";setTimeout(()=>btn.textContent="📋 Copy Wallet Address",1500);}function fallbackCopy(){const ta=document.createElement("textarea");ta.value=CRYPTO_ADDRESS;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");showCopied();}catch(e){alert("Copy failed — please copy manually:\n"+CRYPTO_ADDRESS);}document.body.removeChild(ta);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CRYPTO_ADDRESS).then(showCopied).catch(fallbackCopy);}else{fallbackCopy();}}
-async function alog(){
-  const email=document.getElementById("aemail").value.trim();
-  const pw=document.getElementById("apw").value;
-  const errEl=document.getElementById("aerr");
-  errEl.textContent="";
-  try{
-    const res=await fetch(SUPA_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{"apikey":SUPA_KEY,"Content-Type":"application/json"},body:JSON.stringify({email,password:pw})});
-    const data=await res.json();
-    if(res.ok&&data.access_token){
-      ADMIN_TOKEN=data.access_token;
-      sessionStorage.setItem("bgm_admin_token",ADMIN_TOKEN);
-      S.adminAuth=true;
-      loadOrders().then(()=>render());
-    }else{
-      errEl.textContent="Incorrect email or password";
+// ============================================================
+// ORDER SUBMIT
+// ============================================================
+async function submitOrder() {
+  S.submitError = '';
+  const items = Object.entries(S.cart).filter(([,q]) => q > 0).map(([product_id, qty]) => ({ product_id, qty }));
+  if (items.length === 0) return;
+  const contact = S.contact === 'other' ? (S.contactOther.trim() || 'Not specified') : S.contact;
+  try {
+    const res = await api('rpc/submit_v3_order', {
+      method: 'POST',
+      body: JSON.stringify({
+        p_name: S.form.name.trim(),
+        p_phone: S.form.phone.trim(),
+        p_email: S.form.email.trim(),
+        p_contact: contact,
+        p_items: items
+      })
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      S.submitError = errBody.message || 'Could not submit order — please try again.';
+      render();
+      return;
     }
-  }catch(e){errEl.textContent="Login failed — check your connection.";}
+    const data = await res.json();
+    S.pendingOrder = Array.isArray(data) ? data[0] : data;
+    S.step = 'payment';
+    S.payChoice = null;
+    render();
+  } catch (e) {
+    S.submitError = 'Could not reach the server — check your connection and try again.';
+    render();
+  }
 }
-function cpy(){const t=document.getElementById("vt").innerText;navigator.clipboard.writeText(t).then(()=>{const b=document.getElementById("cpybtn");b.textContent="✅ Copied!";b.classList.add("done");setTimeout(()=>{b.textContent="📋 Copy to Clipboard";b.classList.remove("done");},2000);});}
 
-loadSettings().then(()=>render());
+// ============================================================
+// RENDER: STORE
+// ============================================================
+function flyerHtml() {
+  if (!S.batch || !S.batch.customer_flyer_url) return '';
+  return `<div class="flyer-frame"><img src="${esc(S.batch.customer_flyer_url)}" alt="${esc(S.batch.label || 'This batch')}" /></div>`;
+}
+
+function batchInfoHtml(b) {
+  const bullets = Array.isArray(b.info_bullets) ? b.info_bullets : [];
+  if (bullets.length === 0) return '';
+  return `
+    <div class="batch-info">
+      <span class="batch-info-badge">● This Batch</span>
+      <ul class="info-bullets">${bullets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    </div>`;
+}
+
+function plateHtml() {
+  const label = S.batch ? esc(S.batch.label) : '';
+  const closeStr = S.batch && S.batch.close_date ? new Date(S.batch.close_date).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  return `
+    <header class="plate">
+      <div class="wrap">
+        <div class="mark" onclick="goAdmin()">~BgM's~</div>
+        <h1 class="wordmark">BioStack Community</h1>
+        ${label ? `<div class="batch-line">${label}</div>` : ''}
+        <div class="status-row">
+          <span class="pill open dot">Open</span>
+          ${closeStr ? `<span class="pill plain">Closes ${closeStr}</span>` : ''}
+        </div>
+      </div>
+    </header>`;
+}
+
+function closedHtml() {
+  return `
+    <header class="plate" style="border-bottom:none">
+      <div class="wrap"><div class="mark" onclick="goAdmin()">~BgM's~</div><h1 class="wordmark">BioStack Community</h1></div>
+    </header>
+    <div class="closed-view">
+      <div class="icon">🔒</div>
+      <h2>No Buy Open Right Now</h2>
+      <p>Nothing's live at the moment — check back soon for the next one.</p>
+    </div>`;
+}
+
+function productCardHtml(p) {
+  const price = Number(p.price);
+  const [dollars, cents] = price.toFixed(2).split('.');
+  const testedHtml = p.tested_note ? `<div class="tested">${esc(p.tested_note)}</div>` : `<div class="untested">Not third-party tested</div>`;
+  const oos = p.in_stock === false;
+  const qty = S.cart[p.id] || 0;
+  const photoHtml = p.image_url
+    ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy" />`
+    : `<div class="no-photo">Photo<br>Coming Soon</div>`;
+  return `
+    <div class="pcard ${oos ? 'oos' : ''}">
+      <div class="photo-wrap">${photoHtml}</div>
+      <div class="name">${esc(p.name)}</div>
+      ${p.spec ? `<div class="spec">${esc(p.spec)}</div>` : ''}
+      ${oos ? `<div class="oos-tag">Out of Stock</div>` : testedHtml}
+      <div class="price-block">
+        <div class="price">$${dollars}<span class="cents">.${cents}</span></div>
+        <div class="qty">
+          <button ${oos ? 'disabled' : ''} onclick="changeQty('${p.id}',-1)" aria-label="Decrease">–</button>
+          <output>${qty}</output>
+          <button ${oos ? 'disabled' : ''} onclick="changeQty('${p.id}',1)" aria-label="Increase">+</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function browseHtml() {
+  return `
+    ${plateHtml()}
+    <div class="cartbar">
+      <button class="cart-pill" ${cartCount() === 0 ? 'disabled' : ''} onclick="goStep('ack')">
+        🧺 <span class="count">${cartCount()}</span>
+        <span class="amt">${money(cartSubtotal())}</span>
+      </button>
+    </div>
+    <div class="wrap">
+      ${flyerHtml()}
+      ${S.batch ? batchInfoHtml(S.batch) : ''}
+      <p class="intro">This buy's exclusive list. <b>Products marked Third-Party Tested include a COA</b> — that's not cheap to do, and it's baked into the price.</p>
+      <p class="intro" style="font-size:12.5px;color:var(--ink-faint);margin-top:-4px">COAs are posted in the WhatsApp group only, not here. Vendor names stay private on purpose — that protects the people I source from.</p>
+      <div class="card-grid">${S.products.map(productCardHtml).join('') || `<p style="grid-column:1/-1;text-align:center;color:var(--ink-faint);padding:30px 0">Nothing listed yet.</p>`}</div>
+    </div>
+    ${actionbarHtml()}`;
+}
+
+function ackHtml() {
+  const shipFee = S.batch ? Number(S.batch.shipping_fee || 0) : 0;
+  const adminFee = S.batch ? Number(S.batch.admin_fee || 0) : 0;
+  return `
+    ${plateHtml()}
+    <div class="wrap flow-page">
+      <div class="read-tag">Read Before You Order</div>
+      <h2 class="page-title not-amazon">This isn't Amazon.</h2>
+      <p style="color:var(--ink-dim);font-size:13.5px;margin:-10px 0 18px">A few important things you must understand before placing your order.</p>
+
+      <div class="card">
+        <h3>Shipping Timeline</h3>
+        <p>Expect <b style="color:var(--ink)">8–10 weeks</b>, sometimes longer, after this batch's closing date. This is normal — plan for the full window so you're never caught short.</p>
+      </div>
+
+      <div class="card">
+        <h3>Payment Options</h3>
+        <div class="pay-line"><span>USDC — Ethereum network</span><span class="ok">✓ No fee</span></div>
+        ${S.batch && S.batch.venmo_enabled === false
+          ? `<div class="pay-line"><span>Venmo</span><span class="fee">Not available for this buy</span></div>`
+          : `<div class="pay-line"><span>Venmo</span><span class="fee">+10% fee</span></div>
+        <p style="margin-top:10px">Crypto is preferred and free. Venmo adds a convenience fee because of the extra manual work and time required to convert and forward your payment.</p>`}
+        <div class="warn-box" style="margin-top:10px">⚠ If you send on the wrong network, your funds could be lost. Always double-check it's USDC on the Ethereum network, sent to Boyd's wallet address.</div>
+      </div>
+
+      ${(shipFee > 0 || adminFee > 0) ? `<div class="card"><h3>Shipping &amp; Admin Fee</h3>
+        ${shipFee > 0 ? `<div class="pay-line"><span>Shipping</span><span>${money(shipFee)}</span></div>` : ''}
+        ${adminFee > 0 ? `<div class="pay-line"><span>Admin Fee</span><span>${money(adminFee)}</span></div>` : ''}
+      </div>` : ''}
+
+      <div class="card risk">
+        <h3>For Research Purposes Only</h3>
+        <p>All products are sold strictly for research purposes only. By continuing, you accept all responsibility and risk associated with your order.</p>
+      </div>
+
+      <label class="acknowledge-row" style="margin-top:16px">
+        <input type="checkbox" ${S.ackChecked ? 'checked' : ''} onchange="S.ackChecked=this.checked;render()" />
+        <span>I acknowledge and understand everything above.</span>
+      </label>
+    </div>
+    ${actionbarHtml()}`;
+}
+
+function checkoutHtml() {
+  const sub = cartSubtotalFromPending();
+  const shipFee = S.batch ? Number(S.batch.shipping_fee || 0) : 0;
+  const adminFee = S.batch ? Number(S.batch.admin_fee || 0) : 0;
+  const items = S.products.filter(p => S.cart[p.id] > 0);
+  return `
+    ${plateHtml()}
+    <div class="wrap flow-page">
+      <h2 class="page-title">Your Order</h2>
+
+      <div class="card">
+        <h3>Summary</h3>
+        ${items.map(p => `<div class="summary-line"><span class="n">${esc(p.name)}${p.spec ? ' (' + esc(p.spec) + ')' : ''} × ${S.cart[p.id]}</span><span class="v">${money(p.price * S.cart[p.id])}</span></div>`).join('')}
+        <div class="summary-line"><span class="n">Shipping</span><span class="v">${money(shipFee)}</span></div>
+        <div class="summary-line"><span class="n">Admin Fee</span><span class="v">${money(adminFee)}</span></div>
+        <div class="summary-line" style="border-top:1px solid var(--border-soft);margin-top:6px;padding-top:10px;font-weight:700"><span class="n" style="color:var(--ink)">Estimated Total</span><span class="v" style="color:var(--accent);font-size:16px">${money(sub + shipFee + adminFee)}</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Your Info</h3>
+        <div class="form-field"><label>Name</label><input type="text" value="${esc(S.form.name)}" oninput="S.form.name=this.value;updateCheckoutValidity()" placeholder="Full name" /></div>
+        <div class="form-field"><label>Phone</label><input type="tel" value="${esc(S.form.phone)}" oninput="S.form.phone=this.value;updateCheckoutValidity()" placeholder="(555) 555-5555" /></div>
+        <div class="form-field"><label>Email</label><input type="email" value="${esc(S.form.email)}" oninput="S.form.email=this.value;updateCheckoutValidity()" placeholder="you@example.com" /></div>
+        <div class="form-field">
+          <label>Who is your contact to Boyd?</label>
+          <p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-faint)">They will deliver your order to you.</p>
+          <select onchange="S.contact=this.value;render()">
+            <option value="self" ${S.contact === 'self' ? 'selected' : ''}>Self (I'll pick up directly)</option>
+            <option value="Boyd" ${S.contact === 'Boyd' ? 'selected' : ''}>Boyd</option>
+            <option value="Bronson" ${S.contact === 'Bronson' ? 'selected' : ''}>Bronson</option>
+            <option value="Justin" ${S.contact === 'Justin' ? 'selected' : ''}>Justin</option>
+            <option value="Dwayne" ${S.contact === 'Dwayne' ? 'selected' : ''}>Dwayne</option>
+            <option value="Luke" ${S.contact === 'Luke' ? 'selected' : ''}>Luke</option>
+            <option value="Jessica" ${S.contact === 'Jessica' ? 'selected' : ''}>Jessica</option>
+            <option value="Jared" ${S.contact === 'Jared' ? 'selected' : ''}>Jared</option>
+            <option value="Heath" ${S.contact === 'Heath' ? 'selected' : ''}>Heath</option>
+            <option value="other" ${S.contact === 'other' ? 'selected' : ''}>Someone else…</option>
+          </select>
+          ${S.contact === 'other' ? `<input type="text" value="${esc(S.contactOther)}" oninput="S.contactOther=this.value" placeholder="Type name here if not listed above" style="margin-top:8px" />` : ''}
+        </div>
+      </div>
+
+      <div class="warn-box" style="text-align:center;margin-top:18px;font-size:13px">Submit your order first — then choose how to pay on the next screen.</div>
+      ${S.submitError ? `<p class="field-err" style="text-align:center">${esc(S.submitError)}</p>` : ''}
+    </div>
+    ${actionbarHtml()}`;
+}
+function cartSubtotalFromPending() { return cartSubtotal(); }
+
+function paymentHtml() {
+  const o = S.pendingOrder || {};
+  const total = Number(o.total_due || 0);
+  const venmoTotal = Math.round(total * 1.10 * 100) / 100;
+  return `
+    ${plateHtml()}
+    <div class="wrap flow-page">
+      <h2 class="page-title" style="color:var(--good)">Order Submitted!</h2>
+      <p style="color:var(--ink-dim);font-size:14px;margin:-8px 0 18px">Your order is saved. Now choose how you'd like to pay below.</p>
+
+      <div class="card" style="margin-bottom:18px">
+        <h3>Total Due</h3>
+        <p style="color:var(--ink);font-size:20px;font-family:var(--font-mono)">${money(total)}</p>
+      </div>
+
+      <div class="warn-box" style="margin-bottom:12px">📝 Write down your total due before you continue — you'll want it handy once you switch over to pay.</div>
+
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn" style="background:var(--good-bg);color:var(--good);border:1px solid var(--good)" onclick="S.payChoice='usdc';render()">Click Here — Get Wallet Address<br><span style="font-weight:400;font-size:10.5px">Ethereum network — no fee — ${money(total)}</span></button>
+        ${S.batch && S.batch.venmo_enabled === false
+          ? `<button class="btn" disabled style="background:var(--border);color:var(--ink-faint);cursor:not-allowed">Venmo<br><span style="font-weight:400;font-size:10.5px">Not available for this buy</span></button>`
+          : `<button class="btn" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue)" onclick="S.payChoice='venmo';render()">Click Here — Open Venmo &amp; Pay<br><span style="font-weight:400;font-size:10.5px">+10% fee — ${money(venmoTotal)}</span></button>`}
+      </div>
+
+      ${S.payChoice === 'usdc' ? `
+      <div class="pay-panel usdc">
+        <h3 class="usdc-h">USDC — Ethereum Network</h3>
+        <div class="sub">No fee — send ${money(total)}</div>
+        <div class="warn-box">⚠ ETHEREUM (ERC-20) ONLY. Sending on any other network results in permanent loss of funds.</div>
+        <div class="wallet-row"><code id="walletAddr">${CRYPTO_ADDRESS}</code><button class="copy-btn" onclick="copyWallet()">Copy Address</button></div>
+      </div>` : ''}
+
+      ${S.payChoice === 'venmo' ? `
+      <div class="pay-panel venmo">
+        <h3 class="venmo-h">Venmo</h3>
+        <div class="sub">+10% fee included — pay ${money(venmoTotal)}</div>
+        <div class="warn-box">⚠ The "What's this for?" note will auto-fill with "Reimbursement" — leave it exactly as-is. Writing anything else (or changing it) can get the payment flagged and sent back by Venmo.</div>
+        <a class="venmo-link-btn" href="venmo://paycharge?txn=pay&amp;recipients=Boyd-Moretti&amp;amount=${venmoTotal.toFixed(2)}&amp;note=Reimbursement">Open Venmo &amp; Pay</a>
+        <div class="wallet-row" style="margin-top:10px"><code>${VENMO_HANDLE}</code><button class="copy-btn" onclick="copyVenmo()">Copy Handle</button></div>
+      </div>` : ''}
+
+      <div class="warn-box" style="margin-top:16px;background:var(--good-bg);border-color:var(--good);color:var(--good)">✅ Order Complete — everything's done except payment. You can close this window once you've copied the wallet address (or Venmo handle).</div>
+    </div>
+    ${actionbarHtml()}`;
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+function copyWallet() { copyToClipboard(CRYPTO_ADDRESS); const b = event.target; b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy Address', 1500); }
+function copyVenmo() { copyToClipboard(VENMO_HANDLE); const b = event.target; b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy Handle', 1500); }
+
+function contactInfoValid() {
+  const name = S.form.name.trim();
+  const phoneDigits = S.form.phone.replace(/\D/g, '');
+  const email = S.form.email.trim();
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return !!name && phoneDigits.length >= 10 && emailOk;
+}
+function actionbarHtml() {
+  const sub = cartSubtotal();
+  const shipFee = S.batch ? Number(S.batch.shipping_fee || 0) : 0;
+  const adminFee = S.batch ? Number(S.batch.admin_fee || 0) : 0;
+  const fee = shipFee + adminFee;
+  if (S.step === 'browse') {
+    return `<div class="actionbar"><div class="actionbar-inner">
+      <div class="ledger-line"><span>Subtotal</span><span class="amt">${money(sub)}</span></div>
+      <div class="ledger-line total"><span>Total</span><span class="amt">${money(sub + (sub > 0 ? fee : 0))}</span></div>
+      <div class="btn-row"><button class="btn btn-primary" ${sub > 0 ? '' : 'disabled'} onclick="goStep('ack')">Continue</button></div>
+    </div></div>`;
+  }
+  if (S.step === 'ack') {
+    return `<div class="actionbar"><div class="actionbar-inner">
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goStep('browse')">Back</button>
+        <button class="btn btn-primary" ${S.ackChecked ? '' : 'disabled'} onclick="goStep('checkout')">Continue</button>
+      </div>
+    </div></div>`;
+  }
+  if (S.step === 'checkout') {
+    const valid = contactInfoValid();
+    const already = !!S.pendingOrder;
+    return `<div class="actionbar"><div class="actionbar-inner">
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goStep('ack')">Back</button>
+        <button class="btn btn-primary" id="checkoutSubmitBtn" ${valid ? '' : 'disabled'} onclick="${already ? "goStep('payment')" : 'submitOrder()'}">${already ? 'Continue to Payment' : 'Submit Order'}</button>
+      </div>
+    </div></div>`;
+  }
+  if (S.step === 'payment') {
+    return `<div class="actionbar"><div class="actionbar-inner">
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goStep('checkout')">← Back to Order</button>
+      </div>
+    </div></div>`;
+  }
+  return '';
+}
+
+function updateCheckoutValidity() {
+  const btn = document.getElementById('checkoutSubmitBtn');
+  if (!btn) return;
+  const valid = contactInfoValid();
+  btn.disabled = !valid;
+}
+function goStep(s) {
+  if (s === 'ack' && cartCount() === 0) return;
+  if (s === 'browse') S.pendingOrder = null;
+  S.step = s;
+  window.scrollTo(0, 0);
+  render();
+}
+function goAdmin() {
+  S.route = 'admin';
+  render();
+  if (S.adminToken) loadAdminData();
+}
+function goStore() { S.route = 'store'; render(); init(); }
+
+// ============================================================
+// RENDER: MAIN DISPATCH
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  if (S.route === 'admin') { app.innerHTML = adminHtml(); return; }
+
+  let html;
+  if (!S.batch) {
+    html = closedHtml();
+  } else {
+    if (S.step === 'browse') html = browseHtml();
+    else if (S.step === 'ack') html = ackHtml();
+    else if (S.step === 'checkout') html = checkoutHtml();
+    else if (S.step === 'payment') html = paymentHtml();
+  }
+  app.innerHTML = html + `<footer class="sig">~BgM's~ BioStack Community</footer>`;
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+async function adminLogin(email, password, errElId) {
+  const errEl = document.getElementById(errElId);
+  if (errEl) errEl.textContent = '';
+  try {
+    const res = await fetch(SUPA_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      S.adminToken = data.access_token;
+      sessionStorage.setItem('v3_admin_token', S.adminToken);
+      await loadAdminData();
+      render();
+    } else if (errEl) {
+      errEl.textContent = 'Incorrect email or password.';
+    }
+  } catch (e) {
+    if (errEl) errEl.textContent = 'Login failed — check your connection.';
+  }
+}
+function adminLogout() {
+  S.adminToken = null;
+  sessionStorage.removeItem('v3_admin_token');
+  render();
+}
+
+async function loadAdminData() {
+  S.adminBusy = true;
+  S.adminErr = '';
+  try {
+    const res = await apiAuth('v3_batches?select=*&order=created_at.desc');
+    if (res.status === 401) { adminSessionExpired(); return; }
+    if (!res.ok) {
+      S.adminErr = 'Could not load your batches (server error) — your data is safe, this is just a display problem. Tap Retry.';
+      S.adminBusy = false;
+      render();
+      return;
+    }
+    S.adminBatches = await res.json();
+    if (!S.adminSelectedBatchId && S.adminBatches[0]) S.adminSelectedBatchId = S.adminBatches[0].id;
+    await loadBatchDetail();
+  } catch (e) {
+    S.adminErr = 'Could not reach the server — check your connection and tap Retry. Your data is safe.';
+  }
+  S.adminBusy = false;
+  render();
+}
+
+async function loadBatchDetail() {
+  if (!S.adminSelectedBatchId) { S.adminProducts = []; S.adminOrders = []; return; }
+  try {
+    const [prodRes, ordRes] = await Promise.all([
+      apiAuth(`v3_products?batch_id=eq.${S.adminSelectedBatchId}&select=*&order=sort_order.asc`),
+      apiAuth(`v3_orders?batch_id=eq.${S.adminSelectedBatchId}&select=*&order=created_at.desc`)
+    ]);
+    if (prodRes.status === 401 || ordRes.status === 401) { adminSessionExpired(); return; }
+    if (!prodRes.ok || !ordRes.ok) {
+      S.adminErr = 'Could not load this batch\'s products/orders (server error) — your data is safe. Tap Retry.';
+      return;
+    }
+    S.adminProducts = await prodRes.json();
+    S.adminOrders = await ordRes.json();
+  } catch (e) {
+    S.adminErr = 'Could not reach the server loading this batch — check your connection and tap Retry. Your data is safe.';
+  }
+}
+
+function currentAdminBatch() { return S.adminBatches.find(b => b.id === S.adminSelectedBatchId) || null; }
+
+async function selectAdminBatch(id) {
+  S.adminSelectedBatchId = id;
+  await loadBatchDetail();
+  render();
+}
+
+async function createNewBatch() {
+  const label = prompt('Batch / flyer label for this new round:');
+  if (!label) return;
+  const res = await apiAuth('v3_batches', { method: 'POST', body: JSON.stringify({ label, status: 'closed', markup_percent: 0, shipping_fee: 0, admin_fee: 0 }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  const data = await res.json();
+  await loadAdminData();
+  if (Array.isArray(data) && data[0]) S.adminSelectedBatchId = data[0].id;
+  await loadBatchDetail();
+  render();
+}
+
+async function setBatchOpen(open) {
+  const b = currentAdminBatch();
+  if (!b) return;
+  if (open) {
+    // enforce a single open batch at a time
+    await apiAuth('v3_batches?status=eq.open', { method: 'PATCH', body: JSON.stringify({ status: 'closed' }) });
+  }
+  const res = await apiAuth(`v3_batches?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ status: open ? 'open' : 'closed' }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadAdminData();
+  render();
+}
+
+function localDateStr(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+function localTimeStr(dt) {
+  return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+async function saveCloseDateTime() {
+  const d = document.getElementById('closeDateOnly').value;
+  const t = document.getElementById('closeTimeOnly').value || '00:00';
+  if (!d) { saveBatchField('close_date', null); return; }
+  saveBatchField('close_date', new Date(`${d}T${t}`).toISOString());
+}
+
+async function saveBatchField(field, value) {
+  const b = currentAdminBatch();
+  if (!b) return;
+  const res = await apiAuth(`v3_batches?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ [field]: value }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadAdminData();
+  render();
+}
+
+async function uploadFlyerImage(file, bucket, field) {
+  const b = currentAdminBatch();
+  if (!b || !file) return;
+  S.adminErr = '';
+  const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
+  const ext = (extMatch ? extMatch[1] : (file.type || '').split('/')[1] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = `${b.id}/${Date.now()}.${ext}`;
+  try {
+    const res = await storageAuth(`object/${bucket}/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    });
+    if (res.status === 401) { adminSessionExpired(); return; }
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      S.adminErr = `Image upload failed (${res.status}): ${errText || 'unknown error'}`;
+      render();
+      return;
+    }
+  } catch (e) {
+    S.adminErr = `Image upload failed — could not reach the server: ${e.message}`;
+    render();
+    return;
+  }
+  const publicUrl = `${SUPA_URL}/storage/v1/object/public/${bucket}/${path}`;
+  await saveBatchField(field, publicUrl);
+}
+
+async function uploadProductImage(file, productId) {
+  if (!file) return;
+  S.adminErr = '';
+  const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
+  const ext = (extMatch ? extMatch[1] : (file.type || '').split('/')[1] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = `${productId}/${Date.now()}.${ext}`;
+  try {
+    const res = await storageAuth(`object/v3-product-images/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    });
+    if (res.status === 401) { adminSessionExpired(); return; }
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      S.adminErr = `Image upload failed (${res.status}): ${errText || 'unknown error'}`;
+      render();
+      return;
+    }
+  } catch (e) {
+    S.adminErr = `Image upload failed — could not reach the server: ${e.message}`;
+    render();
+    return;
+  }
+  const publicUrl = `${SUPA_URL}/storage/v1/object/public/v3-product-images/${path}`;
+  const res2 = await apiAuth(`v3_products?id=eq.${productId}`, { method: 'PATCH', body: JSON.stringify({ image_url: publicUrl }) });
+  if (res2.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function replaceProductList(text) {
+  const b = currentAdminBatch();
+  if (!b) return;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const items = lines.map(line => {
+    const parts = line.split('|').map(s => s.trim());
+    return { batch_id: b.id, name: parts[0] || 'Unnamed', spec: parts[1] || '', cost: parseFloat(parts[2]) || 0, category: parts[3] || null };
+  }).filter(i => i.name);
+  if (items.length === 0) return;
+  const res = await apiAuth('rpc/replace_v3_batch_products', {
+    method: 'POST',
+    body: JSON.stringify({ p_batch_id: b.id, p_products: items })
+  });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  if (!res.ok) { S.adminErr = 'Could not save the product list — nothing was changed.'; render(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function toggleProductStock(id, inStock) {
+  const res = await apiAuth(`v3_products?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ in_stock: inStock }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+async function saveProductTested(id, text) {
+  const res = await apiAuth(`v3_products?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ tested_note: text || null }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+}
+async function toggleProductTested(id, on) {
+  const res = await apiAuth(`v3_products?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ tested_note: on ? 'Third-Party Tested' : null }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+async function deleteProduct(id) {
+  if (!confirm('Remove this product?')) return;
+  const res = await apiAuth(`v3_products?id=eq.${id}`, { method: 'DELETE' });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function moveProduct(id, direction) {
+  const idx = S.adminProducts.findIndex(p => p.id === id);
+  const swapIdx = idx + direction;
+  if (idx === -1 || swapIdx < 0 || swapIdx >= S.adminProducts.length) return;
+  const a = S.adminProducts[idx];
+  const b = S.adminProducts[swapIdx];
+  const [resA, resB] = await Promise.all([
+    apiAuth(`v3_products?id=eq.${a.id}`, { method: 'PATCH', body: JSON.stringify({ sort_order: b.sort_order }) }),
+    apiAuth(`v3_products?id=eq.${b.id}`, { method: 'PATCH', body: JSON.stringify({ sort_order: a.sort_order }) })
+  ]);
+  if (resA.status === 401 || resB.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function setOrderPaymentMethod(id, method) {
+  const o = S.adminOrders.find(x => x.id === id);
+  if (!o) return;
+  const fee = method === 'venmo' ? Math.round(Number(o.total_due) * 10) / 100 : 0;
+  const res = await apiAuth(`v3_orders?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ payment_method: method, venmo_fee: fee }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function setOrderPaid(id, paid) {
+  const res = await apiAuth(`v3_orders?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ paid }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+async function setFeeWaived(id, waived) {
+  const o = S.adminOrders.find(x => x.id === id);
+  const b = currentAdminBatch();
+  if (!o || !b) return;
+  const newShipCharged = waived ? 0 : (Number(b.shipping_fee) || 0);
+  const newAdminCharged = waived ? 0 : (Number(b.admin_fee) || 0);
+  const newTotalDue = Number(o.total_due) - Number(o.shipping_charged) - Number(o.admin_fee_charged) + newShipCharged + newAdminCharged;
+  const res = await apiAuth(`v3_orders?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ fee_waived: waived, shipping_charged: newShipCharged, admin_fee_charged: newAdminCharged, total_due: newTotalDue }) });
+  if (res.status === 401) { adminSessionExpired(); return; }
+  await loadBatchDetail();
+  render();
+}
+
+function printPackingSlip(orderId) {
+  const order = S.adminOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const b = currentAdminBatch();
+  const venmoFee = Number(order.venmo_fee) || 0;
+  const grandTotal = Number(order.total_due) + venmoFee;
+  const items = (order.items || []).map(i => `<tr><td>${esc(i.name)}${i.spec ? ' (' + esc(i.spec) + ')' : ''}</td><td style="text-align:right;padding-left:36px">${i.qty}</td><td style="text-align:right;padding-left:36px">$${Number(i.unit_price).toFixed(2)}</td><td style="text-align:right;padding-left:36px">$${(Number(i.unit_price) * i.qty).toFixed(2)}</td></tr>`).join('');
+  const html = `
+    <h2>~BgM's~ BioStack Community</h2>
+    <p><b>${esc(b ? b.label : '')}</b></p>
+    <p>Name: ${esc(order.customer_name)}<br>Phone: ${esc(order.customer_phone)}<br>Contact: ${esc(order.contact_to_boyd || '')}</p>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px">
+      <thead><tr><th style="text-align:left">Item</th><th style="text-align:right;padding-left:36px">Qty</th><th style="text-align:right;padding-left:36px">Each</th><th style="text-align:right;padding-left:36px">Total</th></tr></thead>
+      <tbody>${items}</tbody>
+    </table>
+    <p style="margin-top:10px">Shipping: $${Number(order.shipping_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
+    <p>Admin Fee: $${Number(order.admin_fee_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
+    ${venmoFee > 0 ? `<p>Venmo Convenience Fee (10%): $${venmoFee.toFixed(2)}</p>` : ''}
+    <p style="font-size:16px"><b>Total Paid: $${grandTotal.toFixed(2)}</b></p>`;
+  document.getElementById('printSlip').innerHTML = html;
+  window.print();
+}
+
+function adminHtml() {
+  if (!S.adminToken) {
+    return `
+      <div class="admin-login">
+        <h2>Admin Login</h2>
+        <div class="form-field"><label>Email</label><input type="text" id="admEmail" /></div>
+        <div class="form-field"><label>Password</label><input type="password" id="admPw" /></div>
+        <p class="field-err" id="admErr"></p>
+        <button class="btn btn-primary" style="width:100%" onclick="adminLogin(document.getElementById('admEmail').value.trim(), document.getElementById('admPw').value, 'admErr')">Log In</button>
+        <p style="text-align:center;margin-top:16px"><button class="ghost-small-btn" onclick="goStore()">← Back to storefront</button></p>
+      </div>`;
+  }
+  const b = currentAdminBatch();
+  return `
+    <div class="wrap admin-pad">
+      <div class="admin-topbar">
+        <div class="title">~BgM's~ BioStack Admin</div>
+        <div style="display:flex;gap:8px">
+          <button class="ghost-small-btn" onclick="goStore()">View Storefront</button>
+          <button class="logout-btn" onclick="adminLogout()">Log Out</button>
+        </div>
+      </div>
+      ${S.adminErr ? `<div class="warn-box" style="margin-bottom:14px">⚠ ${esc(S.adminErr)} <button class="ghost-small-btn" style="margin-left:8px" onclick="loadAdminData()">Retry</button></div>` : ''}
+      <div class="batch-picker">
+        <select onchange="selectAdminBatch(this.value)">
+          ${S.adminBatches.map(x => `<option value="${x.id}" ${x.id === S.adminSelectedBatchId ? 'selected' : ''}>${esc(x.label)} ${x.status === 'open' ? '— OPEN' : ''}</option>`).join('')}
+        </select>
+        <button class="ghost-small-btn" onclick="createNewBatch()">+ New Batch</button>
+        <button class="ghost-small-btn" onclick="loadAdminData()">↻ Reload</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="${S.adminTab === 'batch' ? 'active' : ''}" onclick="S.adminTab='batch';render()">Batch</button>
+        <button class="${S.adminTab === 'products' ? 'active' : ''}" onclick="S.adminTab='products';render()">Products</button>
+        <button class="${S.adminTab === 'orders' ? 'active' : ''}" onclick="S.adminTab='orders';render()">Orders</button>
+        <button class="${S.adminTab === 'summary' ? 'active' : ''}" onclick="S.adminTab='summary';render()">Boyd's Summary</button>
+      </div>
+      ${!b && !S.adminErr ? `<p style="color:var(--ink-faint)">No batch selected — create one to get started.</p>` : ''}
+      ${b && S.adminTab === 'batch' ? adminBatchTab(b) : ''}
+      ${b && S.adminTab === 'products' ? adminProductsTab(b) : ''}
+      ${b && S.adminTab === 'orders' ? adminOrdersTab(b) : ''}
+      ${b && S.adminTab === 'summary' ? adminSummaryTab(b) : ''}
+    </div>`;
+}
+
+function adminBatchTab(b) {
+  const sampleCost = 50;
+  const preview = (sampleCost * (1 + Number(b.markup_percent) / 100)).toFixed(2);
+  return `
+    <div class="panel">
+      <h2>This Batch</h2>
+      <div class="field-row">
+        <label>Portal status</label>
+        <button class="toggle-open ${b.status === 'open' ? 'on' : ''}" onclick="setBatchOpen(${b.status !== 'open'})"><span class="sw"></span> ${b.status === 'open' ? 'Open' : 'Closed'}</button>
+      </div>
+      <div class="field-row">
+        <label>Batch / flyer label</label>
+        <input type="text" class="admin-input-text" value="${esc(b.label)}" onblur="saveBatchField('label', this.value)" />
+      </div>
+      <div class="field-row">
+        <label>Closes</label>
+        <div style="display:flex;gap:8px">
+          <input type="date" class="admin-input-text" style="width:150px" id="closeDateOnly" value="${b.close_date ? localDateStr(new Date(b.close_date)) : ''}" onchange="saveCloseDateTime()" />
+          <input type="time" class="admin-input-text" style="width:120px" id="closeTimeOnly" value="${b.close_date ? localTimeStr(new Date(b.close_date)) : ''}" onchange="saveCloseDateTime()" />
+        </div>
+      </div>
+      <div class="field-row">
+        <label>Venmo accepted this batch</label>
+        <button class="toggle-open ${b.venmo_enabled ? 'on' : ''}" onclick="saveBatchField('venmo_enabled', ${!b.venmo_enabled})"><span class="sw"></span> ${b.venmo_enabled ? 'Yes' : 'No — USDC only'}</button>
+      </div>
+      <div class="field-row">
+        <label>Customer flyer (shown full-size on the storefront)</label>
+        <input type="file" accept="image/*" onchange="uploadFlyerImage(this.files[0], 'v3-customer-flyer-images', 'customer_flyer_url')" />
+      </div>
+      ${b.customer_flyer_url ? `<img src="${esc(b.customer_flyer_url)}" style="width:100%;max-width:400px;margin-top:8px;border-radius:4px;border:1px solid var(--border);display:block" />` : ''}
+      <div class="field-row" style="margin-top:14px">
+        <label>Cost flyer (your reference only — customers never see this)</label>
+        <input type="file" accept="image/*" onchange="uploadFlyerImage(this.files[0], 'v3-cost-flyer-images', 'cost_flyer_url')" />
+      </div>
+      ${b.cost_flyer_url ? `<img src="${esc(b.cost_flyer_url)}" style="width:100%;max-width:400px;margin-top:8px;border-radius:4px;border:1px solid var(--border);display:block" />` : ''}
+    </div>
+    <div class="panel">
+      <h2>Markup</h2>
+      <div class="slider-block">
+        <div class="slider-readout">Applies to every item's cost, live <b>${b.markup_percent}%</b></div>
+        <input type="range" min="0" max="100" step="5" value="${b.markup_percent}" oninput="this.nextElementSibling.querySelector('b').textContent=this.value+'%'; this.nextElementSibling.querySelector('span.pv').textContent=(50*(1+this.value/100)).toFixed(2)" onchange="saveBatchField('markup_percent', Number(this.value))" />
+        <div class="preview-line">At <b>${b.markup_percent}%</b> — a $${sampleCost.toFixed(2)} cost item shows as $<span class="pv">${preview}</span> to customers.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Shipping &amp; Admin Fee</h2>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">Shown to customers as two separate line items — these can move independently from buy to buy, so they're priced separately, not as one lump fee.</p>
+      <div class="field-row">
+        <label>Shipping, per order</label>
+        <input type="number" value="${b.shipping_fee}" onblur="saveBatchField('shipping_fee', Number(this.value)||0)" />
+      </div>
+      <div class="field-row">
+        <label>Admin Fee, per order</label>
+        <input type="number" value="${b.admin_fee}" onblur="saveBatchField('admin_fee', Number(this.value)||0)" />
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:8px 0 0">Both are charged on every order — waive them together per repeat order in the Orders tab.</p>
+    </div>
+    <div class="panel">
+      <h2>This Batch — Info Bullets</h2>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">Shown at the top of the storefront, one per line (e.g. "No minimum order," "Every item fully tested"). Keep anything batch-specific here — this list rotates with the batch, nothing here is permanent copy.</p>
+      <textarea class="admin-input" id="infoBulletsText" style="min-height:90px">${esc((b.info_bullets || []).join('\n'))}</textarea>
+      <button class="save-btn" onclick="saveInfoBullets(document.getElementById('infoBulletsText').value)">Save Bullets</button>
+    </div>`;
+}
+
+async function saveInfoBullets(text) {
+  const bullets = text.split('\n').map(l => l.trim()).filter(Boolean);
+  await saveBatchField('info_bullets', bullets);
+}
+
+function adminProductsTab(b) {
+  const seedText = S.adminProducts.map(p => `${p.name} | ${p.spec || ''} | ${p.cost}`).join('\n');
+  return `
+    <div class="panel">
+      <h2>Bulk Replace Product List</h2>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">One product per line: <code>Name | Size/Spec | Cost</code></p>
+      <textarea class="admin-input" id="bulkProductText">${esc(seedText)}</textarea>
+      <button class="save-btn" onclick="replaceProductList(document.getElementById('bulkProductText').value)">Replace Product List</button>
+    </div>
+    <div class="panel">
+      <h2>Products (${S.adminProducts.length})</h2>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">This is the order customers see them in — use ▲▼ to rearrange.</p>
+      ${S.adminProducts.map((p, idx) => `
+        <div class="prod-row">
+          <div class="pn" style="display:flex;gap:10px;align-items:flex-start">
+            ${p.image_url ? `<img src="${esc(p.image_url)}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0" />` : `<div style="width:44px;height:44px;border-radius:4px;border:1px dashed var(--border);flex-shrink:0"></div>`}
+            <div>
+              ${esc(p.name)}<span class="sp">${esc(p.spec || '')} · cost ${money(p.cost)}</span>
+              ${p.tested_note ? `<input type="text" class="admin-input-text" style="margin-top:6px;font-size:11.5px" placeholder="Customize wording (e.g. name a lab) — optional" value="${esc(p.tested_note)}" onblur="saveProductTested('${p.id}', this.value)" />` : ''}
+              <input type="file" accept="image/*" style="margin-top:6px;font-size:11px;max-width:200px" onchange="uploadProductImage(this.files[0], '${p.id}')" />
+            </div>
+          </div>
+          <button class="mini-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveProduct('${p.id}', -1)">▲</button>
+          <button class="mini-btn" ${idx === S.adminProducts.length - 1 ? 'disabled' : ''} onclick="moveProduct('${p.id}', 1)">▼</button>
+          <button class="mini-btn ${p.tested_note ? 'on' : ''}" onclick="toggleProductTested('${p.id}', ${!p.tested_note})">${p.tested_note ? '✓ Tested' : 'Not Tested'}</button>
+          <button class="mini-btn ${p.in_stock ? 'on' : ''}" onclick="toggleProductStock('${p.id}', ${!p.in_stock})">${p.in_stock ? 'In Stock' : 'OOS'}</button>
+          <button class="mini-btn del" onclick="deleteProduct('${p.id}')">Remove</button>
+        </div>`).join('') || `<p style="color:var(--ink-faint)">No products yet — paste a list above.</p>`}
+    </div>`;
+}
+
+function adminOrdersTab(b) {
+  return `
+    <div class="panel">
+      <h2>Orders (${S.adminOrders.length})</h2>
+      ${S.adminOrders.map(o => {
+        const margin = Number(o.subtotal) - Number(o.cost_total);
+        const venmoFee = Number(o.venmo_fee) || 0;
+        const grandTotal = Number(o.total_due) + venmoFee;
+        return `
+        <details class="order-detail" ${S.adminOpenOrderIds.has(o.id) ? 'open' : ''} ontoggle="toggleOrderOpen('${o.id}', this.open)">
+          <summary>
+            <span>${esc(o.customer_name)} — ${(o.items || []).length} item(s) — ${money(grandTotal)}</span>
+            ${o.paid ? `<span class="fee-tag">✓ Paid</span>` : `<span class="repeat-flag">⚑ Awaiting payment</span>`}
+            ${o.is_repeat ? `<span class="repeat-flag">⚑ repeat</span>` : ''}
+            ${o.fee_waived ? `<span class="repeat-flag">Fee Waived</span>` : `<span class="fee-tag">Shipping &amp; Admin Fee Charged</span>`}
+          </summary>
+          <div class="body">
+            ${(o.items || []).map(i => `<div class="line"><span>${esc(i.name)}${i.spec ? ' (' + esc(i.spec) + ')' : ''} × ${i.qty}</span><span class="v">${money(i.unit_price * i.qty)}</span></div>`).join('')}
+            <div class="line"><span>Shipping</span><span class="v">${money(o.shipping_charged)}${o.fee_waived ? ' (waived)' : ''}</span></div>
+            <div class="line"><span>Admin Fee</span><span class="v">${money(o.admin_fee_charged)}${o.fee_waived ? ' (waived)' : ''}</span></div>
+            ${venmoFee > 0 ? `<div class="line"><span>Venmo Convenience Fee (10%)</span><span class="v">${money(venmoFee)}</span></div>` : ''}
+            <div class="line total"><span>Customer paid</span><span class="v">${money(grandTotal)}</span></div>
+            <div class="line"><span>Your cost</span><span class="v">${money(o.cost_total)}</span></div>
+            <div class="line total"><span>Your margin</span><span class="v" style="color:var(--accent)">${money(margin)}</span></div>
+            <div class="line"><span>Phone</span><span class="v">${esc(o.customer_phone)}</span></div>
+            <div class="line"><span>Email</span><span class="v">${esc(o.customer_email)}</span></div>
+            <div class="line"><span>Contact to Boyd</span><span class="v">${esc(o.contact_to_boyd || '')}</span></div>
+          </div>
+          <div class="body" style="padding-top:0;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="mini-btn ${o.payment_method === 'usdc' ? 'on' : ''}" onclick="setOrderPaymentMethod('${o.id}','usdc')">USDC</button>
+            <button class="mini-btn ${o.payment_method === 'venmo' ? 'on' : ''}" onclick="setOrderPaymentMethod('${o.id}','venmo')">Venmo (+10%)</button>
+            <button class="mini-btn ${o.paid ? 'on' : ''}" onclick="setOrderPaid('${o.id}', ${!o.paid})">${o.paid ? '✓ Paid' : 'Mark Paid'}</button>
+            ${o.is_repeat ? `<button class="mini-btn ${o.fee_waived ? 'on' : ''}" onclick="setFeeWaived('${o.id}', ${!o.fee_waived})">${o.fee_waived ? '✓ Fee Waived' : 'Waive Fee'}</button>` : ''}
+          </div>
+          <div style="padding:0 14px 14px"><button class="print-btn" onclick="printPackingSlip('${o.id}')">Print Packing Slip</button></div>
+        </details>`;
+      }).join('') || `<p style="color:var(--ink-faint)">No orders yet this batch.</p>`}
+    </div>`;
+}
+
+// Sums each order's line items for Boyd's Summary. Per-line cost is looked up
+// against the *current* product list by product_id when possible, but a
+// batch's product list gets fully deleted+reinserted (new IDs) on every
+// bulk-paste save, which orphans product_id on any order placed before that
+// save. Rather than let orphaned lines silently show $0, this reconciles each
+// order's lines against that order's own stored cost_total (captured
+// correctly at order time and never stale) — matched lines use their real
+// per-unit cost, and any leftover is split across unmatched lines in
+// proportion to what the customer paid for them. Grand Total is therefore
+// always the true sum of cost_total across orders, whether or not today's
+// product list still contains the exact rows those orders were placed against.
+function computeBoydSummaryTotals() {
+  const totals = {};
+  let qtyTotal = 0, costTotal = 0;
+  S.adminOrders.forEach(o => {
+    const items = o.items || [];
+    const resolved = items.map(i => {
+      const prod = S.adminProducts.find(p => p.id === i.product_id);
+      const unitCost = prod ? Number(prod.cost) : null;
+      return { i, unitCost, lineValue: Number(i.unit_price) * i.qty };
+    });
+    const matchedCost = resolved.reduce((s, r) => s + (r.unitCost !== null ? r.unitCost * r.i.qty : 0), 0);
+    const remaining = (Number(o.cost_total) || 0) - matchedCost;
+    const unmatched = resolved.filter(r => r.unitCost === null);
+    const unmatchedValueSum = unmatched.reduce((s, r) => s + r.lineValue, 0);
+    resolved.forEach(r => {
+      const lineCost = r.unitCost !== null
+        ? r.unitCost * r.i.qty
+        : unmatchedValueSum > 0
+          ? remaining * (r.lineValue / unmatchedValueSum)
+          : (unmatched.length ? remaining / unmatched.length : 0);
+      const key = r.i.name + '|' + (r.i.spec || '');
+      if (!totals[key]) totals[key] = { name: r.i.name, spec: r.i.spec, qty: 0, cost: 0 };
+      totals[key].qty += r.i.qty;
+      totals[key].cost += lineCost;
+      qtyTotal += r.i.qty;
+      costTotal += lineCost;
+    });
+  });
+  return { rows: Object.values(totals), qtyTotal, costTotal };
+}
+
+function adminSummaryTab(b) {
+  const { rows, qtyTotal, costTotal } = computeBoydSummaryTotals();
+  return `
+    <div class="panel">
+      <h2>Boyd's Summary — ${esc(b.label)}</h2>
+      <div style="overflow-x:auto">
+        <table class="summary">
+          <thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Cost Total</th></tr></thead>
+          <tbody>${rows.map(r => `<tr><td class="pname">${esc(r.name)}${r.spec ? ' — ' + esc(r.spec) : ''}</td><td class="num">${r.qty}</td><td class="num">${money(r.cost)}</td></tr>`).join('') || `<tr><td colspan="3" style="color:var(--ink-faint)">No orders yet this batch.</td></tr>`}</tbody>
+          <tfoot><tr><td>Grand Total</td><td class="num">${qtyTotal}</td><td class="num">${money(costTotal)}</td></tr></tfoot>
+        </table>
+      </div>
+      <button class="print-btn" onclick="printBoydSummary()">Print Page</button>
+    </div>`;
+}
+
+function printBoydSummary() {
+  const b = currentAdminBatch();
+  if (!b) return;
+  const { rows, qtyTotal, costTotal } = computeBoydSummaryTotals();
+  const html = `
+    <h2>~BgM's~ BioStack Community — Boyd's Summary</h2>
+    <p><b>${esc(b.label)}</b></p>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px">
+      <thead><tr><th style="text-align:left">Product</th><th style="text-align:right;padding-left:36px">Qty</th><th style="text-align:right;padding-left:36px">Cost Total</th></tr></thead>
+      <tbody>${rows.map(r => `<tr><td>${esc(r.name)}${r.spec ? ' — ' + esc(r.spec) : ''}</td><td style="text-align:right;padding-left:36px">${r.qty}</td><td style="text-align:right;padding-left:36px">$${r.cost.toFixed(2)}</td></tr>`).join('')}</tbody>
+    </table>
+    <p style="font-size:16px;margin-top:10px"><b>Grand Total: ${qtyTotal} items — $${costTotal.toFixed(2)}</b></p>`;
+  document.getElementById('printSlip').innerHTML = html;
+  window.print();
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
 </script>
 </body>
 </html>
