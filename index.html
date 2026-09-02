@@ -268,7 +268,8 @@ let S = {
   adminOrders: [],
   adminBusy: false,
   adminErr: '',
-  adminOpenOrderIds: new Set()
+  adminOpenOrderIds: new Set(),
+  costFlyerSigned: { path: null, url: null }
 };
 
 function toggleOrderOpen(id, isOpen) {
@@ -863,8 +864,39 @@ async function uploadFlyerImage(file, bucket, field) {
     render();
     return;
   }
-  const publicUrl = `${SUPA_URL}/storage/v1/object/public/${bucket}/${path}`;
-  await saveBatchField(field, publicUrl);
+  // Cost flyer bucket is private (2026-09-01 fix) -- store just the object
+  // path, not a public URL, since a public URL to a private object is
+  // useless. The customer flyer bucket stays public, keep saving its full
+  // public URL as before.
+  const valueToSave = field === 'cost_flyer_url'
+    ? path
+    : `${SUPA_URL}/storage/v1/object/public/${bucket}/${path}`;
+  await saveBatchField(field, valueToSave);
+}
+
+// Cost flyer is private -- this fetches a short-lived signed URL (requires
+// the admin's auth token) so the image loads without ever being a plain
+// public link. Cached per-path in S.costFlyerSigned so a render loop
+// doesn't re-request it every time; a fresh batch load or a new upload
+// (new path) triggers a fresh sign.
+async function loadCostFlyerSignedUrl(b) {
+  const path = b.cost_flyer_url;
+  if (!path) return;
+  S.costFlyerSigned = { path, url: null };
+  try {
+    const res = await storageAuth(`object/sign/v3-cost-flyer-images/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: 3600 })
+    });
+    if (res.status === 401) { adminSessionExpired(); return; }
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.signedURL && S.costFlyerSigned.path === path) {
+      S.costFlyerSigned.url = SUPA_URL + '/storage/v1' + data.signedURL;
+      render();
+    }
+  } catch (e) {}
 }
 
 async function uploadProductImage(file, productId) {
@@ -1053,6 +1085,16 @@ function adminHtml() {
     </div>`;
 }
 
+function costFlyerPreviewHtml(b) {
+  if (!b.cost_flyer_url) return '';
+  if (S.costFlyerSigned.path !== b.cost_flyer_url) {
+    loadCostFlyerSignedUrl(b); // sync-sets S.costFlyerSigned.path immediately, fetch resolves async and re-renders
+    return `<p style="font-size:12.5px;color:var(--ink-faint);margin-top:8px">Loading preview…</p>`;
+  }
+  if (!S.costFlyerSigned.url) return `<p style="font-size:12.5px;color:var(--ink-faint);margin-top:8px">Loading preview…</p>`;
+  return `<img src="${esc(S.costFlyerSigned.url)}" style="width:100%;max-width:400px;margin-top:8px;border-radius:4px;border:1px solid var(--border);display:block" />`;
+}
+
 function adminBatchTab(b) {
   const sampleCost = 50;
   const preview = (sampleCost * (1 + Number(b.markup_percent) / 100)).toFixed(2);
@@ -1084,10 +1126,10 @@ function adminBatchTab(b) {
       </div>
       ${b.customer_flyer_url ? `<img src="${esc(b.customer_flyer_url)}" style="width:100%;max-width:400px;margin-top:8px;border-radius:4px;border:1px solid var(--border);display:block" />` : ''}
       <div class="field-row" style="margin-top:14px">
-        <label>Cost flyer (your reference only — customers never see this)</label>
+        <label>Cost flyer (private — requires your login, customers never see this)</label>
         <input type="file" accept="image/*" onchange="uploadFlyerImage(this.files[0], 'v3-cost-flyer-images', 'cost_flyer_url')" />
       </div>
-      ${b.cost_flyer_url ? `<img src="${esc(b.cost_flyer_url)}" style="width:100%;max-width:400px;margin-top:8px;border-radius:4px;border:1px solid var(--border);display:block" />` : ''}
+      ${costFlyerPreviewHtml(b)}
     </div>
     <div class="panel">
       <h2>Markup</h2>
