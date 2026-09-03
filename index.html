@@ -547,11 +547,6 @@ function checkoutHtml() {
             <option value="Boyd" ${S.contact === 'Boyd' ? 'selected' : ''}>Boyd</option>
             <option value="Bronson" ${S.contact === 'Bronson' ? 'selected' : ''}>Bronson</option>
             <option value="Justin" ${S.contact === 'Justin' ? 'selected' : ''}>Justin</option>
-            <option value="Dwayne" ${S.contact === 'Dwayne' ? 'selected' : ''}>Dwayne</option>
-            <option value="Luke" ${S.contact === 'Luke' ? 'selected' : ''}>Luke</option>
-            <option value="Jessica" ${S.contact === 'Jessica' ? 'selected' : ''}>Jessica</option>
-            <option value="Jared" ${S.contact === 'Jared' ? 'selected' : ''}>Jared</option>
-            <option value="Heath" ${S.contact === 'Heath' ? 'selected' : ''}>Heath</option>
             <option value="other" ${S.contact === 'other' ? 'selected' : ''}>Someone else…</option>
           </select>
           ${S.contact === 'other' ? `<input type="text" value="${esc(S.contactOther)}" oninput="S.contactOther=this.value" placeholder="Type name here if not listed above" style="margin-top:8px" />` : ''}
