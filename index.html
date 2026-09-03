@@ -493,7 +493,7 @@ function ackHtml() {
         <div class="pay-line"><span>USDC — Ethereum network</span><span class="ok">✓ No fee</span></div>
         ${S.batch && S.batch.venmo_enabled === false
           ? `<div class="pay-line"><span>Venmo</span><span class="fee">Not available for this buy</span></div>`
-          : `<div class="pay-line"><span>Venmo</span><span class="fee">+10% fee</span></div>
+          : `<div class="pay-line"><span>Venmo</span><span class="fee">+${S.batch ? Number(S.batch.venmo_surcharge_percent ?? 10) : 10}% fee</span></div>
         <p style="margin-top:10px">Crypto is preferred and free. Venmo adds a convenience fee because of the extra manual work and time required to convert and forward your payment.</p>`}
         <div class="warn-box" style="margin-top:10px">⚠ If you send on the wrong network, your funds could be lost. Always double-check it's USDC on the Ethereum network, sent to Boyd's wallet address.</div>
       </div>
@@ -563,7 +563,8 @@ function cartSubtotalFromPending() { return cartSubtotal(); }
 function paymentHtml() {
   const o = S.pendingOrder || {};
   const total = Number(o.total_due || 0);
-  const venmoTotal = Math.round(total * 1.10 * 100) / 100;
+  const venmoPct = S.batch ? Number(S.batch.venmo_surcharge_percent ?? 10) : 10;
+  const venmoTotal = Math.round(total * (1 + venmoPct / 100) * 100) / 100;
   return `
     ${plateHtml()}
     <div class="wrap flow-page">
@@ -581,7 +582,7 @@ function paymentHtml() {
         <button class="btn" style="background:var(--good-bg);color:var(--good);border:1px solid var(--good)" onclick="S.payChoice='usdc';render()">Click Here — Get Wallet Address<br><span style="font-weight:400;font-size:10.5px">Ethereum network — no fee — ${money(total)}</span></button>
         ${S.batch && S.batch.venmo_enabled === false
           ? `<button class="btn" disabled style="background:var(--border);color:var(--ink-faint);cursor:not-allowed">Venmo<br><span style="font-weight:400;font-size:10.5px">Not available for this buy</span></button>`
-          : `<button class="btn" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue)" onclick="S.payChoice='venmo';render()">Click Here — Open Venmo &amp; Pay<br><span style="font-weight:400;font-size:10.5px">+10% fee — ${money(venmoTotal)}</span></button>`}
+          : `<button class="btn" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue)" onclick="S.payChoice='venmo';render()">Click Here — Open Venmo &amp; Pay<br><span style="font-weight:400;font-size:10.5px">+${venmoPct}% fee — ${money(venmoTotal)}</span></button>`}
       </div>
 
       ${S.payChoice === 'usdc' ? `
@@ -595,7 +596,7 @@ function paymentHtml() {
       ${S.payChoice === 'venmo' ? `
       <div class="pay-panel venmo">
         <h3 class="venmo-h">Venmo</h3>
-        <div class="sub">+10% fee included — pay ${money(venmoTotal)}</div>
+        <div class="sub">+${venmoPct}% fee included — pay ${money(venmoTotal)}</div>
         <div class="warn-box">⚠ The "What's this for?" note will auto-fill with "Reimbursement" — leave it exactly as-is. Writing anything else (or changing it) can get the payment flagged and sent back by Venmo.</div>
         <a class="venmo-link-btn" href="venmo://paycharge?txn=pay&amp;recipients=Boyd-Moretti&amp;amount=${venmoTotal.toFixed(2)}&amp;note=Reimbursement">Open Venmo &amp; Pay</a>
         <div class="wallet-row" style="margin-top:10px"><code>${VENMO_HANDLE}</code><button class="copy-btn" onclick="copyVenmo()">Copy Handle</button></div>
@@ -986,8 +987,10 @@ async function moveProduct(id, direction) {
 async function setOrderPaymentMethod(id, method) {
   const o = S.adminOrders.find(x => x.id === id);
   if (!o) return;
-  const fee = method === 'venmo' ? Math.round(Number(o.total_due) * 10) / 100 : 0;
-  const res = await apiAuth(`v3_orders?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ payment_method: method, venmo_fee: fee }) });
+  const b = currentAdminBatch();
+  const pct = b ? Number(b.venmo_surcharge_percent ?? 10) : 10;
+  const fee = method === 'venmo' ? Math.round(Number(o.total_due) * pct) / 100 : 0;
+  const res = await apiAuth(`v3_orders?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ payment_method: method, venmo_fee: fee, venmo_surcharge_percent: method === 'venmo' ? pct : null }) });
   if (res.status === 401) { adminSessionExpired(); return; }
   await loadBatchDetail();
   render();
@@ -1030,7 +1033,7 @@ function printPackingSlip(orderId) {
     </table>
     <p style="margin-top:10px">Shipping: $${Number(order.shipping_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
     <p>Admin Fee: $${Number(order.admin_fee_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
-    ${venmoFee > 0 ? `<p>Venmo Convenience Fee (10%): $${venmoFee.toFixed(2)}</p>` : ''}
+    ${venmoFee > 0 ? `<p>Venmo Convenience Fee (${Number(order.venmo_surcharge_percent ?? 10)}%): $${venmoFee.toFixed(2)}</p>` : ''}
     <p style="font-size:16px"><b>Total Paid: $${grandTotal.toFixed(2)}</b></p>`;
   document.getElementById('printSlip').innerHTML = html;
   window.print();
@@ -1114,6 +1117,13 @@ function adminBatchTab(b) {
       <div class="field-row">
         <label>Venmo accepted this batch</label>
         <button class="toggle-open ${b.venmo_enabled ? 'on' : ''}" onclick="saveBatchField('venmo_enabled', ${!b.venmo_enabled})"><span class="sw"></span> ${b.venmo_enabled ? 'Yes' : 'No — USDC only'}</button>
+      </div>
+      <div class="field-row">
+        <label>Venmo surcharge</label>
+        <div class="slider-block" style="flex:1">
+          <div class="slider-readout">Applied on top of the order total when a customer pays Venmo, live <b>${b.venmo_surcharge_percent}%</b></div>
+          <input type="range" min="0" max="30" step="1" value="${b.venmo_surcharge_percent}" oninput="this.nextElementSibling.querySelector('b').textContent=this.value+'%'" onchange="saveBatchField('venmo_surcharge_percent', Number(this.value))" />
+        </div>
       </div>
       <div class="field-row">
         <label>Customer flyer (shown full-size on the storefront)</label>
@@ -1211,7 +1221,7 @@ function adminOrdersTab(b) {
             ${(o.items || []).map(i => `<div class="line"><span>${esc(i.name)}${i.spec ? ' (' + esc(i.spec) + ')' : ''} × ${i.qty}</span><span class="v">${money(i.unit_price * i.qty)}</span></div>`).join('')}
             <div class="line"><span>Shipping</span><span class="v">${money(o.shipping_charged)}${o.fee_waived ? ' (waived)' : ''}</span></div>
             <div class="line"><span>Admin Fee</span><span class="v">${money(o.admin_fee_charged)}${o.fee_waived ? ' (waived)' : ''}</span></div>
-            ${venmoFee > 0 ? `<div class="line"><span>Venmo Convenience Fee (10%)</span><span class="v">${money(venmoFee)}</span></div>` : ''}
+            ${venmoFee > 0 ? `<div class="line"><span>Venmo Convenience Fee (${Number(o.venmo_surcharge_percent ?? 10)}%)</span><span class="v">${money(venmoFee)}</span></div>` : ''}
             <div class="line total"><span>Customer paid</span><span class="v">${money(grandTotal)}</span></div>
             <div class="line"><span>Your cost</span><span class="v">${money(o.cost_total)}</span></div>
             <div class="line total"><span>Your margin</span><span class="v" style="color:var(--accent)">${money(margin)}</span></div>
@@ -1221,7 +1231,7 @@ function adminOrdersTab(b) {
           </div>
           <div class="body" style="padding-top:0;display:flex;gap:8px;flex-wrap:wrap">
             <button class="mini-btn ${o.payment_method === 'usdc' ? 'on' : ''}" onclick="setOrderPaymentMethod('${o.id}','usdc')">USDC</button>
-            <button class="mini-btn ${o.payment_method === 'venmo' ? 'on' : ''}" onclick="setOrderPaymentMethod('${o.id}','venmo')">Venmo (+10%)</button>
+            <button class="mini-btn ${o.payment_method === 'venmo' ? 'on' : ''}" onclick="setOrderPaymentMethod('${o.id}','venmo')">Venmo (+${Number(b.venmo_surcharge_percent ?? 10)}%)</button>
             <button class="mini-btn ${o.paid ? 'on' : ''}" onclick="setOrderPaid('${o.id}', ${!o.paid})">${o.paid ? '✓ Paid' : 'Mark Paid'}</button>
             ${o.is_repeat ? `<button class="mini-btn ${o.fee_waived ? 'on' : ''}" onclick="setFeeWaived('${o.id}', ${!o.fee_waived})">${o.fee_waived ? '✓ Fee Waived' : 'Waive Fee'}</button>` : ''}
           </div>
