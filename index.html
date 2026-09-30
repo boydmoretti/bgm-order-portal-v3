@@ -353,10 +353,14 @@ function changeQty(id, d) {
 // ORDER SUBMIT
 // ============================================================
 async function submitOrder() {
+  if (S.submitting) return;
   S.submitError = '';
   const items = Object.entries(S.cart).filter(([,q]) => q > 0).map(([product_id, qty]) => ({ product_id, qty }));
   if (items.length === 0) return;
   const contact = S.contact === 'other' ? (S.contactOther.trim() || 'Not specified') : S.contact;
+  S.submitting = true;
+  const submitBtn = document.getElementById('checkoutSubmitBtn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
   try {
     const res = await api('rpc/submit_v3_order', {
       method: 'POST',
@@ -371,6 +375,7 @@ async function submitOrder() {
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
       S.submitError = errBody.message || 'Could not submit order — please try again.';
+      S.submitting = false;
       render();
       return;
     }
@@ -378,9 +383,11 @@ async function submitOrder() {
     S.pendingOrder = Array.isArray(data) ? data[0] : data;
     S.step = 'payment';
     S.payChoice = null;
+    S.submitting = false;
     render();
   } catch (e) {
     S.submitError = 'Could not reach the server — check your connection and try again.';
+    S.submitting = false;
     render();
   }
 }
@@ -663,7 +670,7 @@ function actionbarHtml() {
     return `<div class="actionbar"><div class="actionbar-inner">
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="goStep('ack')">Back</button>
-        <button class="btn btn-primary" id="checkoutSubmitBtn" ${valid ? '' : 'disabled'} onclick="${already ? "goStep('payment')" : 'submitOrder()'}">${already ? 'Continue to Payment' : 'Submit Order'}</button>
+        <button class="btn btn-primary" id="checkoutSubmitBtn" ${valid && !S.submitting ? '' : 'disabled'} onclick="${already ? "goStep('payment')" : 'submitOrder()'}">${already ? 'Continue to Payment' : (S.submitting ? 'Submitting…' : 'Submit Order')}</button>
       </div>
     </div></div>`;
   }
@@ -681,7 +688,7 @@ function updateCheckoutValidity() {
   const btn = document.getElementById('checkoutSubmitBtn');
   if (!btn) return;
   const valid = contactInfoValid();
-  btn.disabled = !valid;
+  btn.disabled = !valid || S.submitting;
 }
 function goStep(s) {
   if (s === 'ack' && cartCount() === 0) return;
