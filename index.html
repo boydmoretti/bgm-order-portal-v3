@@ -92,7 +92,6 @@
   .oos-tag { display: block; text-align: center; margin-top: 7px; padding: 3px 9px; border-radius: 4px; background: var(--bad-bg); font-size: 12px; font-weight: 800; color: var(--bad); font-family: var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
   .price-block { text-align: center; margin-top: 10px; }
   .price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 18px; color: var(--accent); }
-  .price .cents { font-size: 12px; color: var(--accent-dim); }
   .qty { margin-top: 8px; display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
   .qty button { width: 30px; height: 30px; background: var(--surface-2); border: none; color: var(--ink-dim); font-family: var(--font-mono); font-size: 14px; cursor: pointer; }
   .qty button:disabled { opacity: .3; cursor: not-allowed; }
@@ -279,7 +278,12 @@ function toggleOrderOpen(id, isOpen) {
 // ============================================================
 // UTIL
 // ============================================================
-function money(n) { return '$' + Number(n || 0).toFixed(2); }
+// Whole-dollar amounts show without ".00"; real cents (older orders, Venmo
+// fees) still show both decimals.
+function money(n) {
+  const v = Math.round(Number(n || 0) * 100) / 100;
+  return '$' + (v % 1 === 0 ? v : v.toFixed(2));
+}
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function api(path, opts = {}) {
@@ -430,7 +434,6 @@ function closedHtml() {
 
 function productCardHtml(p) {
   const price = Number(p.price);
-  const [dollars, cents] = price.toFixed(2).split('.');
   const testedHtml = p.tested_note ? `<div class="tested">${esc(p.tested_note)}</div>` : `<div class="untested">Not third-party tested</div>`;
   const oos = p.in_stock === false;
   const qty = S.cart[p.id] || 0;
@@ -444,7 +447,7 @@ function productCardHtml(p) {
       ${p.spec ? `<div class="spec">${esc(p.spec)}</div>` : ''}
       ${oos ? `<div class="oos-tag">Out of Stock</div>` : testedHtml}
       <div class="price-block">
-        <div class="price">$${dollars}<span class="cents">.${cents}</span></div>
+        <div class="price">${money(price)}</div>
         <div class="qty">
           <button ${oos ? 'disabled' : ''} onclick="changeQty('${p.id}',-1)" aria-label="Decrease">–</button>
           <output>${qty}</output>
@@ -1022,7 +1025,7 @@ function printPackingSlip(orderId) {
   const b = currentAdminBatch();
   const venmoFee = Number(order.venmo_fee) || 0;
   const grandTotal = Number(order.total_due) + venmoFee;
-  const items = (order.items || []).map(i => `<tr><td>${esc(i.name)}${i.spec ? ' (' + esc(i.spec) + ')' : ''}</td><td style="text-align:right;padding-left:36px">${i.qty}</td><td style="text-align:right;padding-left:36px">$${Number(i.unit_price).toFixed(2)}</td><td style="text-align:right;padding-left:36px">$${(Number(i.unit_price) * i.qty).toFixed(2)}</td></tr>`).join('');
+  const items = (order.items || []).map(i => `<tr><td>${esc(i.name)}${i.spec ? ' (' + esc(i.spec) + ')' : ''}</td><td style="text-align:right;padding-left:36px">${i.qty}</td><td style="text-align:right;padding-left:36px">${money(Number(i.unit_price))}</td><td style="text-align:right;padding-left:36px">${money((Number(i.unit_price) * i.qty))}</td></tr>`).join('');
   const html = `
     <h2>~BgM's~ BioStack Community</h2>
     <p><b>${esc(b ? b.label : '')}</b></p>
@@ -1031,10 +1034,10 @@ function printPackingSlip(orderId) {
       <thead><tr><th style="text-align:left">Item</th><th style="text-align:right;padding-left:36px">Qty</th><th style="text-align:right;padding-left:36px">Each</th><th style="text-align:right;padding-left:36px">Total</th></tr></thead>
       <tbody>${items}</tbody>
     </table>
-    <p style="margin-top:10px">Shipping: $${Number(order.shipping_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
-    <p>Admin Fee: $${Number(order.admin_fee_charged).toFixed(2)}${order.fee_waived ? ' (waived)' : ''}</p>
-    ${venmoFee > 0 ? `<p>Venmo Convenience Fee (${Number(order.venmo_surcharge_percent ?? 10)}%): $${venmoFee.toFixed(2)}</p>` : ''}
-    <p style="font-size:16px"><b>Total Paid: $${grandTotal.toFixed(2)}</b></p>`;
+    <p style="margin-top:10px">Shipping: ${money(Number(order.shipping_charged))}${order.fee_waived ? ' (waived)' : ''}</p>
+    <p>Admin Fee: ${money(Number(order.admin_fee_charged))}${order.fee_waived ? ' (waived)' : ''}</p>
+    ${venmoFee > 0 ? `<p>Venmo Convenience Fee (${Number(order.venmo_surcharge_percent ?? 10)}%): ${money(venmoFee)}</p>` : ''}
+    <p style="font-size:16px"><b>Total Paid: ${money(grandTotal)}</b></p>`;
   document.getElementById('printSlip').innerHTML = html;
   window.print();
 }
@@ -1095,7 +1098,7 @@ function costFlyerPreviewHtml(b) {
 
 function adminBatchTab(b) {
   const sampleCost = 50;
-  const preview = (sampleCost * (1 + Number(b.markup_percent) / 100)).toFixed(2);
+  const preview = money(Math.round(sampleCost * (1 + Number(b.markup_percent) / 100)));
   return `
     <div class="panel">
       <h2>This Batch</h2>
@@ -1145,7 +1148,7 @@ function adminBatchTab(b) {
           <span style="font-size:12.5px;color:var(--ink-faint)">% (0–100)</span>
         </div>
       </div>
-      <div class="preview-line">At <b>${b.markup_percent}%</b> — a $${sampleCost.toFixed(2)} cost item shows as $${preview} to customers.</div>
+      <div class="preview-line">At <b>${b.markup_percent}%</b> — a ${money(sampleCost)} cost item shows as ${preview} to customers.</div>
     </div>
     <div class="panel">
       <h2>Shipping &amp; Admin Fee</h2>
@@ -1311,9 +1314,9 @@ function printBoydSummary() {
     <p><b>${esc(b.label)}</b></p>
     <table style="width:100%;border-collapse:collapse;margin-top:10px">
       <thead><tr><th style="text-align:left">Product</th><th style="text-align:right;padding-left:36px">Qty</th><th style="text-align:right;padding-left:36px">Cost Total</th></tr></thead>
-      <tbody>${rows.map(r => `<tr><td>${esc(r.name)}${r.spec ? ' — ' + esc(r.spec) : ''}</td><td style="text-align:right;padding-left:36px">${r.qty}</td><td style="text-align:right;padding-left:36px">$${r.cost.toFixed(2)}</td></tr>`).join('')}</tbody>
+      <tbody>${rows.map(r => `<tr><td>${esc(r.name)}${r.spec ? ' — ' + esc(r.spec) : ''}</td><td style="text-align:right;padding-left:36px">${r.qty}</td><td style="text-align:right;padding-left:36px">${money(r.cost)}</td></tr>`).join('')}</tbody>
     </table>
-    <p style="font-size:16px;margin-top:10px"><b>Grand Total: ${qtyTotal} items — $${costTotal.toFixed(2)}</b></p>`;
+    <p style="font-size:16px;margin-top:10px"><b>Grand Total: ${qtyTotal} items — ${money(costTotal)}</b></p>`;
   document.getElementById('printSlip').innerHTML = html;
   window.print();
 }
