@@ -1208,7 +1208,7 @@ function adminBatchTab(b) {
       <div class="field-row">
         <label>Venmo surcharge</label>
         <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" onwheel="this.blur()" min="0" max="30" step="1" value="${b.venmo_surcharge_percent}" style="width:70px" onblur="saveBatchField('venmo_surcharge_percent', Math.max(0,Math.min(30,Math.round(Number(this.value)||0))))" />
+          <input type="number" onwheel="if (document.activeElement === this) event.preventDefault()" min="0" max="30" step="1" value="${b.venmo_surcharge_percent}" style="width:70px" onblur="saveBatchField('venmo_surcharge_percent', Math.max(0,Math.min(30,Math.round(Number(this.value)||0))))" />
           <span style="font-size:12.5px;color:var(--ink-faint)">% — applied on top of the order total when a customer pays Venmo (0–30)</span>
         </div>
       </div>
@@ -1232,11 +1232,11 @@ function adminBatchTab(b) {
       <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">Shown to customers as two separate line items — these can move independently from buy to buy, so they're priced separately, not as one lump fee.</p>
       <div class="field-row">
         <label>Shipping, per order</label>
-        <input type="number" onwheel="this.blur()" value="${b.shipping_fee}" onblur="saveBatchField('shipping_fee', Math.max(0, Math.round(Number(this.value) || 0)))" />
+        <input type="number" onwheel="if (document.activeElement === this) event.preventDefault()" value="${b.shipping_fee}" onblur="saveBatchField('shipping_fee', Math.max(0, Math.round(Number(this.value) || 0)))" />
       </div>
       <div class="field-row">
         <label>Admin Fee, per order</label>
-        <input type="number" onwheel="this.blur()" value="${b.admin_fee}" onblur="saveBatchField('admin_fee', Math.max(0, Math.round(Number(this.value) || 0)))" />
+        <input type="number" onwheel="if (document.activeElement === this) event.preventDefault()" value="${b.admin_fee}" onblur="saveBatchField('admin_fee', Math.max(0, Math.round(Number(this.value) || 0)))" />
       </div>
       <p style="font-size:12.5px;color:var(--ink-faint);margin:8px 0 0">Both are charged on every order — waive them together per repeat order in the Orders tab.</p>
     </div>
