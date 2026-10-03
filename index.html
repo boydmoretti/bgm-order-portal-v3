@@ -238,6 +238,9 @@
   .manifest .untested { display: inline-block; text-align: left; margin-top: 6px; }
   .manifest .price-block { text-align: right; margin-top: 0; }
   .manifest .qty button { width: 28px; height: 28px; }
+
+  /* Photos layout name tile (step C): shown when a product has no photo or its photo won't load */
+  .pcard .photo-wrap .name-tile { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--ink-dim); text-align: center; padding: 0 14px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -280,6 +283,8 @@ let S = {
   adminBusy: false,
   adminErr: '',
   adminBulkDraft: null, // unsaved paste text, kept on screen if the save fails
+  photoDraft: null, // product photo picked but not saved yet: {productId, file, url, busy}
+  photoRemoveConfirm: null, // product id whose Remove photo was tapped once
   pasteSummary: null, // last product-paste result: {kept, added, removed, sold_out_instead_of_removed}
   adminOpenOrderIds: new Set(),
   costFlyerSigned: { path: null, url: null }
@@ -458,9 +463,10 @@ function productCardHtml(p) {
   const testedHtml = p.tested_note ? `<div class="tested">${esc(p.tested_note)}</div>` : `<div class="untested">Not third-party tested</div>`;
   const oos = p.in_stock === false;
   const qty = S.cart[p.id] || 0;
+  const nameTile = `<div class="no-photo name-tile">${esc(p.name)}</div>`;
   const photoHtml = p.image_url
-    ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy" />`
-    : `<div class="no-photo">Photo<br>Coming Soon</div>`;
+    ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-photo name-tile" style="display:none">${esc(p.name)}</div>`
+    : nameTile;
   return `
     <div class="pcard ${oos ? 'oos' : ''}">
       <div class="photo-wrap">${photoHtml}</div>
@@ -848,6 +854,8 @@ function currentAdminBatch() { return S.adminBatches.find(b => b.id === S.adminS
 async function selectAdminBatch(id) {
   S.adminSelectedBatchId = id;
   S.pasteSummary = null;
+  cancelProductPhoto(true); // a half-done photo pick or remove never survives a round switch
+  S.photoRemoveConfirm = null;
   S.adminBulkDraft = null; // switching batches - don't carry another batch's unsaved text over
   await loadBatchDetail();
   render();
@@ -1041,36 +1049,6 @@ async function loadCostFlyerSignedUrl(b) {
   } catch (e) {}
 }
 
-async function uploadProductImage(file, productId) {
-  if (!file) return;
-  S.adminErr = '';
-  const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || '');
-  const ext = (extMatch ? extMatch[1] : (file.type || '').split('/')[1] || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
-  const path = `${productId}/${Date.now()}.${ext}`;
-  try {
-    const res = await storageAuth(`object/v3-product-images/${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file
-    });
-    if (res.status === 401) { adminSessionExpired(); return; }
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      S.adminErr = `Image upload failed (${res.status}): ${errText || 'unknown error'}`;
-      render();
-      return;
-    }
-  } catch (e) {
-    S.adminErr = `Image upload failed — could not reach the server: ${e.message}`;
-    render();
-    return;
-  }
-  const publicUrl = `${SUPA_URL}/storage/v1/object/public/v3-product-images/${path}`;
-  const res2 = await apiAuth(`v3_products?id=eq.${productId}`, { method: 'PATCH', body: JSON.stringify({ image_url: publicUrl }) });
-  if (res2.status === 401) { adminSessionExpired(); return; }
-  await loadBatchDetail();
-  render();
-}
 
 async function replaceProductList(text) {
   const b = currentAdminBatch();
@@ -1367,6 +1345,127 @@ async function saveInfoBullets(text) {
   await saveBatchField('info_bullets', bullets);
 }
 
+// Product photos (layout switch step C): pick -> preview -> "Use this photo" / Cancel; Replace;
+// Remove takes two taps. Uploads go to <round>/<product>/<timestamp>.<ext>; only Boyd's login can write.
+const PRODUCT_PHOTO_BUCKET = 'v3-product-images';
+const PHOTO_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+
+function productThumbHtml(p) {
+  return p.image_url
+    ? `<img src="${esc(p.image_url)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0" onerror="this.style.visibility='hidden'" />`
+    : `<div style="width:44px;height:44px;border-radius:4px;border:1px dashed var(--border);flex-shrink:0"></div>`;
+}
+
+function productPhotoControlsHtml(p) {
+  const d = S.photoDraft && S.photoDraft.productId === p.id ? S.photoDraft : null;
+  if (d) return `
+    <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <img src="${esc(d.url)}" alt="Preview" style="width:72px;height:72px;object-fit:cover;border-radius:4px;border:1px solid var(--border)" />
+      <button class="mini-btn on" ${d.busy ? 'disabled' : ''} onclick="useProductPhoto()">${d.busy ? 'Saving…' : 'Use this photo'}</button>
+      <button class="mini-btn" ${d.busy ? 'disabled' : ''} onclick="cancelProductPhoto()">Cancel</button>
+    </div>`;
+  const removing = S.photoRemoveConfirm === p.id;
+  return `
+    <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label class="mini-btn" style="cursor:pointer">${p.image_url ? 'Replace photo' : 'Add photo'}<input type="file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="pickProductPhoto(this.files[0], '${p.id}'); this.value = ''" /></label>
+      ${p.image_url ? `<button class="mini-btn del" onclick="removeProductPhoto('${p.id}')">${removing ? 'Tap again to remove photo' : 'Remove photo'}</button>` : ''}
+      ${removing ? `<button class="mini-btn" onclick="S.photoRemoveConfirm = null; render()">Keep it</button>` : ''}
+    </div>`;
+}
+
+function pickProductPhoto(file, productId) {
+  if (!file) return;
+  S.adminErr = '';
+  if (!PHOTO_TYPES[file.type]) { S.adminErr = 'That file isn\'t a JPEG, PNG or WebP photo. Nothing was uploaded.'; render(); return; }
+  if (file.size > PHOTO_MAX_BYTES) { S.adminErr = `That photo is ${(file.size / 1048576).toFixed(1)} MB; the limit is 5 MB. Nothing was uploaded.`; render(); return; }
+  cancelProductPhoto(true);
+  S.photoRemoveConfirm = null;
+  S.photoDraft = { productId, file, url: URL.createObjectURL(file), busy: false };
+  render();
+}
+
+function cancelProductPhoto(silent) {
+  if (S.photoDraft && S.photoDraft.url) URL.revokeObjectURL(S.photoDraft.url);
+  S.photoDraft = null;
+  if (!silent) render();
+}
+
+async function errDetail(res) {
+  const t = await res.text().catch(() => '');
+  try { return JSON.parse(t).message || t; } catch { return t; }
+}
+
+async function useProductPhoto() {
+  const d = S.photoDraft;
+  const b = currentAdminBatch();
+  if (!d || d.busy || !b) return;
+  d.busy = true; S.adminErr = ''; render();
+  const path = `${b.id}/${d.productId}/${Date.now()}.${PHOTO_TYPES[d.file.type]}`;
+  let res;
+  try {
+    res = await storageAuth(`object/${PRODUCT_PHOTO_BUCKET}/${path}`, { method: 'POST', headers: { 'Content-Type': d.file.type }, body: d.file });
+  } catch (e) {
+    d.busy = false;
+    if (S.photoDraft !== d) return; // stale: Boyd switched rounds or picked another photo; don't show this on his new screen
+    S.adminErr = `Could not confirm whether the photo uploaded (the connection dropped). The product's photo was not changed; try again. (${e.message})`;
+    render(); return;
+  }
+  if (res.status === 401) { if (S.photoDraft === d) cancelProductPhoto(true); adminSessionExpired(); return; }
+  if (!res.ok) {
+    const detail = await errDetail(res); // read the whole error first, then check it still belongs on screen
+    d.busy = false;
+    if (S.photoDraft !== d) return; // stale: Boyd switched rounds or picked another photo; don't show this on his new screen
+    S.adminErr = `Photo upload failed, nothing was changed. (${res.status}: ${detail || 'unknown error'})`;
+    render(); return;
+  }
+  const publicUrl = `${SUPA_URL}/storage/v1/object/public/${PRODUCT_PHOTO_BUCKET}/${path}`;
+  let res2;
+  try {
+    res2 = await apiAuth(`v3_products?id=eq.${d.productId}`, { method: 'PATCH', body: JSON.stringify({ image_url: publicUrl }) });
+  } catch (e) {
+    d.busy = false;
+    if (S.photoDraft !== d) return; // stale: Boyd switched rounds or picked another photo; don't show this on his new screen
+    S.adminErr = `The photo uploaded, but I couldn't confirm it was attached to the product (the connection dropped). Tap Reload and check before trying again. (${e.message})`;
+    render(); return;
+  }
+  if (res2.status === 401) { if (S.photoDraft === d) cancelProductPhoto(true); adminSessionExpired(); return; }
+  if (!res2.ok) {
+    const detail = await errDetail(res2); // read the whole error first, then check it still belongs on screen
+    d.busy = false;
+    if (S.photoDraft !== d) return; // stale: Boyd switched rounds or picked another photo; don't show this on his new screen
+    S.adminErr = `The photo uploaded but couldn't be attached to the product, so it isn't showing. (${res2.status}: ${detail || 'unknown error'})`;
+    render(); return;
+  }
+  if (S.photoDraft === d) cancelProductPhoto(true);
+  await loadBatchDetail();
+  render();
+}
+
+async function removeProductPhoto(productId) {
+  if (S.photoRemoveConfirm !== productId) { S.photoRemoveConfirm = productId; render(); return; }
+  S.photoRemoveConfirm = null;
+  S.adminErr = '';
+  const roundId = S.adminSelectedBatchId;
+  let res;
+  try {
+    res = await apiAuth(`v3_products?id=eq.${productId}`, { method: 'PATCH', body: JSON.stringify({ image_url: null }) });
+  } catch (e) {
+    if (S.adminSelectedBatchId !== roundId) return; // stale: Boyd switched rounds
+    S.adminErr = `Could not confirm whether the photo was removed (the connection dropped). Tap Reload and check. (${e.message})`;
+    render(); return;
+  }
+  if (res.status === 401) { adminSessionExpired(); return; }
+  if (!res.ok) {
+    const detail = await errDetail(res); // read the whole error first, then check it still belongs on screen
+    if (S.adminSelectedBatchId !== roundId) return; // stale: Boyd switched rounds
+    S.adminErr = `Could not remove the photo, nothing was changed. (${res.status}: ${detail || 'unknown error'})`;
+    render(); return;
+  }
+  await loadBatchDetail();
+  render();
+}
+
 function pasteSummaryHtml() {
   const s = S.pasteSummary;
   if (!s) return '';
@@ -1393,11 +1492,11 @@ function adminProductsTab(b) {
       ${S.adminProducts.map((p, idx) => `
         <div class="prod-row">
           <div class="pn" style="display:flex;gap:10px;align-items:flex-start">
-            ${p.image_url ? `<img src="${esc(p.image_url)}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0" />` : `<div style="width:44px;height:44px;border-radius:4px;border:1px dashed var(--border);flex-shrink:0"></div>`}
+            ${productThumbHtml(p)}
             <div>
               ${esc(p.name)}<span class="sp">${esc(p.spec || '')} · cost ${money(p.cost)}</span>
               ${p.tested_note ? `<input type="text" class="admin-input-text" style="margin-top:6px;font-size:11.5px" placeholder="Customize wording (e.g. name a lab) — optional" value="${esc(p.tested_note)}" onblur="saveProductTested('${p.id}', this.value)" />` : ''}
-              <input type="file" accept="image/*" style="margin-top:6px;font-size:11px;max-width:200px" onchange="uploadProductImage(this.files[0], '${p.id}')" />
+              ${productPhotoControlsHtml(p)}
             </div>
           </div>
           <button class="mini-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveProduct('${p.id}', -1)">▲</button>
