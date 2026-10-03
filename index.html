@@ -194,7 +194,7 @@
   table.summary td.pname { color: var(--ink); }
   table.summary tfoot td { border-bottom: none; border-top: 1px solid var(--border); padding-top: 10px; color: var(--ink); font-weight: 700; }
   table.summary tfoot td.num { color: var(--accent); }
-  .prod-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+  .prod-row { display: grid; grid-template-columns: 1fr repeat(5, auto); gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
   @media (max-width: 480px) { .prod-row { grid-template-columns: 1fr; } .prod-row > button { justify-self: start; } }
   .prod-row .pn { font-size: 13.5px; }
   .prod-row .pn .sp { color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; display: block; }
