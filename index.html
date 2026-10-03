@@ -268,6 +268,8 @@ let S = {
   adminOrders: [],
   adminBusy: false,
   adminErr: '',
+  adminBulkDraft: null, // unsaved paste text, kept on screen if the save fails
+  pasteSummary: null, // last product-paste result: {kept, added, removed, sold_out_instead_of_removed}
   adminOpenOrderIds: new Set(),
   costFlyerSigned: { path: null, url: null }
 };
@@ -800,6 +802,8 @@ function currentAdminBatch() { return S.adminBatches.find(b => b.id === S.adminS
 
 async function selectAdminBatch(id) {
   S.adminSelectedBatchId = id;
+  S.pasteSummary = null;
+  S.adminBulkDraft = null; // switching batches - don't carry another batch's unsaved text over
   await loadBatchDetail();
   render();
 }
@@ -1011,18 +1015,36 @@ async function uploadProductImage(file, productId) {
 async function replaceProductList(text) {
   const b = currentAdminBatch();
   if (!b) return;
+  S.pasteSummary = null;
+  S.adminBulkDraft = text; // keep whatever's typed on screen if the save below fails
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   const items = lines.map(line => {
     const parts = line.split('|').map(s => s.trim());
     return { batch_id: b.id, name: parts[0] || 'Unnamed', spec: parts[1] || '', cost: parseFloat(parts[2]) || 0, category: parts[3] || null };
   }).filter(i => i.name);
   if (items.length === 0) return;
-  const res = await apiAuth('rpc/replace_v3_batch_products', {
-    method: 'POST',
-    body: JSON.stringify({ p_batch_id: b.id, p_products: items })
-  });
+  let res;
+  try {
+    res = await apiAuth('rpc/replace_v3_batch_products', {
+      method: 'POST',
+      body: JSON.stringify({ p_batch_id: b.id, p_products: items })
+    });
+  } catch (e) {
+    S.adminErr = `Could not confirm whether this saved (the connection dropped). Your edits are still in the box below. Reload and check the list before trying again. (${e.message})`;
+    render();
+    return;
+  }
   if (res.status === 401) { adminSessionExpired(); return; }
-  if (!res.ok) { S.adminErr = 'Could not save the product list — nothing was changed.'; render(); return; }
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '');
+    let detail = errBody;
+    try { detail = JSON.parse(errBody).message || errBody; } catch {}
+    S.adminErr = `Could not save the product list — nothing was changed. Your edits are still in the box below. (${res.status}: ${detail || 'unknown error'})`;
+    render();
+    return;
+  }
+  S.adminBulkDraft = null; // save succeeded, safe to go back to showing live server state
+  S.pasteSummary = await res.json().catch(() => null);
   await loadBatchDetail();
   render();
 }
@@ -1044,9 +1066,34 @@ async function toggleProductTested(id, on) {
   render();
 }
 async function deleteProduct(id) {
-  if (!confirm('Remove this product?')) return;
-  const res = await apiAuth(`v3_products?id=eq.${id}`, { method: 'DELETE' });
+  const b = currentAdminBatch();
+  let opts = { method: 'DELETE' };
+  if (b && b.status === 'open') {
+    // Open round: customers may have it in a cart, so the safe move is SOLD OUT, not a delete.
+    if (confirm('This round is OPEN, so customers may already have this product in their cart.\n\nOK = mark it SOLD OUT (safe).\nCancel = more options.')) {
+      opts = { method: 'PATCH', body: JSON.stringify({ in_stock: false }) };
+    } else if (!confirm('Remove it completely anyway?\n\nAnyone who already has it in their cart may get an error at checkout. This cannot be undone.')) {
+      return;
+    }
+  } else if (!confirm('Remove this product?')) return;
+  const what = opts.method === 'PATCH' ? 'mark it sold out' : 'remove it';
+  let res;
+  try {
+    res = await apiAuth(`v3_products?id=eq.${id}`, opts);
+  } catch (e) {
+    S.adminErr = `Could not confirm whether it worked (the connection dropped). Reload and check the list before trying again. (${e.message})`;
+    render();
+    return;
+  }
   if (res.status === 401) { adminSessionExpired(); return; }
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '');
+    let detail = errBody;
+    try { detail = JSON.parse(errBody).message || errBody; } catch {}
+    S.adminErr = `Could not ${what}, nothing was changed. (${res.status}: ${detail || 'unknown error'})`;
+    render();
+    return;
+  }
   await loadBatchDetail();
   render();
 }
@@ -1253,14 +1300,25 @@ async function saveInfoBullets(text) {
   await saveBatchField('info_bullets', bullets);
 }
 
+function pasteSummaryHtml() {
+  const s = S.pasteSummary;
+  if (!s) return '';
+  const parts = [`Kept ${s.kept || 0}`, `Added ${s.added || 0}`];
+  if (s.removed) parts.push(`Removed ${s.removed}`);
+  const soldOut = s.sold_out_instead_of_removed || 0;
+  return `<div style="margin-top:10px;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font-size:12.5px">Saved: ${parts.join(' · ')}${soldOut ? `<br>${soldOut} left out of the list ${soldOut === 1 ? 'is' : 'are'} now SOLD OUT instead of removed, because this round is open (customers may have ${soldOut === 1 ? 'it' : 'them'} in a cart).` : ''}</div>`;
+}
+
 function adminProductsTab(b) {
-  const seedText = S.adminProducts.map(p => `${p.name} | ${p.spec || ''} | ${p.cost}`).join('\n');
+  const seedText = S.adminBulkDraft ?? S.adminProducts.map(p => `${p.name} | ${p.spec || ''} | ${p.cost}`).join('\n');
   return `
     <div class="panel">
       <h2>Bulk Replace Product List</h2>
       <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">One product per line: <code>Name | Size/Spec | Cost</code></p>
+      <p style="font-size:12.5px;color:var(--ink-faint);margin:0 0 8px">Products are matched by name + size: a match keeps its photo, stock and tested note. Left out of the list: removed on a closed round, marked SOLD OUT on an open one. The same name + size twice is refused.</p>
       <textarea class="admin-input" id="bulkProductText">${esc(seedText)}</textarea>
       <button class="save-btn" onclick="replaceProductList(document.getElementById('bulkProductText').value)">Replace Product List</button>
+      ${pasteSummaryHtml()}
     </div>
     <div class="panel">
       <h2>Products (${S.adminProducts.length})</h2>
@@ -1279,7 +1337,7 @@ function adminProductsTab(b) {
           <button class="mini-btn" ${idx === S.adminProducts.length - 1 ? 'disabled' : ''} onclick="moveProduct('${p.id}', 1)">▼</button>
           <button class="mini-btn ${p.tested_note ? 'on' : ''}" onclick="toggleProductTested('${p.id}', ${!p.tested_note})">${p.tested_note ? '✓ Tested' : 'Not Tested'}</button>
           <button class="mini-btn ${p.in_stock ? 'on' : ''}" onclick="toggleProductStock('${p.id}', ${!p.in_stock})">${p.in_stock ? 'In Stock' : 'OOS'}</button>
-          <button class="mini-btn del" onclick="deleteProduct('${p.id}')">Remove</button>
+          <button class="mini-btn del" onclick="deleteProduct('${p.id}')">${b.status === 'open' ? 'Sell out' : 'Remove'}</button>
         </div>`).join('') || `<p style="color:var(--ink-faint)">No products yet — paste a list above.</p>`}
     </div>`;
 }
